@@ -9,8 +9,8 @@ export default async function Home() {
             product_name,
             product_sku,
             product_quantity,
-            product_category,
-            product_variant
+            categories( category_name ),
+            variants( variant_name )
         `);
 
     return (
@@ -23,7 +23,7 @@ export default async function Home() {
                         <th>SKU</th>
                         <th>Quantity</th>
                         <th>Category</th>
-                    <th>Variant</th>
+                        <th>Variant</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,8 +32,8 @@ export default async function Home() {
                             <td>{product.product_name}</td>
                             <td>{product.product_sku}</td>
                             <td>{product.product_quantity}</td>
-                            <td>{product.product_category}</td>
-                            <td>{product.product_variant}</td>
+                            <td>{product.categories.category_name}</td>
+                            <td>{product.variants.variant_name}</td>
                         </tr>
                     ))}
                 </tbody>
