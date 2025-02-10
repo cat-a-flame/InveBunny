@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Quicksand, PT_Serif } from "next/font/google";
+import Script from 'next/script';
 import "./globals.css";
+
+import Sidebar from '../components/sidebar';
 
 const geistSans = Quicksand({
   variable: "--font-geist-sans",
@@ -26,7 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+      <Sidebar />
         {children}
+
+        <Script src="https://kit.fontawesome.com/cd9ec28620.js" crossOrigin="anonymous" />
       </body>
     </html>
   );

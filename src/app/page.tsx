@@ -11,7 +11,7 @@ export default async function Home() {
             product_quantity,
             categories( category_name ),
             variants( variant_name )
-        `);
+        `).order('product_name', { ascending: true });
 
     return (
         <main>

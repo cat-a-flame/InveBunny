@@ -3,10 +3,11 @@
 :root {
     --title-font: "PT Serif", serif;
     --brand-color: #9986ac;
+    --bg-color: #f4f6fa;
 }
 
 body {
-    background-color: #f5f9fa;
+    background-color: var(--bg-color);
     color: #6c5c7c;
     font-family: "Quicksand", serif;
     font-size: 16px;
@@ -59,7 +60,8 @@ table {
     width: 100%;
 }
 
-th, td {
+th,
+td {
     padding: .8rem;
     text-align: left;
     vertical-align: middle;
@@ -69,6 +71,7 @@ th, td {
         width: 95px;
     }
 }
+
 th {
     background-color: #c1b2c7;
     color: #4f264b;
@@ -193,8 +196,8 @@ select {
 dialog {
     border: 0;
     border-radius: 8px;
-    box-shadow: 0 0 10px #a89fa9e8;
-    padding: 20px;
+    box-shadow: 0 0 10px #a89fa960;
+    padding: 1.75rem;
     width: 400px;
 
     &::backdrop {
@@ -205,12 +208,19 @@ dialog {
 
 dialog[open] {
     animation: open .6s forwards;
-  }
-  
-  @keyframes open {
-    from { opacity: 0; transform: scale(0.7); }
-    to   { opacity: 1; transform: scale(1); }
-  }
+}
+
+@keyframes open {
+    from {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 
 .dialog-title {
     color: #6c5c7c;
@@ -219,13 +229,16 @@ dialog[open] {
     margin-bottom: 1.8rem;
 }
 
-input, textarea {
+input,
+textarea {
     border: 1px solid #c1b2c7;
     border-radius: 4px;
+    box-sizing: border-box;
     color: #6c5c7c;
-    font-family: "Nunito", serif;
-    font-size: 16px;
-    padding: .7rem 1rem;
+    font-family: "Quicksand", serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: .7rem .7rem;
 }
 
 .form-row {
@@ -379,7 +392,7 @@ input, textarea {
         display: flex;
         justify-content: space-between;
         margin: 10px 0;
-      }
+    }
 }
 
 .scanned-items-list::after {
@@ -391,7 +404,7 @@ input, textarea {
     left: 0;
     background: url(/images/receipt_bg.svg) bottom;
     background-size: 200%;
-  }
+}
 
 #totalScannedItems {
     display: flex;
@@ -403,27 +416,169 @@ input, textarea {
     font-weight: 600;
 }
 
-nav {
+.sidebar {
+    background-color: var(--bg-color);
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
     padding: 1rem;
-    background: #8a6d95;
-    box-shadow: 0 0 10px #8a6d959c;
-    
-    & a {
-      display: grid;
-      width: 24px;
-      height: 24px;
-      text-align: center;
-      background-color: #fff;
-      padding: .3rem;
-      border-radius: 6px;
-      text-decoration: none;
-      color: #8a6d95;
-      margin-bottom: 1rem;
-      place-items: center;
+
+    & .navigationLink {
+        display: grid;
+        width: 1.5rem;
+        height: 1.5rem;
+        text-align: center;
+        padding: 0.7rem 0.75rem;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #8a6d95;
+        margin-bottom: 1rem;
+        place-items: center;
+
+        &.active,
+        &:hover {
+            background-color: #fff;
+            box-shadow: 0px 2px 4px 0px rgba(162, 166, 187, 0.50);
+        }
+    }
+
+    &.collapsed .label {
+        display: none;
     }
 }
 
+.navigation {
+    margin-top: 2.5rem;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+label {
+    display: block;
+    color: #957D9D;
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+/* DIALOG */
+
+.dialog-title {
+    font-family: var(--title-font);
+    font-size: 1.5rem;
+}
+
+dialog input {
+    display: block;
+    width: 100%;
+}
+
+.input-group {
+    margin-bottom: 1.25rem;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.75rem;
+}
+
+.help-text {
+    color: #957D9D;
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    margin-top: .25rem;
+}
+
+/* BUTTONS */
+
+/* CTA */
+.button-cta {
+    background-color:#E04A6E;
+    border: 0;
+    border-radius: 3.125rem;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0px 2px 10px 0px rgba(224, 74, 110, 0.60);
+    font-family: Quicksand;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s;
+
+    & i {
+        margin-right: .75rem;
+    }
+
+    &:hover {
+        background: #CF3D60;
+        box-shadow: 0px 2px 10px 0px rgba(207, 61, 96, 0.60);
+    }
+
+    &:active {
+        background: #B92D4E;
+        box-shadow: none;
+    }
+}
+
+/* PRIMARY */
+.button-primary {
+    background-color:#E04A6E;
+    border: 0;
+    border-radius: .5rem;
+    color: #fff;
+    cursor: pointer;
+    font-family: Quicksand;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    padding: 0.625rem 1rem;
+    transition: all 0.3s;
+
+    & i {
+        margin-right: .75rem;
+    }
+
+    &:hover {
+        background: #CF3D60;
+    }
+
+    &:active {
+        background: #B92D4E;
+    }
+}
+
+/* GHOST */
+.button-ghost {
+    background-color:#fff;
+    border: 0;
+    border-radius: .5rem;
+    color: #725A79;
+    cursor: pointer;
+    font-family: Quicksand;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    padding: 0.625rem 1rem;
+    transition: all 0.3s;
+
+    & i {
+        margin-right: .75rem;
+    }
+
+    &:hover {
+        background: rgba(176, 136, 189, 0.20);
+    }
+
+    &:active {
+        background: rgba(176, 136, 189, 0.30);
+    }
+}
