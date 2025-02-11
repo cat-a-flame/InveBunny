@@ -1,0 +1,48 @@
+.title {
+    color: #725A79;
+    font-family: titleFont;
+    font-size: 1.5rem;
+    margin-bottom: 1.8rem;
+}
+
+.dialog input,
+.dialog select {
+    display: block;
+    width: 100%;
+}
+
+.dialog {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #a89fa960;
+    padding: 1.75rem;
+    width: 400px;
+
+    &::backdrop {
+        background-color: var(--brand-color);
+        opacity: .5;
+    }
+}
+
+.dialog[open] {
+    animation: open .3s forwards;
+}
+
+@keyframes open {
+    from {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.75rem;
+}

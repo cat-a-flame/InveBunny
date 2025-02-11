@@ -13,36 +13,28 @@ export function AddButton() {
     };
 
     const handleConfirm = () => {
-        alert("Supply saved!");
+        alert("Category saved!");
         setIsDialogOpen(false);
     };
 
     return (
         <>
-            <Button variant="cta" onClick={() => setIsDialogOpen(true)} icon={<CgMathPlus />}>Add new supply</Button>
+            <Button variant="cta" onClick={() => setIsDialogOpen(true)} icon={<CgMathPlus />}>Add new category</Button>
 
 
             <Dialog
                 open={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}
-                title="Add new supply"
+                title="Add new category"
                 onCancel={handleCancel}
                 onCta={handleConfirm}
                 cancelLabel="Cancel"
-                ctaLabel="Save supply">
+                ctaLabel="Save category">
 
                 <div className="input-group">
-                    <label className="input-label" htmlFor="supplyName">Supply name</label>
-                    <input type="text" placeholder="Supply name" />
+                    <label className="input-label" htmlFor="supplyName">Category name</label>
+                    <input type="text" />
                 </div>
-
-{/*}
-                <div className="input-group">
-                    <label className="input-label" htmlFor="supplyPrefix">Batch ID prefix</label>
-                    <input type="text" placeholder="eg. mysupply" />
-                    <span className="help-text">Use only lowercase letters, numbers, and dashes.</span>
-                </div>
-*/}
             </Dialog>
         </>
     );

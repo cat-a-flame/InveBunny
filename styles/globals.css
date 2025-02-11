@@ -1,0 +1,182 @@
+@import "reset.css";
+@import "helpers.css";
+
+:root {
+    --brand-color: #9986ac;
+    --bg-color: #f4f6fa;
+}
+
+@font-face {
+    font-family: titleFont;
+    font-weight: 400;
+    src: url(../public/fonts/Fields-Regular.woff2) format("woff2");
+}
+
+body {
+    background-color: var(--bg-color);
+    color: #6c5c7c;
+    font-family: "Quicksand", serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 2rem;
+}
+
+b, strong {
+    font-weight: 600;
+}
+
+/* LAYOUT */
+
+main {
+    max-width: 1124px;
+    margin: 0 auto;
+}
+
+.heading-title {
+    font-family: titleFont;
+    font-size: 2rem;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+/* TABLE */
+
+table {
+    border-collapse: collapse;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #7e95a64a;
+    overflow: hidden;
+    width: 100%;
+}
+
+th,
+td {
+    padding: .75rem 1.25rem;
+    text-align: left;
+    vertical-align: middle;
+
+    &.action-cell {
+        text-align: right;
+        width: 95px;
+    }
+}
+
+th {
+    background-color: #fff;
+    color: #957D9D;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+tr {
+    background-color: #fff;
+    
+    &:hover {
+        background-color: #fbfbfc;
+    }
+}
+
+td {
+    color: #725A79;
+    font-weight: 600;
+}
+
+.item-name {
+    display: block;
+    font-weight: 800;
+}
+
+.item-sku {
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.quantity-badge {
+    background-color: #F3EEFF;
+    border-radius: 8px;
+    display: inline-block;
+    padding: .25rem .6rem;
+    text-align: center;
+    width: 50px;
+
+    &.out-of-stock {
+        background-color: #E04A6E;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    &.low-stock {
+        background-color: #B795C2;
+        color: #fff;
+        font-weight: 700;
+    }
+}
+
+.error-message {
+    margin-bottom: 1rem;
+}
+
+/* INPUTS */
+
+select {
+    background-color: #fff;
+    border: 1px solid #c1b2c7;
+    border-radius: 4px;
+    color: #7b688e;
+    cursor: pointer;
+    font-family: "Quicksand", serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: .75rem 1rem;
+
+    & option {
+        color: #7b688e;
+        font-family: "Quicksand", serif;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+}
+
+input,
+textarea {
+    border: 1px solid #c1b2c7;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: #6c5c7c;
+    font-family: "Quicksand", serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: .7rem .7rem;
+}
+
+.input-label {
+    display: block;
+    color: #957D9D;
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.input-group {
+    flex-grow: 1;
+    margin-bottom: 1.25rem;
+
+    &.input-group-sku {
+        flex-grow: 1;
+        flex-shrink: 0;
+        width: 260px;
+    }
+}
+
+.help-text {
+    color: #957D9D;
+    display: block;
+    font-size: .875rem;
+    font-weight: 500;
+    margin-top: .25rem;
+}

@@ -1,0 +1,71 @@
+.button {
+    align-items: center;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    font-family: Quicksand;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    padding: .75rem 1.25rem;
+    transition: all 0.3s;
+
+    & span {
+        display: grid;
+        font-size: 1.5rem;
+        margin-right: .75rem;
+    }
+
+    &.buttonWithIcon {
+        padding: .75rem 1.25rem .75rem 1rem;
+    }
+}
+
+
+/* CTA */
+.button-cta {
+    background-color:#E04A6E;
+    border-radius: 3.125rem;
+    color: #fff;
+    box-shadow: 0px 2px 10px 0px rgba(224, 74, 110, 0.60);
+
+    &:hover {
+        background: #CF3D60;
+        box-shadow: 0px 2px 10px 0px rgba(207, 61, 96, 0.60);
+    }
+
+    &:active {
+        background: #B92D4E;
+        box-shadow: none;
+    }
+}
+
+/* PRIMARY */
+.button-primary {
+    background-color:#E04A6E;
+    border-radius: .5rem;
+    color: #fff;
+
+    &:hover {
+        background: #CF3D60;
+    }
+
+    &:active {
+        background: #B92D4E;
+    }
+}
+
+/* GHOST */
+.button-ghost {
+    background-color:#fff;
+    border-radius: .5rem;
+    color: #725A79;
+
+    &:hover {
+        background: rgba(176, 136, 189, 0.20);
+    }
+
+    &:active {
+        background: rgba(176, 136, 189, 0.30);
+    }
+}

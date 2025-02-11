@@ -1,0 +1,20 @@
+.toast {
+    align-items: center;
+    background-color: #a78b9d;
+    border-radius: 4px;
+    bottom: -20rem;
+    box-shadow: 0 2px 4px #a78b9d;
+    color: white;
+    display: flex;
+    left: 50%;
+    opacity: 0;
+    padding: 16px;
+    position: fixed;
+    transition: all 0.4s;
+    z-index: 20;
+}
+
+.toast.show {
+    bottom: 2rem;
+    opacity: 1;
+}

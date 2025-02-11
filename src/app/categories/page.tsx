@@ -1,19 +1,19 @@
 import { createClient } from '@/src/utils/supabase/server';
 import { AddButton } from './addButton';
 
-export default async function SuppliesPage() {
+export default async function CategoriesPage() {
     const supabase = await createClient();
-    const { data: supplies } = await supabase
-    .from("supplies")
+    const { data: categories } = await supabase
+    .from("categories")
     .select(`
             id,
-            supply_name
-        `).order('supply_name', { ascending: true });
+            category_name
+        `).order('category_name', { ascending: true });
 
     return (
         <>
             <div className="pageHeader">
-                <h2 className="heading-title">Supplies</h2>
+                <h2 className="heading-title">Categories</h2>
 
             <AddButton />
             </div>
@@ -21,15 +21,15 @@ export default async function SuppliesPage() {
             <table>
                 <thead>
                     <tr>
-                        <th>Supply name</th>
+                        <th>Category name</th>
                         <th># assigned products</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {supplies && supplies.map(supply => (
-                        <tr key={supply.id}>
-                            <td>{supply.supply_name}</td>
+                    {categories && categories.map(category => (
+                        <tr key={category.id}>
+                            <td>{category.category_name}</td>
                             <td></td>
                             <td>Delete | Batch | Edit</td>
                         </tr>

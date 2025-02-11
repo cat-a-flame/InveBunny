@@ -1,0 +1,64 @@
+
+.scanning-area {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#barcodeInput {
+    width: 400px;
+}
+
+.barcode-image {
+    width: 100%;
+    margin: 20px 0 0;
+}
+
+#scannedItemsList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#scannedItemsList li {
+    margin: 10px 0;
+}
+
+.scanned-items-list {
+    display: none;
+    max-width: 400px;
+    margin: 0 auto;
+    margin-top: 0px;
+    background: #fff;
+    padding: .5rem 2rem 1rem;
+    margin-top: 2rem;
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 0 15px 0px #c1b2c740;
+    position: relative;
+
+    & li {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+    }
+}
+
+.scanned-items-list::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    height: 20px;
+    width: 100%;
+    left: 0;
+    background: url(/images/receipt_bg.svg) bottom;
+    background-size: 200%;
+}
+
+#totalScannedItems {
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
+    border-top: 2px dotted #111;
+    padding-top: 1rem;
+    margin-top: 1rem;
+    font-weight: 600;
+}
