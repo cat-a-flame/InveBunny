@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { CgMathPlus } from "react-icons/cg";
 import { Button } from "../../components/Button/button";
 import { Dialog } from "../../components/Dialog/dialog";
