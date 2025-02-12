@@ -4,6 +4,7 @@
 :root {
     --brand-color: #9986ac;
     --bg-color: #f4f6fa;
+    --icon-color: #B088BD;
 }
 
 @font-face {
@@ -22,8 +23,9 @@ body {
     padding: 2rem;
 }
 
-b, strong {
-    font-weight: 600;
+b,
+strong {
+    font-weight: 700;
 }
 
 /* LAYOUT */
@@ -44,13 +46,32 @@ main {
     margin-bottom: 2rem;
 }
 
+.content {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #7e95a64a;
+    overflow: hidden;
+    padding: 1.5rem 0 1rem;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1.25rem;
+    padding: 0 1.25rem 1.5rem;
+
+    & .search-input {
+        width: 450px;
+    }
+
+    & select {
+        flex-grow: 1;
+    }
+}
+
 /* TABLE */
 
 table {
     border-collapse: collapse;
-    border-radius: 8px;
-    box-shadow: 0 0 10px #7e95a64a;
-    overflow: hidden;
     width: 100%;
 }
 
@@ -67,7 +88,6 @@ td {
 }
 
 th {
-    background-color: #fff;
     color: #957D9D;
     font-size: 0.8125rem;
     font-weight: 700;
@@ -75,7 +95,7 @@ th {
 
 tr {
     background-color: #fff;
-    
+
     &:hover {
         background-color: #fbfbfc;
     }
@@ -117,41 +137,66 @@ td {
     }
 }
 
+.table-actions {
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-end;
+}
+
 .error-message {
     margin-bottom: 1rem;
+}
+
+.pagination {
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #7e95a64a;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding: .5rem 1.25rem;
 }
 
 /* INPUTS */
 
 select {
     background-color: #fff;
-    border: 1px solid #c1b2c7;
-    border-radius: 4px;
-    color: #7b688e;
+    border: 1px solid #E2D9F6;
+    border-radius: .5rem;
+    color: #725A79;
     cursor: pointer;
     font-family: "Quicksand", serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1rem;
     padding: .75rem 1rem;
 
-    & option {
-        color: #7b688e;
-        font-family: "Quicksand", serif;
-        font-weight: 500;
-        font-size: 1rem;
+
+
+    &:focus-visible {
+        border: 1px solid #C9B7F0;
+        outline: none;
+        box-shadow: 0 0px 8px #c8b7ee75;
     }
 }
 
 input,
 textarea {
-    border: 1px solid #c1b2c7;
-    border-radius: 4px;
+    border: 1px solid #E2D9F6;
+    border-radius: .5rem;
     box-sizing: border-box;
-    color: #6c5c7c;
+    color: #725A79;
     font-family: "Quicksand", serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1rem;
     padding: .7rem .7rem;
+    transition: all .2s;
+
+    &:focus-visible {
+        border: 1px solid #C9B7F0;
+        outline: none;
+        box-shadow: 0 0px 8px #c8b7ee75;
+    }
 }
 
 .input-label {
@@ -179,4 +224,18 @@ textarea {
     font-size: .875rem;
     font-weight: 500;
     margin-top: .25rem;
+}
+
+.input-with-icon {
+    position: relative;
+
+    & i {
+        background-color: #fff;
+        color: var(--icon-color);
+        padding: 0.5rem;
+        position: absolute;
+        right: .5rem;
+        top: 50%;
+        transform: translateY(-50%);
+      }
 }

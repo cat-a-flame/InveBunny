@@ -55,6 +55,22 @@
     }
 }
 
+/* SECONDARY */
+.button-secondary {
+    background-color: rgba(255, 255, 255, 0.20);
+    border: 1px solid #C9B7F0;
+    border-radius: .5rem;
+    color: #725A79;
+
+    &:hover {
+        background-color: rgba(176, 136, 189, 0.20);
+    }
+
+    &:active {
+        background-color: rgba(176, 136, 189, 0.30);
+    }
+}
+
 /* GHOST */
 .button-ghost {
     background-color:#fff;

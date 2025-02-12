@@ -2,3 +2,37 @@
     display: flex;
     gap: 1.25rem;
 }
+
+.iventory-summary {
+    & .total {
+        font-size: 0.875rem;
+    }
+}
+
+.stock-info {
+    display: flex;
+    font-size: 0.75rem;
+    gap: .9rem;
+    margin-top: .5rem;
+}
+
+.stock-status {
+    align-items: center;
+    display: flex;
+    gap: .38rem;
+    
+    span {
+        border-radius: 20px;
+        display: block;
+        height: 8px;
+        width: 8px;
+    }
+}
+
+.low-stock span {
+    background-color: #B795C2;
+}
+
+.out-of-stock span {
+    background-color: #E04A6E;
+}

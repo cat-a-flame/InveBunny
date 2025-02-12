@@ -1,0 +1,25 @@
+.icon-button {
+    background-color: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: #B088BD;
+    cursor: pointer;
+    display: grid;
+    font-size: 1.05rem;
+    height: 40px;
+    padding: 0;
+    place-items: center;
+    width: 40px;
+
+    &:hover,
+    &:focus {
+        background-color: #fff;
+        box-shadow: 0px 2px 4px 0px rgba(125, 114, 148, 0.25);
+        outline: 0;
+    }
+
+    &:active {
+        background-color: #f8f8f8;
+        box-shadow: 0px 2px 4px 0px rgba(125, 114, 148, 0.25);
+    }
+}

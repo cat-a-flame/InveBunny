@@ -20,7 +20,7 @@ export function AddButton() {
 
     return (
         <>
-            <Button variant="cta" onClick={() => setIsDialogOpen(true)} icon={<CgMathPlus />}>Add new item</Button>
+            <Button variant="cta" onClick={() => setIsDialogOpen(true)} icon={<CgMathPlus />}>Add new product</Button>
 
 
             <Dialog
