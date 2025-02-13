@@ -21,7 +21,7 @@ const Sidebar = () => {
                         <li>
                             <Link className={`${styles.navigationLink} ${pathname === '/inventory' ? styles.active : ''}`} href="/" title="Inventory">
                                 <i className="fa-solid fa-box-open"></i>
-                                {!isCollapsed && <span>Iventory</span>}
+                                {!isCollapsed && <span>Inventory</span>}
                             </Link>
                         </li>
                         <li>
