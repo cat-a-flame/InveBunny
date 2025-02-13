@@ -1,0 +1,38 @@
+.login-page {
+    display: grid;
+    padding: 0;
+    place-items: center;
+    height: 70vh;
+
+    & main {
+        display: none;
+    }
+}
+
+.login-form {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px 0px rgba(162, 166, 187, 0.50);
+    width: 300px;
+    padding: 2rem;
+
+    & input,
+    & button {
+        width: 100%;
+    }
+
+    & button {
+        justify-content: center;
+
+        &:first-of-type {
+            margin-bottom: 1rem;
+        }
+    }
+
+    & h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 3rem;
+        text-align: center;
+    }
+}
