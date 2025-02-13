@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CgMathPlus } from "react-icons/cg";
 import { Button } from "../../components/Button/button";
 import { Dialog } from "../../components/Dialog/dialog";
+import { supabaseClient } from "@/src/utils/supabase/client";
 
 export function AddButton() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -12,8 +13,12 @@ export function AddButton() {
         setIsDialogOpen(false);
     };
 
-    const handleConfirm = () => {
-        alert("Category saved!");
+    const handleConfirm = async () => {
+        console.log(supabaseClient)
+        const asd = await supabaseClient.from("categories").insert({
+            category_name: "New categor"
+        })
+        console.log(asd)
         setIsDialogOpen(false);
     };
 
