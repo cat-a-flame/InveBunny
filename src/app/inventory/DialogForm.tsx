@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { CgMathPlus } from "react-icons/cg";
 import { Button } from "../../components/Button/button";
 
+import { useToast } from '../../components/Toast/toast';
+
 export function DialogForm() {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -14,6 +16,9 @@ export function DialogForm() {
   const [variantId, setVariantId] = useState('');
   const [categories, setCategories] = useState([]);
   const [variants, setVariants] = useState([]);
+
+  const toast = useToast();
+
 
   // Fetch categories
   useEffect(() => {
@@ -52,10 +57,11 @@ export function DialogForm() {
     const result = await response.json();
 
     if (result.success) {
-      alert('Product created!');
+      toast('Product created!');
       closeDialog();
+      //location.reload(); // if you're fine with a full page reload
     } else {
-      alert(`Error: ${result.error}`);
+      toast(`Error: ${result.error}`);
     }
   };
 
