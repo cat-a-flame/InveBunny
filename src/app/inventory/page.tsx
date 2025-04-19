@@ -2,15 +2,8 @@ import { createClient } from '@/src/utils/supabase/server';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { DialogForm } from './DialogForm';
 import styles from './inventory.module.css';
-import { Pagination } from '@/src/components/Pagination/pagination';
-//import { useState } from 'react';
 
 export default async function Home() {
-    //const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = 10;
-
-
-
     const supabase = await createClient();
     const { data: products } = await supabase
         .from("products")
@@ -105,8 +98,6 @@ export default async function Home() {
                         <span className={`${styles["out-of-stock"]} ${styles["stock-status"]}`}><span></span> Out of stock: {products?.filter(p => p.product_quantity === 0).length || 0}</span>
                     </div>
                 </div>
-
-                {/* <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} /> */}
             </div>
         </>
     );
