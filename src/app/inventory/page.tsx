@@ -1,6 +1,6 @@
 import { createClient } from '@/src/utils/supabase/server';
-import { AddButton } from './addButton';
 import { IconButton } from '@/src/components/IconButton/iconButton';
+import { DialogForm } from './DialogForm';
 import styles from './inventory.module.css';
 import { Pagination } from '@/src/components/Pagination/pagination';
 //import { useState } from 'react';
@@ -8,8 +8,8 @@ import { Pagination } from '@/src/components/Pagination/pagination';
 export default async function Home() {
     //const [currentPage, setCurrentPage] = useState(1);
     const totalPages = 10;
-    
-    
+
+
 
     const supabase = await createClient();
     const { data: products } = await supabase
@@ -25,11 +25,7 @@ export default async function Home() {
 
     return (
         <>
-            <div className="pageHeader">
-                <h2 className="heading-title">Inventory</h2>
-
-                <AddButton />
-            </div>
+            <DialogForm />
 
             <div className="content">
                 <div className="filter-bar">
