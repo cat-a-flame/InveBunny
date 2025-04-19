@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { CgMathPlus } from "react-icons/cg";
 import { Button } from "../../components/Button/button";
 
 export function DialogForm() {
@@ -60,81 +61,59 @@ export function DialogForm() {
 
   return (
     <>
-    <div className="pageHeader">
-      <h2 className="heading-title">Inventory</h2>
+      <div className="pageHeader">
+        <h2 className="heading-title">Inventory</h2>
 
-        <Button variant="cta" onClick={openDialog}>Add new product</Button>
+        <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>Add new product</Button>
       </div>
 
-      <dialog ref={dialogRef}>
+      <dialog className="dialog" ref={dialogRef}>
         <form onSubmit={handleSubmit} method="dialog">
-          <h2>Add Product</h2>
+          <h2 className="dialog-title">Add new product</h2>
 
-          <label>
-            Name:
-            <input
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              required
-            />
-          </label>
+          <div className="input-group">
+            <label className="input-label">Name</label>
+            <input value={productName} onChange={(e) => setProductName(e.target.value)} required />
+          </div>
 
-          <label>
-            SKU:
-            <input
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-              required
-            />
-          </label>
+          <div className="input-group">
+            <label className="input-label">SKU</label>
+            <input value={sku} onChange={(e) => setSku(e.target.value)} required />
+          </div>
 
-          <label>
-            Quantity:
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              required
-            />
-          </label>
+          <div className="input-group">
+            <label className="input-label">Quantity</label>
+            <input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} required />
+          </div>
 
-          <label>
-            Category:
+          <div className="input-group">
+            <label className="input-label">Category</label>
             <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
-            >
-              <option value="">Select category</option>
+              value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+              <option value="">Select a category</option>
               {categories.map((cat: any) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.category_name}
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label>
-            Variant:
-            <select
-              value={variantId}
-              onChange={(e) => setVariantId(e.target.value)}
-              required
-            >
-              <option value="">Select variant</option>
+          <div className="input-group">
+            <label className="input-label">Variant</label>
+            <select value={variantId} onChange={(e) => setVariantId(e.target.value)} required>
+              <option value="">Select a variant</option>
               {variants.map((variant: any) => (
                 <option key={variant.id} value={variant.id}>
                   {variant.variant_name}
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <div style={{ marginTop: '1rem' }}>
-            <button type="submit">Save</button>
-            <button type="button" onClick={closeDialog}>
-              Cancel
-            </button>
+          <div className="dialog-buttons">
+            <Button variant="ghost" onClick={closeDialog}>Cancel</Button>
+            <Button variant="primary" type="submit">Save product</Button>
           </div>
         </form>
       </dialog>
