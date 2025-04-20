@@ -1,7 +1,7 @@
 'use client';
 
-import { IconButton } from '../../components/IconButton/iconButton';
-import { useToast } from '../../components/Toast/toast';
+import { IconButton } from '../../../components/IconButton/iconButton';
+import { useToast } from '../../../components/Toast/toast';
 import { useRef } from 'react';
 import { DeleteConfirmationDialog, DeleteConfirmationDialogHandle } from './DeleteConfirmationDialog';
 
@@ -12,7 +12,7 @@ type Props = {
 export const DeleteProductButton = ({ productId }: Props) => {
     const dialogRef = useRef<DeleteConfirmationDialogHandle>(null);
     const toast = useToast();
-    
+
     const handleDelete = async () => {
         try {
             const res = await fetch(`/api/inventory/deleteProduct?id=${productId}`, { method: 'DELETE' });
@@ -28,7 +28,7 @@ export const DeleteProductButton = ({ productId }: Props) => {
 
     return (
         <>
-            <IconButton icon={<i className="fa-solid fa-trash-can"></i>} onClick={() => dialogRef.current?.open()} title="Delete product" />
+            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => dialogRef.current?.open()} title="Delete product" />
 
             <DeleteConfirmationDialog ref={dialogRef} onConfirm={handleDelete} />
         </>

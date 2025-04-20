@@ -5,7 +5,21 @@ import { CgMathPlus } from "react-icons/cg";
 import { Button } from "../../components/Button/button";
 import { useToast } from '../../components/Toast/toast';
 
-export function DialogForm() {
+type Product = {
+  id: string;
+  product_name: string;
+  product_sku: string;
+  product_quantity: number;
+  category_id: string;
+  variant_id: string;
+};
+
+type DialogFormProps = {
+  productToEdit?: Product | null;
+  onSave?: () => void;
+};
+
+export function DialogForm({ productToEdit = null, onSave }: DialogFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [productName, setProductName] = useState('');
@@ -18,28 +32,54 @@ export function DialogForm() {
 
   const toast = useToast();
 
-  // Fetch categories
   useEffect(() => {
     fetch('/api/categories')
       .then(res => res.json())
       .then(data => setCategories(data.categories || []));
   }, []);
 
-  // Fetch variants
   useEffect(() => {
     fetch('/api/variants')
       .then(res => res.json())
       .then(data => setVariants(data.variants || []));
   }, []);
 
+  useEffect(() => {
+    if (productToEdit) {
+      setProductName(productToEdit.product_name);
+      setSku(productToEdit.product_sku);
+      setQuantity(productToEdit.product_quantity);
+      setCategoryId(productToEdit.category_id);
+      setVariantId(productToEdit.variant_id);
+      dialogRef.current?.showModal();
+    }
+  }, [productToEdit]);
+
   const openDialog = () => dialogRef.current?.showModal();
-  const closeDialog = () => dialogRef.current?.close();
+  const closeDialog = () => {
+    dialogRef.current?.close();
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setProductName('');
+    setSku('');
+    setQuantity(0);
+    setCategoryId('');
+    setVariantId('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch('/api/inventory/addNewProduct', {
-      method: 'POST',
+    const url = productToEdit
+      ? `/api/inventory/updateProduct?id=${productToEdit.id}`
+      : '/api/inventory/addNewProduct';
+
+    const method = productToEdit ? 'PATCH' : 'POST';
+
+    const response = await fetch(url, {
+      method,
       body: JSON.stringify({
         product_name: productName,
         product_sku: sku,
@@ -55,8 +95,9 @@ export function DialogForm() {
     const result = await response.json();
 
     if (result.success) {
-      toast('Product created!');
+      toast(productToEdit ? 'Product updated!' : 'Product created!');
       closeDialog();
+      onSave?.();
     } else {
       toast(`Error: ${result.error}`);
     }
@@ -64,15 +105,20 @@ export function DialogForm() {
 
   return (
     <>
-      <div className="pageHeader">
-        <h2 className="heading-title">Inventory</h2>
-
-        <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>Add new product</Button>
-      </div>
+      {!productToEdit && (
+        <div className="pageHeader">
+          <h2 className="heading-title">Inventory</h2>
+          <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>
+            Add new product
+          </Button>
+        </div>
+      )}
 
       <dialog className="dialog" ref={dialogRef}>
         <form onSubmit={handleSubmit} method="dialog">
-          <h2 className="dialog-title">Add new product</h2>
+          <h2 className="dialog-title">
+            {productToEdit ? 'Edit product' : 'Add new product'}
+          </h2>
 
           <div className="input-group">
             <label className="input-label">Name</label>
@@ -91,13 +137,10 @@ export function DialogForm() {
 
           <div className="input-group">
             <label className="input-label">Category</label>
-            <select
-              value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
               <option value="">Select a category</option>
               {categories.map((cat: any) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.category_name}
-                </option>
+                <option key={cat.id} value={cat.id}>{cat.category_name}</option>
               ))}
             </select>
           </div>
@@ -107,16 +150,16 @@ export function DialogForm() {
             <select value={variantId} onChange={(e) => setVariantId(e.target.value)} required>
               <option value="">Select a variant</option>
               {variants.map((variant: any) => (
-                <option key={variant.id} value={variant.id}>
-                  {variant.variant_name}
-                </option>
+                <option key={variant.id} value={variant.id}>{variant.variant_name}</option>
               ))}
             </select>
           </div>
 
           <div className="dialog-buttons">
             <Button variant="ghost" onClick={closeDialog}>Cancel</Button>
-            <Button variant="primary" type="submit">Save product</Button>
+            <Button variant="primary" type="submit">
+              {productToEdit ? 'Update product' : 'Save product'}
+            </Button>
           </div>
         </form>
       </dialog>

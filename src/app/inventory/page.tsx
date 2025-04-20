@@ -1,7 +1,7 @@
 import { createClient } from '@/src/utils/supabase/server';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { DialogForm } from './DialogForm';
-import { DeleteProductButton } from './DeleteProductButton';
+import { DeleteProductButton } from './delete/DeleteProductButton';
 import styles from './inventory.module.css';
 
 export default async function Home() {
