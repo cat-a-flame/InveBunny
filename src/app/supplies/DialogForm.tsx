@@ -18,27 +18,13 @@ export function DialogForm() {
 
   const toast = useToast();
 
-  // Fetch categories
-  useEffect(() => {
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data.categories || []));
-  }, []);
-
-  // Fetch variants
-  useEffect(() => {
-    fetch('/api/variants')
-      .then(res => res.json())
-      .then(data => setVariants(data.variants || []));
-  }, []);
-
   const openDialog = () => dialogRef.current?.showModal();
   const closeDialog = () => dialogRef.current?.close();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch('/api/inventory/addNewProduct', {
+    const response = await fetch('/api/submit', {
       method: 'POST',
       body: JSON.stringify({
         product_name: productName,
@@ -65,7 +51,7 @@ export function DialogForm() {
   return (
     <>
       <div className="pageHeader">
-        <h2 className="heading-title">Inventory</h2>
+        <h2 className="heading-title">Supplies</h2>
 
         <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>Add new product</Button>
       </div>
@@ -77,41 +63,6 @@ export function DialogForm() {
           <div className="input-group">
             <label className="input-label">Name</label>
             <input value={productName} onChange={(e) => setProductName(e.target.value)} required />
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">SKU</label>
-            <input value={sku} onChange={(e) => setSku(e.target.value)} required />
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Quantity</label>
-            <input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} required />
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Category</label>
-            <select
-              value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-              <option value="">Select a category</option>
-              {categories.map((cat: any) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.category_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Variant</label>
-            <select value={variantId} onChange={(e) => setVariantId(e.target.value)} required>
-              <option value="">Select a variant</option>
-              {variants.map((variant: any) => (
-                <option key={variant.id} value={variant.id}>
-                  {variant.variant_name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="dialog-buttons">

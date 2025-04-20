@@ -1,7 +1,4 @@
-"use client";
-
 import { ButtonHTMLAttributes, ReactNode } from "react";
-import { cn } from "@/src/utils/utils";
 import styles from "./iconButton.module.css";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &{

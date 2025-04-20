@@ -2,7 +2,6 @@ import { createClient } from '@/src/utils/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    // Initialize Supabase client
     const supabase = await createClient();
 
     // Get the authenticated user
@@ -15,10 +14,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { product_name, product_sku, product_quantity, category_id, variant_id } = body;
 
-    // Fetch the category based on category_id (we need the UUID here)
     const { data: categoryData, error: categoryError } = await supabase
       .from('categories')
-      .select('id') // Fetching the category UUID
+      .select('id')
       .eq('id', category_id)
       .single();
 
@@ -26,10 +24,9 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ success: false, error: 'Invalid category' }), { status: 400 });
     }
 
-    // Fetch the variant based on variant_id (we need the UUID here)
     const { data: variantData, error: variantError } = await supabase
       .from('variants')
-      .select('id') // Fetching the variant UUID
+      .select('id')
       .eq('id', variant_id)
       .single();
 
@@ -45,9 +42,9 @@ export async function POST(request: Request) {
           product_name,
           product_sku,
           product_quantity,
-          product_category: categoryData.id,  // Insert the category UUID here
-          product_variant: variantData.id,    // Insert the variant UUID here
-          owner_id: user.id,  // Add the owner ID (authenticated user)
+          product_category: categoryData.id,
+          product_variant: variantData.id,
+          owner_id: user.id,
         },
       ]);
 

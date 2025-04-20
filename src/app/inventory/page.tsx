@@ -1,6 +1,7 @@
 import { createClient } from '@/src/utils/supabase/server';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { DialogForm } from './DialogForm';
+import { DeleteProductButton } from './DeleteProductButton';
 import styles from './inventory.module.css';
 
 export default async function Home() {
@@ -78,7 +79,7 @@ export default async function Home() {
                                 <td>{product.variants.variant_name}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" />
+                                        <DeleteProductButton productId={product.id} />
                                         <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
                                         <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" />
                                     </div>
