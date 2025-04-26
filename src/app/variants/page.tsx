@@ -1,6 +1,7 @@
 import { createClient } from '@/src/utils/supabase/server';
-import { AddButton } from './addButton';
-import { IconButton } from '@/src/components/IconButton/iconButton';
+import { AddButton } from './add/AddButton';
+import { DeleteButton } from './delete/DeleteButton';
+import { EditVariantButton } from './edit/EditVariantButton';
 
 export default async function VariantsPage() {
     const supabase = await createClient();
@@ -16,7 +17,6 @@ export default async function VariantsPage() {
         <>
             <div className="pageHeader">
                 <h2 className="heading-title">Variants</h2>
-
                 <AddButton />
             </div>
             
@@ -36,8 +36,8 @@ export default async function VariantsPage() {
                                 <td>{variant.products ? variant.products.length : 0}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" />
-                                        <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" />
+                                        <DeleteButton variantId={variant.id} />
+                                        <EditVariantButton variantId={variant.id} currentName={variant.variant_name} />
                                     </div>
                                 </td>
                             </tr>

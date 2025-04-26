@@ -8,7 +8,7 @@ import { useToast } from '../../components/Toast/toast';
 export function DialogForm() {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const [supplyName, setSupplyName] = useState('');
+  const [variantName, setVariantName] = useState('');
   const toast = useToast();
 
   const openDialog = () => dialogRef.current?.showModal();
@@ -17,10 +17,10 @@ export function DialogForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch('/api/supplies/addNewSupply', {
+    const response = await fetch('/api/variants/addNewVariant', {
       method: 'POST',
       body: JSON.stringify({
-        supply_name: supplyName,
+        variant_name: variantName,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export function DialogForm() {
     const result = await response.json();
 
     if (result.success) {
-      toast('Supply created!');
+      toast('Variant created!');
       closeDialog();
     } else {
       toast(`Error: ${result.error}`);
@@ -41,20 +41,20 @@ export function DialogForm() {
   return (
     <>
       <div className="pageHeader">
-        <h2 className="heading-title">Supplies</h2>
+        <h2 className="heading-title">Variants</h2>
 
-        <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>Add new supply</Button>
+        <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>Add new variant</Button>
       </div>
 
       <dialog className="dialog" ref={dialogRef}>
         <form onSubmit={handleSubmit} method="dialog">
-          <h2 className="dialog-title">Add new supply</h2>
+          <h2 className="dialog-title">Add new variant</h2>
 
           <div className="input-group">
             <label className="input-label">Name</label>
             <input
-              value={supplyName}
-              onChange={(e) => setSupplyName(e.target.value)}
+              value={variantName}
+              onChange={(e) => setVariantName(e.target.value)}
               required
             />
           </div>
