@@ -5,13 +5,14 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &{
     icon?: ReactNode;
     title?: string;
     size?: "sm" | "md";
+    disabled?: boolean;
 }
 
-export function IconButton({ icon, className, title, size, ...props }: ButtonProps) {
+export function IconButton({ icon, className, title, size, disabled, ...props }: ButtonProps) {
     const sizeClass = size === "sm" ? styles["icon-button-sm"] : "";
 
     return (
-        <button className={`${styles["icon-button"]} ${sizeClass}`} title={title}  {...props}>
+        <button className={`${styles["icon-button"]} ${sizeClass}`} title={title}  disabled={disabled} {...props}>
             {icon && <span className={styles.icon}>{icon}</span>}
         </button>
     );

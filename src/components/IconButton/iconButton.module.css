@@ -27,6 +27,12 @@
         height: 32px;
         width: 32px;
     }
+
+    &[disabled] {
+        color: #e9dbef;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
 }
 
 .icon-button-sm {
