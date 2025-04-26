@@ -12,7 +12,7 @@ export function AddButton() {
     return (
         <>
             <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>
-                Add new supply
+                Add new category
             </Button>
 
             <AddCategoryDialog dialogRef={dialogRef} />

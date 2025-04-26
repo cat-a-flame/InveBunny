@@ -2,16 +2,28 @@ import { createClient } from '@/src/utils/supabase/server';
 import { DeleteButton } from './delete/DeleteButton';
 import { EditCategoryButton } from './edit/EditCategoryButton';
 import { AddButton } from './add/AddButton';
+import { Pagination } from '@/src/components/Pagination/pagination';
 
-export default async function CategoriesPage() {
+type SearchParams = {
+    page?: string;
+};
+
+export default async function CategoriesPage({ searchParams }: { searchParams: SearchParams }) {
     const supabase = await createClient();
-    const { data: categories } = await supabase
+
+    // Pagination setup
+    const searchParamsResolved = await searchParams;
+    const page = parseInt(searchParamsResolved.page || "1");
+    const pageSize = 12;
+
+    const { data: categories, count } = await supabase
     .from("categories")
-    .select(`
-            id,
-            category_name,
-            products (id)
-        `).order('category_name', { ascending: true });
+    .select("id, category_name, products (id)", { count: 'exact' })
+    .range((page - 1) * pageSize, page * pageSize - 1)
+    .order('category_name', { ascending: true });
+
+    const totalCount = count ?? 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
         <>
@@ -45,6 +57,8 @@ export default async function CategoriesPage() {
                     </tbody>
                 </table>
             </div>
+
+            <Pagination totalPages={totalPages} currentPage={page} />
         </>
     );
 };

@@ -1,26 +1,30 @@
-import { createClient } from '@/src/utils/supabase/server';
-import { Pagination } from '@/src/components/Pagination/pagination';
+import { AddButton } from './add/AddButton';
 import { DeleteButton } from './delete/DeleteButton';
 import { EditSupplyButton } from './edit/EditSupplyButton';
-import { AddButton } from './add/AddButton';
 import { IconButton } from '@/src/components/IconButton/iconButton';
+import { Pagination } from '@/src/components/Pagination/pagination';
+import { Search } from '../../components/SearchBar/searchBar';
+import { createClient } from '@/src/utils/supabase/server';
 
 type SearchParams = {
     page?: string;
+    query?: string;
 };
 
 export default async function SuppliesPage({ searchParams }: { searchParams: SearchParams }) {
     const supabase = await createClient();
 
-    // Pagination setup
-    const searchParamsResolved = await searchParams;
-    const page = parseInt(searchParamsResolved.page || "1");
+    // Await searchParams before accessing
+    const resolvedSearchParams = await searchParams;
+    const page = parseInt(resolvedSearchParams.page || "1");
+    const query = resolvedSearchParams.query || "";
     const pageSize = 12;
 
-    // Fetch supplies based on pagination
+    // Query builder (as you already have it)
     const { data: supplies, count } = await supabase
         .from("supplies")
         .select("id, supply_name, supply_category", { count: 'exact' })
+        .or(`supply_name.ilike.%${query}%,supply_category.ilike.%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('supply_name', { ascending: true });
 
@@ -34,7 +38,10 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
                 <AddButton />
             </div>
 
+
             <div className="content">
+                <Search query={query} />
+
                 <table>
                     <thead>
                         <tr>
@@ -66,7 +73,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
                     </tbody>
                 </table>
             </div>
-            
+
             <Pagination totalPages={totalPages} currentPage={page} />
         </>
     );
