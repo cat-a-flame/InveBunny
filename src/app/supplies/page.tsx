@@ -1,6 +1,8 @@
 import { createClient } from '@/src/utils/supabase/server';
-import { AddButton } from './addButton';
 import { IconButton } from '@/src/components/IconButton/iconButton';
+import { DeleteButton } from './delete/DeleteButton';
+import { EditSupplyButton } from './edit/EditSupplyButton';
+import { AddButton } from './add/AddButton';
 
 export default async function SuppliesPage() {
     const supabase = await createClient();
@@ -15,8 +17,7 @@ export default async function SuppliesPage() {
         <>
             <div className="pageHeader">
                 <h2 className="heading-title">Supplies</h2>
-
-                <AddButton />
+                <AddButton/>
             </div>
 
             <div className="content">
@@ -32,12 +33,12 @@ export default async function SuppliesPage() {
                         {supplies && supplies.map(supply => (
                             <tr key={supply.id}>
                                 <td><span className="item-name">{supply.supply_name}</span></td>
-                                <td></td>
+                                <td>{/*supply.products ? supply.products.length : 0*/}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" />
+                                        <DeleteButton supplyId={supply.id} />
                                         <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
-                                        <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" />
+                                        <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} />
                                     </div>
                                 </td>
                             </tr>
