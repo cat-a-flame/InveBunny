@@ -1,6 +1,7 @@
 import { createClient } from '@/src/utils/supabase/server';
-import { AddButton } from './addButton';
-import { IconButton } from '@/src/components/IconButton/iconButton';
+import { DeleteButton } from './delete/DeleteButton';
+import { EditCategoryButton } from './edit/EditCategoryButton';
+import { AddButton } from './add/AddButton';
 
 export default async function CategoriesPage() {
     const supabase = await createClient();
@@ -16,7 +17,6 @@ export default async function CategoriesPage() {
         <>
             <div className="pageHeader">
                 <h2 className="heading-title">Categories</h2>
-
                 <AddButton />
             </div>
             
@@ -36,8 +36,8 @@ export default async function CategoriesPage() {
                                 <td>{category.products ? category.products.length : 0}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" />
-                                        <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" />
+                                        <DeleteButton categoryId={category.id} />
+                                        <EditCategoryButton categoryId={category.id} currentName={category.category_name} />
                                     </div>
                                 </td>
                             </tr>
