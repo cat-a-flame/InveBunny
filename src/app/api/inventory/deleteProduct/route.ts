@@ -1,4 +1,3 @@
-// app/api/products/delete/route.ts
 import { createClient } from '@/src/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
