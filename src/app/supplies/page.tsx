@@ -1,23 +1,37 @@
 import { createClient } from '@/src/utils/supabase/server';
-import { IconButton } from '@/src/components/IconButton/iconButton';
+import { Pagination } from '@/src/components/Pagination/pagination';
 import { DeleteButton } from './delete/DeleteButton';
 import { EditSupplyButton } from './edit/EditSupplyButton';
 import { AddButton } from './add/AddButton';
+import { IconButton } from '@/src/components/IconButton/iconButton';
 
-export default async function SuppliesPage() {
+type SearchParams = {
+    page?: string;
+};
+
+export default async function SuppliesPage({ searchParams }: { searchParams: SearchParams }) {
     const supabase = await createClient();
-    const { data: supplies } = await supabase
+
+    // Pagination setup
+    const searchParamsResolved = await searchParams;
+    const page = parseInt(searchParamsResolved.page || "1");
+    const pageSize = 12;
+
+    // Fetch supplies based on pagination
+    const { data: supplies, count } = await supabase
         .from("supplies")
-        .select(`
-            id,
-            supply_name
-        `).order('supply_name', { ascending: true });
+        .select("id, supply_name, supply_category", { count: 'exact' })
+        .range((page - 1) * pageSize, page * pageSize - 1)
+        .order('supply_name', { ascending: true });
+
+    const totalCount = count ?? 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
         <>
             <div className="pageHeader">
                 <h2 className="heading-title">Supplies</h2>
-                <AddButton/>
+                <AddButton />
             </div>
 
             <div className="content">
@@ -25,6 +39,7 @@ export default async function SuppliesPage() {
                     <thead>
                         <tr>
                             <th>Supply name</th>
+                            <th>Category</th>
                             <th># assigned products</th>
                             <th></th>
                         </tr>
@@ -33,6 +48,11 @@ export default async function SuppliesPage() {
                         {supplies && supplies.map(supply => (
                             <tr key={supply.id}>
                                 <td><span className="item-name">{supply.supply_name}</span></td>
+                                <td>
+                                    <div className="category-badge">
+                                        {supply.supply_category}
+                                    </div>
+                                </td>
                                 <td>{/*supply.products ? supply.products.length : 0*/}</td>
                                 <td>
                                     <div className="table-actions">
@@ -46,6 +66,8 @@ export default async function SuppliesPage() {
                     </tbody>
                 </table>
             </div>
+            
+            <Pagination totalPages={totalPages} currentPage={page} />
         </>
     );
 };

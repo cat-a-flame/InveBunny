@@ -137,6 +137,14 @@ td {
     }
 }
 
+.category-badge {
+    background-color: #F3EEFF;
+    border-radius: 8px;
+    display: inline-block;
+    padding: .25rem .6rem;
+    text-align: center;
+}
+
 .table-actions {
     display: flex;
     gap: .5rem;

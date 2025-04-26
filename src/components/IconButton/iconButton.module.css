@@ -22,4 +22,15 @@
         background-color: #f8f8f8;
         box-shadow: 0px 2px 4px 0px rgba(125, 114, 148, 0.25);
     }
+
+    &-sm {
+        height: 32px;
+        width: 32px;
+    }
+}
+
+.icon-button-sm {
+    font-size: .8rem;
+    height: 32px;
+    width: 32px;
 }
