@@ -7,12 +7,14 @@ import { useToast } from '../../../components/Toast/toast';
 type EditSupplyDialogProps = {
     id: string;
     currentName: string;
+    currentCategory: string; // <-- Add this prop
     onClose: () => void;
 };
 
-export function EditSupplyDialog({ id, currentName, onClose }: EditSupplyDialogProps) {
+export function EditSupplyDialog({ id, currentName, currentCategory, onClose }: EditSupplyDialogProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
     const [supplyName, setSupplyName] = useState(currentName);
+    const [supplyCategory, setSupplyCategory] = useState(currentCategory); // <-- Add a new state
     const toast = useToast();
 
     useEffect(() => {
@@ -32,6 +34,7 @@ export function EditSupplyDialog({ id, currentName, onClose }: EditSupplyDialogP
             body: JSON.stringify({
                 id,
                 supply_name: supplyName,
+                supply_category: supplyCategory, // <-- Add category to the update
             }),
             headers: {
                 'Content-Type': 'application/json',
@@ -58,6 +61,15 @@ export function EditSupplyDialog({ id, currentName, onClose }: EditSupplyDialogP
                     <input
                         value={supplyName}
                         onChange={(e) => setSupplyName(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className="input-group">
+                    <label className="input-label">Category</label>
+                    <input
+                        value={supplyCategory}
+                        onChange={(e) => setSupplyCategory(e.target.value)}
                         required
                     />
                 </div>

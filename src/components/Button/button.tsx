@@ -4,7 +4,7 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/src/utils/utils";
 import styles from "./button.module.css";
 
-type ButtonVariant = "cta" | "primary" | "secondary" | "ghost";
+type ButtonVariant = "cta" | "primary" | "secondary" | "ghost" | "destructive";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &{
     variant: ButtonVariant,
@@ -16,6 +16,7 @@ const buttonVariants: Record<ButtonVariant, string> = {
     primary: styles["button-primary"],
     secondary: styles["button-secondary"],
     ghost: styles["button-ghost"],
+    destructive: styles["button-destructive"],
 };
 
 export function Button({ variant, icon, className, children, ...props }: ButtonProps) {

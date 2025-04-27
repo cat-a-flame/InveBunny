@@ -40,13 +40,13 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
 
 
             <div className="content">
-                <Search query={query} />
+                <Search placeholder="Search for supply name or category" query={query} />
 
                 <table>
                     <thead>
                         <tr>
                             <th>Supply name</th>
-                            <th>Category</th>
+                            <th>Supply category</th>
                             <th># assigned products</th>
                             <th></th>
                         </tr>
@@ -65,7 +65,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} />
                                         <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
-                                        <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} />
+                                        <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} currentCategory={supply.supply_category} />
                                     </div>
                                 </td>
                             </tr>

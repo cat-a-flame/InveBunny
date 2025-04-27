@@ -10,6 +10,7 @@ type Props = {
 
 export function AddSupplyDialog({ dialogRef }: Props) {
     const [supplyName, setSupplyName] = useState('');
+    const [supplyCategory, setsupplyCategory] = useState('');
     const toast = useToast();
 
     const closeDialog = () => dialogRef.current?.close();
@@ -19,7 +20,7 @@ export function AddSupplyDialog({ dialogRef }: Props) {
 
         const response = await fetch('/api/supplies/addNewSupply', {
             method: 'POST',
-            body: JSON.stringify({ supply_name: supplyName }),
+            body: JSON.stringify({ supply_name: supplyName, supply_category: supplyCategory }),
             headers: { 'Content-Type': 'application/json' },
         });
 
@@ -41,6 +42,11 @@ export function AddSupplyDialog({ dialogRef }: Props) {
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={supplyName} onChange={(e) => setSupplyName(e.target.value)} required />
+                </div>
+
+                <div className="input-group">
+                    <label className="input-label">Category</label>
+                    <input value={supplyCategory} onChange={(e) => setsupplyCategory(e.target.value)} required />
                 </div>
 
                 <div className="dialog-buttons">

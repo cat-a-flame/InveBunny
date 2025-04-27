@@ -85,3 +85,18 @@
         background: rgba(176, 136, 189, 0.30);
     }
 }
+
+/* DESTRUCTIVE */
+.button-destructive {
+    background-color:#D93737;
+    border-radius: .5rem;
+    color: #fff;
+
+    &:hover {
+        background: #bd3030
+    }
+
+    &:active {
+        background: #B52727;
+    }
+}

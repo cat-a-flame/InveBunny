@@ -7,9 +7,10 @@ import { IconButton } from '../../../components/IconButton/iconButton';
 type EditSupplyButtonProps = {
     supplyId: string;
     currentName: string;
+    currentCategory: string;
 };
 
-export function EditSupplyButton({ supplyId, currentName }: EditSupplyButtonProps) {
+export function EditSupplyButton({ supplyId, currentName, currentCategory }: EditSupplyButtonProps) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -20,6 +21,7 @@ export function EditSupplyButton({ supplyId, currentName }: EditSupplyButtonProp
                 <EditSupplyDialog
                     id={supplyId}
                     currentName={currentName}
+                    currentCategory={currentCategory}
                     onClose={() => setOpen(false)}
                 />
             )}

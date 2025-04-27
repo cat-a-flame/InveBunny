@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { supply_name } = body;
+    const { supply_name, supply_category } = body;
 
     if (!supply_name || supply_name.trim() === '') {
       return new Response(JSON.stringify({ success: false, error: 'Supply name is required' }), { status: 400 });
@@ -21,6 +21,7 @@ export async function POST(request: Request) {
       .insert([
         {
           supply_name,
+          supply_category,
           owner_id: user.id,
         },
       ]);

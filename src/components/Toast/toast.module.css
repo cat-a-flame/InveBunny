@@ -7,12 +7,12 @@
   }
   
   .toast {
-    background-color: #e04a6e;
-    border-radius: 4px;
+    background-color: #fff;
+    border-radius: 8px;
     box-shadow: 0 2px 4px #a78b9d;
-    color: #fff;
+    color: #725a79;
     font-weight: 700;
-    padding: .5rem 1rem;
+    padding: 1rem 1.5rem;
     opacity: 0;
     animation: fadeInOut 3s ease-in-out forwards;
   }

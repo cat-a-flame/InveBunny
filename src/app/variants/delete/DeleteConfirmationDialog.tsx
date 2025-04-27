@@ -40,7 +40,7 @@ export const DeleteConfirmationDialog = forwardRef<DeleteConfirmationDialogHandl
 
           <div className="dialog-buttons">
             <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-            <Button variant="primary" onClick={handleConfirm}>Delete</Button>
+            <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
           </div>
         </div>
       </dialog>

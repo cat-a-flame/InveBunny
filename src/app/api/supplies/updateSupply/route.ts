@@ -5,7 +5,7 @@ export async function PUT(request: Request) {
   const supabase = await createClient();
 
   const body = await request.json();
-  const { id, supply_name } = body;
+  const { id, supply_name, supply_category } = body;
 
   if (!id || !supply_name) {
     return NextResponse.json({ error: 'Missing data' }, { status: 400 });
@@ -15,7 +15,7 @@ export async function PUT(request: Request) {
 
   const { data, error } = await supabase
     .from('supplies')
-    .update({ supply_name })
+    .update({ supply_name, supply_category })
     .eq('id', id)
     .select();
 
