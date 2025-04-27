@@ -1,9 +1,9 @@
 import { AddButton } from './add/AddButton';
 import { DeleteButton } from './delete/DeleteButton';
 import { EditSupplyButton } from './edit/EditSupplyButton';
-import { IconButton } from '@/src/components/IconButton/iconButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
+import { ViewBatchButton } from './batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
 
 type SearchParams = {
@@ -64,7 +64,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} />
-                                        <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
+                                        <ViewBatchButton supplyId={supply.id} />
                                         <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} currentCategory={supply.supply_category} />
                                     </div>
                                 </td>

@@ -68,6 +68,11 @@ main {
     }
 }
 
+.section-subtitle {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
 /* TABLE */
 
 table {
@@ -114,6 +119,11 @@ td {
 .item-sku {
     font-size: 0.875rem;
     font-weight: 400;
+}
+
+.item-details {
+    display: block;
+    font-weight: 500;
 }
 
 .quantity-badge {
@@ -245,7 +255,7 @@ textarea {
         right: .5rem;
         top: 50%;
         transform: translateY(-50%);
-      }
+    }
 }
 
 /* DIALOG */
@@ -296,4 +306,66 @@ textarea {
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1.75rem;
+}
+
+/* PANEL */
+
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 800px;
+    margin: 0;
+    padding: 2rem;
+    border: none;
+    border-radius: 0;
+    background: white;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 300ms ease;
+    z-index: 1000;
+
+    &.open {
+        transform: translateX(0);
+    }
+}
+
+.side-panel-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    background-color: var(--brand-color);
+    opacity: .5;
+}
+
+.side-panel-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.side-panel-title {
+    font-family: titleFont;
+    font-size: 1.5rem;
+}
+
+/* BATCH TABLE */
+
+.batch-list {
+    box-shadow: 0 0 10px #7e95a64a;
+    border-radius: 8px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+
+    & thead tr {
+        background: #EEE5FF;
+    }
+
+    & tr:nth-child(even) {
+        background-color: #F7F3FF
+    }
 }
