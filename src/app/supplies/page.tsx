@@ -63,7 +63,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
                                 <td>{/*supply.products ? supply.products.length : 0*/}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <DeleteButton supplyId={supply.id} />
+                                        <DeleteButton supplyId={supply.id} supplyName={supply.supply_name} />
                                         <ViewBatchButton supplyId={supply.id} />
                                         <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} currentCategory={supply.supply_category} />
                                     </div>

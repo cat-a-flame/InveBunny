@@ -1,5 +1,6 @@
 import { Button } from "../../../components/Button/button";
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
+import { Dialog } from "../../../components/Dialog/dialog";
 
 export type DeleteConfirmationDialogHandle = {
   open: () => void;
@@ -7,23 +8,19 @@ export type DeleteConfirmationDialogHandle = {
 
 type Props = {
   onConfirm: () => void;
+  supplyName: string;
 };
 
 export const DeleteConfirmationDialog = forwardRef<DeleteConfirmationDialogHandle, Props>(
-  ({ onConfirm }, ref) => {
-    const dialogRef = useRef<HTMLDialogElement>(null);
+  ({ onConfirm, supplyName }, ref) => {
+    const [open, setOpen] = useState(false);
 
     useImperativeHandle(ref, () => ({
-      open: () => {
-        const dialog = dialogRef.current;
-        if (dialog && typeof dialog.showModal === 'function') {
-          dialog.showModal();
-        }
-      },
+      open: () => setOpen(true),
     }));
 
     const handleClose = () => {
-      dialogRef.current?.close();
+      setOpen(false);
     };
 
     const handleConfirm = () => {
@@ -32,18 +29,15 @@ export const DeleteConfirmationDialog = forwardRef<DeleteConfirmationDialogHandl
     };
 
     return (
-      <dialog className="dialog" ref={dialogRef}>
-        <div className="dialog-content">
-          <h2 className="dialog-title">Delete supply</h2>
+      <Dialog open={open} onClose={handleClose} title="Delete supply">
+        <p>Are you sure you want to delete <strong>{supplyName}</strong>?</p>
+        <p>This action will also permanently remove all batches linked to this supply!</p>
 
-          <p>This cannot be undone. Are you sure?</p>
-
-          <div className="dialog-buttons">
-            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
-          </div>
+        <div className="dialog-buttons">
+          <Button variant="ghost" onClick={handleClose}>Cancel</Button>
+          <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
         </div>
-      </dialog>
+      </Dialog>
     );
   }
 );

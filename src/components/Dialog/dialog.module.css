@@ -2,10 +2,19 @@
     color: #725A79;
     font-family: titleFont;
     font-size: 1.5rem;
+}
+
+.subtitle {
+    color: #725A79;
+    font-size: .9rem;
     margin-bottom: 1.8rem;
 }
 
-.dialog input,
+.body {
+    margin-top: 1.8rem;
+}
+
+.dialog input:not([type="checkbox"]),
 .dialog select {
     display: block;
     width: 100%;
@@ -15,12 +24,17 @@
     border: 0;
     border-radius: 8px;
     box-shadow: 0 0 10px #a89fa960;
+    color: #725a79;
     padding: 1.75rem;
     width: 400px;
 
     &::backdrop {
         background-color: var(--brand-color);
         opacity: .5;
+    }
+
+    & p:not(:last-child) {
+        margin-bottom: 1rem;
     }
 }
 

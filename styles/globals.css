@@ -25,7 +25,7 @@ body {
 
 b,
 strong {
-    font-weight: 700;
+    font-weight: 800;
 }
 
 /* LAYOUT */
@@ -98,11 +98,11 @@ th {
     font-weight: 700;
 }
 
-tr {
+tbody tr {
     background-color: #fff;
 
     &:hover {
-        background-color: #fbfbfc;
+        background-color: #f0eafd;
     }
 }
 
@@ -215,6 +215,14 @@ textarea {
         outline: none;
         box-shadow: 0 0px 8px #c8b7ee75;
     }
+
+    &[readonly] {
+        background-color: #F7F3FF;
+        border: 1px solid #E2D9F6;
+        color: #725A79;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
 }
 
 .input-label {
@@ -234,6 +242,22 @@ textarea {
         flex-shrink: 0;
         width: 260px;
     }
+}
+
+.double-input-group {
+    display: flex;
+    gap: 1.25rem;
+}
+
+.input-grow {
+    flex-shrink: 0;
+    flex-grow: 1;
+}
+
+
+.input-shrink {
+    flex-shrink: 1;
+    flex-grow: 0;
 }
 
 .help-text {
@@ -385,4 +409,66 @@ textarea {
     & tr:nth-child(even) {
         background-color: #F7F3FF
     }
+
+    & tr:nth-child(even):hover {
+        background-color: #eee5ff;
+    }
+}
+
+/* SWITCH */
+
+.switch {
+    display: inline-block;
+    height: 32px;
+    position: relative;
+    width: 52px;
+
+    &:focus-visible {
+        border: 1px solid red;
+    }
+}
+
+.switch input {
+    height: 0;
+    opacity: 0;
+    width: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #E2D9F6;
+    transition: 0.2s;
+    border-radius: 8px;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 21px;
+    width: 21px;
+    left: 5px;
+    bottom: 6px;
+    background-color: white;
+    transition: 0.2s;
+    border-radius: 5px;
+}
+
+input:checked + .slider {
+    background-color: #725A79;
+}
+
+input:checked + .slider:before {
+    bottom: 4px;
+    height: 24px;
+    transform: translateX(18px);
+    width: 24px;
+}
+
+input:focus-visible + .slider {
+    box-shadow: 0 0 8px #c8b7ee75;
 }
