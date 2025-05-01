@@ -40,7 +40,7 @@ export default function DeleteBatchDialog({ open, onClose, batchName, batchId, o
             <p>Are you sure you want to delete batch <strong>{batchName}</strong>? This cannot be undone. </p>
 
             <div className="dialog-buttons">
-                <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
                 <Button variant="destructive" onClick={handleDelete}>Delete</Button>
             </div>
         </Dialog>

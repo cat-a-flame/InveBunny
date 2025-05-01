@@ -2,15 +2,16 @@
 
 import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
-import { useRef } from 'react';
+import { useState } from 'react';
 import { DeleteConfirmationDialog, DeleteConfirmationDialogHandle } from './DeleteConfirmationDialog';
 
 type Props = {
     categoryId: string;
+    categoryName: string;
 };
 
-export const DeleteButton = ({ categoryId }: Props) => {
-    const dialogRef = useRef<DeleteConfirmationDialogHandle>(null);
+export const DeleteButton = ({ categoryId, categoryName }: Props) => {
+    const [open, setOpen] = useState(false);
     const toast = useToast();
 
     const handleDelete = async () => {
@@ -28,9 +29,8 @@ export const DeleteButton = ({ categoryId }: Props) => {
 
     return (
         <>
-            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => dialogRef.current?.open()} title="Delete product" />
-
-            <DeleteConfirmationDialog ref={dialogRef} onConfirm={handleDelete} />
+            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => setOpen(true)} title="Delete product" />
+            {open && ( <DeleteConfirmationDialog open={open} onClose={() => setOpen(false)} onConfirm={handleDelete} categoryName={categoryName}  /> )}
         </>
     );
 };

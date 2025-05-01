@@ -1,45 +1,32 @@
 import { Button } from "../../../components/Button/button";
-import { forwardRef, useImperativeHandle, useState } from 'react';
 import { Dialog } from "../../../components/Dialog/dialog";
 
-export type DeleteConfirmationDialogHandle = {
-  open: () => void;
-};
-
 type Props = {
-  onConfirm: () => void;
-  supplyName: string;
+    open: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    supplyName: string;
 };
 
-export const DeleteConfirmationDialog = forwardRef<DeleteConfirmationDialogHandle, Props>(
-  ({ onConfirm, supplyName }, ref) => {
-    const [open, setOpen] = useState(false);
-
-    useImperativeHandle(ref, () => ({
-      open: () => setOpen(true),
-    }));
-
+export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, supplyName }: Props) => {
     const handleClose = () => {
-      setOpen(false);
+        onClose();
     };
 
     const handleConfirm = () => {
-      onConfirm();
-      handleClose();
+        onConfirm();
+        onClose();
     };
 
     return (
-      <Dialog open={open} onClose={handleClose} title="Delete supply">
-        <p>Are you sure you want to delete <strong>{supplyName}</strong>?</p>
-        <p>This action will also permanently remove all batches linked to this supply!</p>
+        <Dialog open={open} onClose={handleClose} title="Delete supply">
+            <p>Are you sure you want to delete <strong>{supplyName}</strong>?</p>
+            <p>This action will also permanently remove all batches linked to this supply!</p>
 
-        <div className="dialog-buttons">
-          <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-          <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
-        </div>
-      </Dialog>
+            <div className="dialog-buttons">
+                <Button variant="ghost" onClick={handleClose} type="button">Cancel</Button>
+                <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
+            </div>
+        </Dialog>
     );
-  }
-);
-
-DeleteConfirmationDialog.displayName = 'DeleteConfirmationDialog';
+};

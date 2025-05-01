@@ -143,7 +143,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                             </table>
                         </>
                     ) : (
-                        <p>No batches yet.</p>
+                        <p>No active batches yet.</p>
                     )}
 
                     {archivedBatches.length > 0 ? (
@@ -225,8 +225,6 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                     }}
                 />
             )}
-
-
         </>
     );
 }

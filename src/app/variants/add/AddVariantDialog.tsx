@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '../../../components/Button/button';
+import { Dialog } from '../../../components/Dialog/dialog';
+import { useState } from 'react';
 import { useToast } from '../../../components/Toast/toast';
 
 type Props = {
-    dialogRef: React.RefObject<HTMLDialogElement>;
+    open: boolean;
+    onClose: () => void;
 };
 
-export function AddVariantDialog({ dialogRef }: Props) {
+export function AddVariantDialog({ open, onClose }: Props) {
     const [variantName, setVariantName] = useState('');
     const toast = useToast();
-
-    const closeDialog = () => dialogRef.current?.close();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,27 +27,25 @@ export function AddVariantDialog({ dialogRef }: Props) {
 
         if (result.success) {
             toast('✅ Variant created!');
-            closeDialog();
+            onClose();
         } else {
             toast(`Error: ${result.error}`);
         }
     };
 
     return (
-        <dialog className="dialog" ref={dialogRef}>
+        <Dialog open={open} onClose={onClose} title="Add new variant">
             <form onSubmit={handleSubmit} method="dialog">
-                <h2 className="dialog-title">Add new variant</h2>
-
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={variantName} onChange={(e) => setVariantName(e.target.value)} required />
                 </div>
 
                 <div className="dialog-buttons">
-                    <Button variant="ghost" onClick={closeDialog}>Cancel</Button>
+                    <Button variant="ghost" onClick={onClose} type="button">Cancel</Button>
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-        </dialog>
+        </Dialog>
     );
 }

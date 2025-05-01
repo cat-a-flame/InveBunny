@@ -36,7 +36,7 @@ export default async function VariantsPage() {
                                 <td>{variant.products ? variant.products.length : 0}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <DeleteButton variantId={variant.id} />
+                                        <DeleteButton variantId={variant.id} variantName={variant.variant_name} />
                                         <EditVariantButton variantId={variant.id} currentName={variant.variant_name} />
                                     </div>
                                 </td>

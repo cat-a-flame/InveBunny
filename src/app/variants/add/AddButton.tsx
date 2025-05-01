@@ -1,21 +1,20 @@
 'use client';
 
-import { useRef } from 'react';
-import { CgMathPlus } from 'react-icons/cg';
-import { Button } from '../../../components/Button/button';
 import { AddVariantDialog } from './AddVariantDialog';
+import { Button } from '../../../components/Button/button';
+import { CgMathPlus } from 'react-icons/cg';
+import { useState } from 'react';
 
 export function AddButton() {
-    const dialogRef = useRef<HTMLDialogElement>(null);
-    const openDialog = () => dialogRef.current?.showModal();
+    const [open, setOpen] = useState(false);
 
     return (
         <>
-            <Button variant="cta" onClick={openDialog} icon={<CgMathPlus />}>
+            <Button variant="cta" onClick={() => setOpen(true)} icon={<CgMathPlus />}>
                 Add new variant
             </Button>
 
-            <AddVariantDialog dialogRef={dialogRef} />
+            {open &&  <AddVariantDialog open={open} onClose={() => setOpen(false)} /> }
         </>
     );
 }

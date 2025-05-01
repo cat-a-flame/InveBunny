@@ -1,19 +1,19 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '../../../components/Button/button';
+import { Dialog } from '../../../components/Dialog/dialog';
+import { useState } from 'react';
 import { useToast } from '../../../components/Toast/toast';
 
 type Props = {
-    dialogRef: React.RefObject<HTMLDialogElement>;
+    open: boolean;
+    onClose: () => void;
 };
 
-export function AddSupplyDialog({ dialogRef }: Props) {
+export function AddSupplyDialog({ open, onClose }: Props) {
     const [supplyName, setSupplyName] = useState('');
     const [supplyCategory, setsupplyCategory] = useState('');
     const toast = useToast();
-
-    const closeDialog = () => dialogRef.current?.close();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,17 +28,15 @@ export function AddSupplyDialog({ dialogRef }: Props) {
 
         if (result.success) {
             toast('✅ Supply created!');
-            closeDialog();
+            onClose();
         } else {
             toast(`Error: ${result.error}`);
         }
     };
 
     return (
-        <dialog className="dialog" ref={dialogRef}>
+        <Dialog open={open} onClose={onClose} title="Add new supply">
             <form onSubmit={handleSubmit} method="dialog">
-                <h2 className="dialog-title">Add new supply</h2>
-
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={supplyName} onChange={(e) => setSupplyName(e.target.value)} required />
@@ -50,10 +48,10 @@ export function AddSupplyDialog({ dialogRef }: Props) {
                 </div>
 
                 <div className="dialog-buttons">
-                    <Button variant="ghost" onClick={closeDialog}>Cancel</Button>
+                    <Button variant="ghost" onClick={onClose} type="button">Cancel</Button>
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-        </dialog>
+        </Dialog>
     );
 }

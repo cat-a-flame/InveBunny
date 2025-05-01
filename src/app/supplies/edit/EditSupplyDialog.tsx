@@ -1,30 +1,29 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../../components/Button/button';
+import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
+import { useState, useEffect } from 'react';
 
 type EditSupplyDialogProps = {
     id: string;
     currentName: string;
     currentCategory: string;
+    open: boolean;
     onClose: () => void;
 };
 
-export function EditSupplyDialog({ id, currentName, currentCategory, onClose }: EditSupplyDialogProps) {
-    const dialogRef = useRef<HTMLDialogElement>(null);
+export function EditSupplyDialog({ id, currentName, currentCategory, open, onClose }: EditSupplyDialogProps) {
     const [supplyName, setSupplyName] = useState(currentName);
     const [supplyCategory, setSupplyCategory] = useState(currentCategory);
     const toast = useToast();
 
     useEffect(() => {
-        dialogRef.current?.showModal();
-    }, []);
-
-    const handleClose = () => {
-        dialogRef.current?.close();
-        onClose();
-    };
+        if (open) {
+            setSupplyName(currentName);
+            setSupplyCategory(currentCategory);
+        }
+    }, [open, currentName, currentCategory]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -44,18 +43,16 @@ export function EditSupplyDialog({ id, currentName, currentCategory, onClose }: 
         const result = await response.json();
 
         if (result.success) {
-            toast('Supply updated!');
-            handleClose();
+            toast('✅ Supply updated!');
+            onClose();
         } else {
             toast(`Error: ${result.error}`);
         }
     };
 
     return (
-        <dialog className="dialog" ref={dialogRef} onClose={handleClose}>
+        <Dialog open={open} onClose={onClose} title="Edit supply">
             <form onSubmit={handleSubmit} method="dialog">
-                <h2 className="dialog-title">Edit supply</h2>
-
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={supplyName} onChange={(e) => setSupplyName(e.target.value)} required />
@@ -67,10 +64,10 @@ export function EditSupplyDialog({ id, currentName, currentCategory, onClose }: 
                 </div>
 
                 <div className="dialog-buttons">
-                    <Button variant="ghost" onClick={handleClose}>Cancel</Button>
+                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-        </dialog>
+        </Dialog>
     );
 }

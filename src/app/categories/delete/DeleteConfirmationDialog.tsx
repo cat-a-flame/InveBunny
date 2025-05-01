@@ -1,51 +1,37 @@
 import { Button } from "../../../components/Button/button";
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { Dialog } from "../../../components/Dialog/dialog";
 
 export type DeleteConfirmationDialogHandle = {
-  open: () => void;
+    open: () => void;
 };
 
 type Props = {
-  onConfirm: () => void;
+    open: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    categoryName?: string;
 };
 
-export const DeleteConfirmationDialog = forwardRef<DeleteConfirmationDialogHandle, Props>(
-  ({ onConfirm }, ref) => {
-    const dialogRef = useRef<HTMLDialogElement>(null);
-
-    useImperativeHandle(ref, () => ({
-      open: () => {
-        const dialog = dialogRef.current;
-        if (dialog && typeof dialog.showModal === 'function') {
-          dialog.showModal();
-        }
-      },
-    }));
-
+export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, categoryName }: Props) => {
     const handleClose = () => {
-      dialogRef.current?.close();
+        onClose();
     };
 
     const handleConfirm = () => {
-      onConfirm();
-      handleClose();
+        onConfirm();
+        onClose();
     };
 
     return (
-      <dialog className="dialog" ref={dialogRef}>
-        <div className="dialog-content">
-          <h2 className="dialog-title">Delete category</h2>
+        <Dialog open={open} onClose={handleClose} title="Delete category">
 
-          <p>This cannot be undone. Are you sure?</p>
+            <p>Are you sure you want to delete <strong>{categoryName}</strong>?</p>
 
-          <div className="dialog-buttons">
-            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
-          </div>
-        </div>
-      </dialog>
+            <div className="dialog-buttons">
+                <Button type="button" variant="ghost" onClick={handleClose}>Cancel</Button>
+                <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
+            </div>
+        </Dialog>
     );
-  }
-);
+};
 
-DeleteConfirmationDialog.displayName = 'DeleteConfirmationDialog';

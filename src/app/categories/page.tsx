@@ -54,7 +54,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
                                 <td>{category.products ? category.products.length : 0}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <DeleteButton categoryId={category.id} />
+                                        <DeleteButton categoryId={category.id} categoryName={category.category_name} />
                                         <EditCategoryButton categoryId={category.id} currentName={category.category_name} />
                                     </div>
                                 </td>
