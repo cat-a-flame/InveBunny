@@ -311,13 +311,16 @@ textarea {
 /* PANEL */
 
 .side-panel {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
     position: fixed;
     top: 0;
     right: 0;
     height: 100vh;
-    width: 800px;
+    width: 900px;
     margin: 0;
-    padding: 2rem;
+    padding: 2rem 0;
     border: none;
     border-radius: 0;
     background: white;
@@ -329,6 +332,13 @@ textarea {
     &.open {
         transform: translateX(0);
     }
+}
+
+.side-panel-content {
+    flex-grow: 1;
+    overflow-y: scroll;
+    margin-bottom: 2rem;
+    padding: 0 2rem;
 }
 
 .side-panel-backdrop {
@@ -346,6 +356,13 @@ textarea {
     display: flex;
     justify-content: space-between;
     margin-bottom: 2rem;
+    padding: 0 2rem;
+}
+
+.side-panel-footer {
+    display: flex;
+    justify-content: end;
+    padding: 0 2rem;
 }
 
 .side-panel-title {
