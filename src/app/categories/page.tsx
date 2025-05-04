@@ -20,11 +20,11 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
     const pageSize = 12;
 
     const { data: categories, count } = await supabase
-    .from("categories")
-    .select("id, category_name, products (id)", { count: 'exact' })
-    .ilike('category_name', `%${query}%`)
-    .range((page - 1) * pageSize, page * pageSize - 1)
-    .order('category_name', { ascending: true });
+        .from("categories")
+        .select("id, category_name, products (id)", { count: 'exact' })
+        .ilike('category_name', `%${query}%`)
+        .range((page - 1) * pageSize, page * pageSize - 1)
+        .order('category_name', { ascending: true });
 
     const totalCount = count ?? 0;
     const totalPages = Math.ceil(totalCount / pageSize);
@@ -35,9 +35,11 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
                 <h2 className="heading-title">Categories</h2>
                 <AddButton />
             </div>
-            
+
             <div className="content">
-                <Search placeholder="Search for category name" query={query} />
+                <div className="filter-bar">
+                    <Search placeholder="Search for category name" query={query} />
+                </div>
 
                 <table>
                     <thead>
@@ -64,7 +66,9 @@ export default async function CategoriesPage({ searchParams }: { searchParams: S
                 </table>
             </div>
 
-            <Pagination totalPages={totalPages} currentPage={page} />
+            <div className="pagination">
+                <Pagination totalPages={totalPages} currentPage={page} />
+            </div>
         </>
     );
 };

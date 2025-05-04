@@ -40,7 +40,9 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
 
 
             <div className="content">
-                <Search placeholder="Search for supply name or category" query={query} />
+                <div className="filter-bar">
+                    <Search placeholder="Search for supply name or category" query={query} />
+                </div>
 
                 <table>
                     <thead>
@@ -74,7 +76,9 @@ export default async function SuppliesPage({ searchParams }: { searchParams: Sea
                 </table>
             </div>
 
-            <Pagination totalPages={totalPages} currentPage={page} />
+            <div className="pagination">
+                <Pagination totalPages={totalPages} currentPage={page} />
+            </div>
         </>
     );
 };

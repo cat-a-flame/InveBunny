@@ -1,14 +1,9 @@
 .pagination {
     align-items: center;
-    background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 0 10px #7e95a64a;
     display: flex;
     font-size: .8rem;
     gap: .3rem;
-    justify-content: end;
-    margin-top: 1rem;
-    padding: .5rem 1rem;
 }
 
 .pageInput {

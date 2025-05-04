@@ -171,9 +171,13 @@ td {
     border-radius: 8px;
     box-shadow: 0 0 10px #7e95a64a;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 1rem;
     padding: .5rem 1.25rem;
+
+    &.inventory-page {
+        justify-content: space-between;
+    }
 }
 
 /* INPUTS */
@@ -189,12 +193,17 @@ select {
     font-size: 1rem;
     padding: .75rem 1rem;
 
-
-
     &:focus-visible {
         border: 1px solid #C9B7F0;
         outline: none;
         box-shadow: 0 0px 8px #c8b7ee75;
+    }
+}
+
+@supports (-moz-appearance:none) {
+    select {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 400;
     }
 }
 
@@ -247,6 +256,7 @@ textarea {
 .double-input-group {
     display: flex;
     gap: 1.25rem;
+    margin-bottom: 1.25rem;
 }
 
 .input-grow {
@@ -260,26 +270,16 @@ textarea {
     flex-grow: 0;
 }
 
+.input-equal {
+    flex-basis: 50%;
+}
+
 .help-text {
     color: #957D9D;
     display: block;
     font-size: .875rem;
     font-weight: 500;
     margin-top: .25rem;
-}
-
-.input-with-icon {
-    position: relative;
-
-    & i {
-        background-color: #fff;
-        color: var(--icon-color);
-        padding: 0.5rem;
-        position: absolute;
-        right: .5rem;
-        top: 50%;
-        transform: translateY(-50%);
-    }
 }
 
 /* DIALOG */
