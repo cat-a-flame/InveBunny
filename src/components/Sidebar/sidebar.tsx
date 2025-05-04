@@ -14,7 +14,7 @@ const Sidebar = () => {
             <div>
                 <Link href="/" className={styles.logoLink}>
                     <span className={styles.logo}>🐰</span>
-                    {!isCollapsed && <span>Ivenbunny</span>}
+                    {!isCollapsed && <span>InveBunny</span>}
                 </Link>
                 <nav className={styles.navigation}>
                     <ul>

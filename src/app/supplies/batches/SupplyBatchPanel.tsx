@@ -103,7 +103,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
             <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
                 <div className="side-panel-header">
-                    <h3 className="side-panel-title">{supplyName}</h3>
+                    <h3 className="side-panel-title">Batches of '{supplyName}'</h3>
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
 
@@ -115,8 +115,8 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                                 <thead>
                                     <tr>
                                         <th>Batch name</th>
-                                        <th>Supplier & Order date</th>
-                                        <th>Vendor & Order ID</th>
+                                        <th>Supplier name<br/> Order date</th>
+                                        <th>Vendor name<br /> Order number</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -153,8 +153,8 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                                 <thead>
                                     <tr>
                                         <th>Batch name</th>
-                                        <th>Supplier & Order date</th>
-                                        <th>Vendor & Order ID</th>
+                                        <th>Supplier name<br/> Order date</th>
+                                        <th>Vendor name<br/> Order number</th>
                                         <th></th>
                                     </tr>
                                 </thead>

@@ -79,7 +79,7 @@ export default async function Home() {
                                 <td>{product.variants.variant_name}</td>
                                 <td>
                                     <div className="table-actions">
-                                        <DeleteProductButton productId={product.id} />
+                                        <DeleteProductButton productId={product.id} productName={product.product_name} />
                                         <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
                                         <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" />
                                     </div>

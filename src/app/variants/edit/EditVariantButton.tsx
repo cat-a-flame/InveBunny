@@ -20,6 +20,7 @@ export function EditVariantButton({ variantId, currentName }: EditVariantButtonP
                 <EditVariantDialog
                     id={variantId}
                     currentName={currentName}
+                    open={open}
                     onClose={() => setOpen(false)}
                 />
             )}

@@ -64,7 +64,7 @@ export default function EditBatchDialog({ open, onClose, batch, onUpdated }: Edi
                 </div>
 
                 <div className="input-group">
-                    <label className="input-label">Order ID</label>
+                    <label className="input-label">Order number</label>
                     <input name="order_id" value={formData.order_id} onChange={(e) => setFormData({ ...formData, order_id: e.target.value })} required />
                 </div>
 

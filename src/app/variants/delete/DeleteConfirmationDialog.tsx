@@ -23,12 +23,13 @@ export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, variantName
     };
 
     return (
-        <Dialog open={open} onClose={handleClose} title="Delete variant">
-            <p>Are you sure you want to delete <strong>{variantName}</strong> variant?</p>
+        <Dialog open={open} onClose={handleClose} title="Delete this variant?">
+            <p>You are about to send <strong>"{variantName}"</strong> to the digital abyss.</p>
+            <p>Items assigned to this variant won't be deleted, but they'll be confused.</p>
 
             <div className="dialog-buttons">
-                <Button variant="ghost" onClick={handleClose} type="button">Cancel</Button>
-                <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
+                <Button variant="ghost" onClick={handleClose} type="button">Never mind</Button>
+                <Button variant="destructive" onClick={handleConfirm}>Yes, delete</Button>
             </div>
         </Dialog>
     );

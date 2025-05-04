@@ -1,28 +1,26 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../../components/Button/button';
+import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
+import { useEffect, useRef, useState } from 'react';
 
 type EditVariantDialogProps = {
     id: string;
     currentName: string;
+    open: boolean;
     onClose: () => void;
 };
 
-export function EditVariantDialog({ id, currentName, onClose }: EditVariantDialogProps) {
-    const dialogRef = useRef<HTMLDialogElement>(null);
+export function EditVariantDialog({ id, currentName, open, onClose }: EditVariantDialogProps) {
     const [variantName, setVariantName] = useState(currentName);
     const toast = useToast();
 
     useEffect(() => {
-        dialogRef.current?.showModal();
-    }, []);
-
-    const handleClose = () => {
-        dialogRef.current?.close();
-        onClose();
-    };
+        if (open) {
+            setVariantName(currentName);
+        }
+    }, [open, currentName]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,18 +39,16 @@ export function EditVariantDialog({ id, currentName, onClose }: EditVariantDialo
         const result = await response.json();
 
         if (result.success) {
-            toast('Variant updated!');
-            handleClose();
+            toast('✅ Variant updated!');
+            onClose();
         } else {
             toast(`Error: ${result.error}`);
         }
     };
 
     return (
-        <dialog className="dialog" ref={dialogRef} onClose={handleClose}>
+        <Dialog open={open} onClose={onClose} title="Edit variant">
             <form onSubmit={handleSubmit} method="dialog">
-                <h2 className="dialog-title">Edit variant</h2>
-
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input
@@ -63,10 +59,10 @@ export function EditVariantDialog({ id, currentName, onClose }: EditVariantDialo
                 </div>
 
                 <div className="dialog-buttons">
-                    <Button variant="ghost" onClick={handleClose}>Cancel</Button>
+                    <Button variant="ghost" onClick={onClose}>Cancel</Button>
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-        </dialog>
+        </Dialog>
     );
 }

@@ -20,6 +20,7 @@ export function EditCategoryButton({ categoryId, currentName }: EditCategoryButt
                 <EditCategoryDialog
                     id={categoryId}
                     currentName={currentName}
+                    open={open}
                     onClose={() => setOpen(false)}
                 />
             )}

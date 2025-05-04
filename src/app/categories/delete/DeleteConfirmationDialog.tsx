@@ -23,13 +23,13 @@ export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, categoryNam
     };
 
     return (
-        <Dialog open={open} onClose={handleClose} title="Delete category">
-
-            <p>Are you sure you want to delete <strong>{categoryName}</strong>?</p>
+        <Dialog open={open} onClose={handleClose} title="Delete this category?">
+            <p>You are about to send <strong>"{categoryName}"</strong> to the digital abyss.</p>
+            <p>Items in this category won't be deleted, but they'll be left without a home.</p>
 
             <div className="dialog-buttons">
-                <Button type="button" variant="ghost" onClick={handleClose}>Cancel</Button>
-                <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
+                <Button type="button" variant="ghost" onClick={handleClose}>Never mind</Button>
+                <Button variant="destructive" onClick={handleConfirm}>Yes, delete</Button>
             </div>
         </Dialog>
     );

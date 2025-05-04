@@ -36,7 +36,6 @@ export function AddCategoryDialog({ open, onClose }: Props) {
     return (
         <Dialog open={open} onClose={onClose} title="Add new category">
             <form onSubmit={handleSubmit} method="dialog">
-
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />

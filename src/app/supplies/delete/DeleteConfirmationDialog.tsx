@@ -19,13 +19,13 @@ export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, supplyName 
     };
 
     return (
-        <Dialog open={open} onClose={handleClose} title="Delete supply">
-            <p>Are you sure you want to delete <strong>{supplyName}</strong>?</p>
-            <p>This action will also permanently remove all batches linked to this supply!</p>
+        <Dialog open={open} onClose={handleClose} title="Delete this supply?">
+            <p>You are about to send <strong>"{supplyName}"</strong> to the digital abyss.</p>
+            <p>This will also delete all its batches, leaving items using this supply empty-handed.</p>
 
             <div className="dialog-buttons">
-                <Button variant="ghost" onClick={handleClose} type="button">Cancel</Button>
-                <Button variant="destructive" onClick={handleConfirm}>Delete</Button>
+                <Button variant="ghost" onClick={handleClose} type="button">Never mind</Button>
+                <Button variant="destructive" onClick={handleConfirm}>Yes, delete</Button>
             </div>
         </Dialog>
     );

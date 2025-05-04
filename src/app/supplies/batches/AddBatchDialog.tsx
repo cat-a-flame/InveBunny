@@ -77,7 +77,7 @@ export default function CreateBatchDialog({ open, onClose, supplyId, supplyName,
                 </div>
 
                 <div className="input-group">
-                    <label className="input-label">Order ID</label>
+                    <label className="input-label">Order number</label>
                     <input name="order_id" value={form.order_id} onChange={handleChange} required />
                 </div>
 

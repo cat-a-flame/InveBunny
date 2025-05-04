@@ -36,12 +36,13 @@ export default function DeleteBatchDialog({ open, onClose, batchName, batchId, o
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Delete batch">
-            <p>Are you sure you want to delete batch <strong>{batchName}</strong>? This cannot be undone. </p>
+        <Dialog open={open} onClose={onClose} title="Delete this batch?">
+            <p>You are about to send <strong>"{batchName}"</strong> to the digital abyss.</p>
+            <p>Items using to this batch won't be deleted, but they'll be left empty-handed.</p>
 
             <div className="dialog-buttons">
-                <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+                <Button type="button" variant="ghost" onClick={onClose}>Never mind</Button>
+                <Button variant="destructive" onClick={handleDelete}>Yes, delete</Button>
             </div>
         </Dialog>
     );

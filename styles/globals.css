@@ -102,7 +102,7 @@ tbody tr {
     background-color: #fff;
 
     &:hover {
-        background-color: #f0eafd;
+        background-color: #F7F3FF;
     }
 }
 
@@ -407,11 +407,11 @@ textarea {
     }
 
     & tr:nth-child(even) {
-        background-color: #F7F3FF
+        background-color: #f9f7fd
     }
 
     & tr:nth-child(even):hover {
-        background-color: #eee5ff;
+        background-color: #F7F3FF;
     }
 }
 

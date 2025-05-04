@@ -1,51 +1,36 @@
 import { Button } from "../../../components/Button/button";
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { Dialog } from "../../../components/Dialog/dialog";
 
 export type DeleteConfirmationDialogHandle = {
-  open: () => void;
+	open: () => void;
 };
 
 type Props = {
-  onConfirm: () => void;
+	open: boolean;
+	onClose: () => void;
+	onConfirm: () => void;
+	productName: string;
 };
 
-export const DeleteConfirmationDialog = forwardRef<DeleteConfirmationDialogHandle, Props>(
-  ({ onConfirm }, ref) => {
-    const dialogRef = useRef<HTMLDialogElement>(null);
+export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, productName }: Props) => {
+	const handleClose = () => {
+		onClose();
+	};
 
-    useImperativeHandle(ref, () => ({
-      open: () => {
-        const dialog = dialogRef.current;
-        if (dialog && typeof dialog.showModal === 'function') {
-          dialog.showModal();
-        }
-      },
-    }));
+	const handleConfirm = () => {
+		onConfirm();
+		onClose();
+	};
 
-    const handleClose = () => {
-      dialogRef.current?.close();
-    };
+	return (
+		<Dialog open={open} onClose={handleClose} title="Delete this product?">
+			<p>You are about to send <strong>"{productName}"</strong> to the digital abyss.</p>
+			<p>This will also delete all its batches.</p>
 
-    const handleConfirm = () => {
-      onConfirm();
-      handleClose();
-    };
-
-    return (
-      <dialog className="dialog" ref={dialogRef}>
-        <div className="dialog-content">
-          <h2 className="dialog-title">Delete product</h2>
-
-          <p>This cannot be undone. Are you sure?</p>
-
-          <div className="dialog-buttons">
-            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-            <Button variant="primary" onClick={handleConfirm}>Delete</Button>
-          </div>
-        </div>
-      </dialog>
-    );
-  }
-);
-
-DeleteConfirmationDialog.displayName = 'DeleteConfirmationDialog';
+			<div className="dialog-buttons">
+				<Button variant="ghost" onClick={handleClose} type="button">Never mind</Button>
+				<Button variant="destructive" onClick={handleConfirm}>Yes, delete</Button>
+			</div>
+		</Dialog>
+	);
+};
