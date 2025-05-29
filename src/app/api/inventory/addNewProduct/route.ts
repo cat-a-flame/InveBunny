@@ -16,10 +16,9 @@ export async function POST(request: Request) {
         const {
             product_name,
             product_sku,
-            product_quantity,
             product_category,
             product_variant,
-            product_status
+            inventories // array of { inventory_id, product_quantity, product_status }
         } = body;
 
         if (!product_name?.trim()) {
@@ -29,38 +28,59 @@ export async function POST(request: Request) {
             }), { status: 400 });
         }
 
-        if (!product_sku?.trim()) {
+        if (!Array.isArray(inventories) || inventories.length === 0) {
             return new Response(JSON.stringify({
                 success: false,
-                error: 'Product SKU is required'
+                error: 'At least one inventory entry is required'
             }), { status: 400 });
         }
 
-        // Insert product
-        const { data, error } = await supabase
+        const { data: productData, error: productError } = await supabase
             .from('products')
             .insert([{
                 product_name,
-                product_sku,
-                product_quantity: product_quantity || 0,
                 product_category,
                 product_variant,
-                product_status,
                 owner_id: user.id
             }])
-            .select();
+            .select()
+            .single();
 
-        if (error) {
-            console.error('Supabase error:', error);
+        if (productError) {
+            console.error('Product insert error:', productError);
             return new Response(JSON.stringify({
                 success: false,
-                error: error.message
+                error: productError.message
+            }), { status: 500 });
+        }
+
+        const product_id = productData.id;
+
+        const inventoryRows = inventories.map((inv: any) => ({
+            product_id,
+            inventory_id: inv.inventoryId,
+            product_sku: inv.sku,
+            product_quantity: inv.quantity,
+            product_status: inv.status,
+            owner_id: user.id
+        }));
+
+        const { error: inventoryError } = await supabase
+            .from('product_inventories')
+            .insert(inventoryRows);
+
+
+        if (inventoryError) {
+            console.error('Inventory insert error:', inventoryError);
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Product created but failed to add inventory details.'
             }), { status: 500 });
         }
 
         return new Response(JSON.stringify({
             success: true,
-            product: data[0]
+            product: productData
         }), { status: 200 });
 
     } catch (error) {

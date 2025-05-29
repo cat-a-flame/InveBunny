@@ -9,14 +9,17 @@ import { useState } from 'react';
 type Category = {
     id: string;
     category_name: string;
+    inventory_name?: string;
+    product_sku: string
 };
 
 type Props = {
     categories: Category[];
-    variants?: any[]; // Add if needed
+    variants?: any[];
+    inventories?: any[];
 };
 
-export function AddButton({ categories, variants }: Props) {
+export function AddButton({ categories, variants, inventories }: Props) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -34,6 +37,7 @@ export function AddButton({ categories, variants }: Props) {
                     onClose={() => setOpen(false)}
                     categories={categories}
                     variants={variants}
+                    inventories={inventories ?? []}
                 />
             )}
         </>

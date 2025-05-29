@@ -52,6 +52,10 @@ main {
     box-shadow: 0 0 10px #7e95a64a;
     overflow: hidden;
     padding: .5rem 0 0;
+
+    &.inventory-content {
+        border-top-left-radius: 0;
+    }
 }
 
 .filter-bar {
@@ -242,15 +246,19 @@ textarea {
     margin-bottom: 4px;
 }
 
+.input-group-wrapper {
+    flex-grow: 1;
+
+    &.input-group-quantity {
+        flex-grow: 0;
+        flex-shrink: 0;
+        width: 120px;
+    }
+}
+
 .input-group {
     flex-grow: 1;
     margin-bottom: 1.25rem;
-
-    &.input-group-sku {
-        flex-grow: 1;
-        flex-shrink: 0;
-        width: 260px;
-    }
 }
 
 .double-input-group {
@@ -458,17 +466,66 @@ textarea {
     border-radius: 5px;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: #725A79;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     bottom: 4px;
     height: 24px;
     transform: translateX(18px);
     width: 24px;
 }
 
-input:focus-visible + .slider {
+input:focus-visible+.slider {
     box-shadow: 0 0 8px #c8b7ee75;
+}
+
+/* TABS */
+
+.tabs {
+    display: flex;
+    font-size: .875rem;
+    gap: .25rem;
+
+    & a {
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 8px 8px 0 0;
+        color: #725a79;
+        display: block;
+        padding: .75rem 1.25rem;
+        text-decoration: none;
+
+        &:hover {
+            background-color: #E2D9F6;
+        }
+
+        &.active {
+            background-color: var(--brand-color);
+            color: #fff;
+        }
+    }
+
+    & .active a {
+        background-color: #fff;
+        box-shadow: 0 0 10px #7e95a64a;
+        cursor: default;
+        font-weight: 700;
+        pointer-events: none;
+    }
+
+    & .active {
+        position: relative;
+    }
+
+    & .active::after {
+        content: "";
+        background: #fff;
+        width: 100%;
+        left: 0;
+        right: 0;
+        height: 15px;
+        bottom: -15px;
+        position: absolute;
+    }
 }

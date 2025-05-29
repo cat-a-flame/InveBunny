@@ -15,14 +15,27 @@ type Variant = {
     variant_name: string;
 };
 
+type Inventory = {
+    id: string;
+    inventory_name: string;
+};
+
+type ProductInventoryData = {
+    product_sku: string;
+    product_quantity: number;
+    inventory_id: string;
+};
+
 type ProductData = {
     id: string;
     product_name: string;
-    product_sku: string;
-    product_quantity: number;
     product_category: string;
     product_variant: string | null;
-    status: boolean;
+    product_status: boolean;
+    product_sku: string;
+    product_quantity: number;
+    inventories: ProductInventoryData[];
+    currentInventoryId?: string;
 };
 
 type EditProductDialogProps = {
@@ -31,6 +44,7 @@ type EditProductDialogProps = {
     product: ProductData;
     categories: Category[];
     variants: Variant[];
+    inventories: Inventory[];
     onSuccess?: () => void;
 };
 
@@ -40,25 +54,94 @@ export function EditProductDialog({
     product,
     categories,
     variants,
-    onSuccess
+    inventories,
+    onSuccess,
 }: EditProductDialogProps) {
-    const [formData, setFormData] = useState<ProductData>(product);
-    const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
+    const [submitting, setSubmitting] = useState(false);
+    
+    // Initialize selected inventory with current inventory or first available
+    const [selectedInventoryId, setSelectedInventoryId] = useState(
+        product.currentInventoryId || product.inventories[0]?.inventory_id || inventories[0]?.id || ''
+    );
 
+    // Find the initial inventory data
+    const initialInventoryData = product.inventories.find(
+        pi => pi.inventory_id === selectedInventoryId
+    ) || {
+        product_sku: product.product_sku,
+        product_quantity: product.product_quantity,
+    };
+
+    const [formData, setFormData] = useState({
+        product_name: product.product_name || '',
+        product_category: product.product_category || '',
+        product_variant: product.product_variant || '',
+        product_status: product.product_status ?? false,
+        product_sku: initialInventoryData.product_sku,
+        product_quantity: initialInventoryData.product_quantity,
+    });
+
+    // Reset form when opening or when product/inventories change
     useEffect(() => {
         if (open) {
-            setFormData(product);
-        }
-    }, [open, product]);
+            const defaultInventoryId = product.currentInventoryId || 
+                                    product.inventories[0]?.inventory_id || 
+                                    inventories[0]?.id || '';
+            setSelectedInventoryId(defaultInventoryId);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+            const selectedInventory = product.inventories.find(
+                pi => pi.inventory_id === defaultInventoryId
+            ) || {
+                product_sku: product.product_sku,
+                product_quantity: product.product_quantity,
+            };
+
+            setFormData({
+                product_name: product.product_name || '',
+                product_category: product.product_category || '',
+                product_variant: product.product_variant || '',
+                product_status: product.product_status ?? false,
+                product_sku: selectedInventory.product_sku,
+                product_quantity: selectedInventory.product_quantity,
+            });
+        }
+    }, [open, product, inventories]);
+
+    // Update form data when selected inventory changes
+    useEffect(() => {
+        const selectedInventory = product.inventories.find(
+            pi => pi.inventory_id === selectedInventoryId
+        ) || {
+            product_sku: product.product_sku,
+            product_quantity: product.product_quantity,
+        };
+
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'product_quantity' ? Number(value) :
-                name === 'status' ? (e.target as HTMLInputElement).checked :
-                    value
+            product_sku: selectedInventory.product_sku,
+            product_quantity: selectedInventory.product_quantity,
+        }));
+    }, [selectedInventoryId, product.inventories]);
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+
+        if (name === 'selectedInventoryId') {
+            setSelectedInventoryId(value);
+            return;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            [name]:
+                name === 'product_quantity'
+                    ? Number(value)
+                    : name === 'product_status'
+                        ? (e.target as HTMLInputElement).checked
+                        : value,
         }));
     };
 
@@ -69,18 +152,17 @@ export function EditProductDialog({
         try {
             const response = await fetch('/api/inventory/updateProduct', {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: formData.id,
+                    id: product.id,
                     product_name: formData.product_name,
-                    product_sku: formData.product_sku,
-                    product_quantity: formData.product_quantity,
                     product_category: formData.product_category,
                     product_variant: formData.product_variant,
-                    product_status: formData.status
-                })
+                    product_status: formData.product_status,
+                    product_sku: formData.product_sku,
+                    product_quantity: formData.product_quantity,
+                    inventory_id: selectedInventoryId,
+                }),
             });
 
             const result = await response.json();
@@ -93,7 +175,7 @@ export function EditProductDialog({
             onClose();
             if (onSuccess) onSuccess();
         } catch (error) {
-            toast(`❌ Error updating product!`);
+            toast('❌ Error updating product!');
         } finally {
             setSubmitting(false);
         }
@@ -103,39 +185,99 @@ export function EditProductDialog({
         <Dialog open={open} onClose={onClose} title="Edit product">
             <form onSubmit={handleSubmit} className="dialog-form">
                 <div className="input-group">
-                    <label htmlFor="product_name" className="input-label">Product name</label>
-                    <input name="product_name" type="text" value={formData.product_name} onChange={handleChange} required />
+                    <label htmlFor="product_name" className="input-label">
+                        Product name
+                    </label>
+                    <input
+                        name="product_name"
+                        type="text"
+                        value={formData.product_name}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
 
                 <div className="double-input-group">
                     <div className="input-grow">
-                        <label htmlFor="product_sku" className="input-label">SKU</label>
-                        <input name="product_sku" type="text" value={formData.product_sku} onChange={handleChange} required />
+                        <label htmlFor="selectedInventoryId" className="input-label">
+                            Inventory
+                        </label>
+                        <select
+                            name="selectedInventoryId"
+                            value={selectedInventoryId}
+                            onChange={handleChange}
+                            required
+                        >
+                            {inventories.map(inv => (
+                                <option key={inv.id} value={inv.id}>
+                                    {inv.inventory_name}
+                                    {inv.id === product.currentInventoryId ? ' (Current)' : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="double-input-group">
+                    <div className="input-grow">
+                        <label htmlFor="product_sku" className="input-label">
+                            SKU
+                        </label>
+                        <input
+                            name="product_sku"
+                            type="text"
+                            value={formData.product_sku}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
 
                     <div className="input-group">
-                        <label htmlFor="product_quantity" className="input-label">Quantity</label>
-                        <input name="product_quantity" type="number" min="0" value={formData.product_quantity} onChange={handleChange} required />
+                        <label htmlFor="product_quantity" className="input-label">
+                            Quantity
+                        </label>
+                        <input
+                            name="product_quantity"
+                            type="number"
+                            min="0"
+                            value={formData.product_quantity}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                 </div>
 
                 <div className="double-input-group">
                     <div className="input-equal">
-                        <label htmlFor="product_category" className="input-label">Category</label>
-                        <select name="product_category" value={formData.product_category} onChange={handleChange} required>
+                        <label htmlFor="product_category" className="input-label">
+                            Category
+                        </label>
+                        <select
+                            name="product_category"
+                            value={formData.product_category}
+                            onChange={handleChange}
+                            required
+                        >
                             <option value="">Select a category</option>
-                            {categories.map((cat) => (
+                            {categories.map(cat => (
                                 <option key={cat.id} value={cat.id}>
                                     {cat.category_name}
                                 </option>
                             ))}
                         </select>
                     </div>
+
                     <div className="input-equal">
-                        <label htmlFor="product_variant" className="input-label">Variant</label>
-                        <select name="product_variant" value={formData.product_variant || ''} onChange={handleChange}>
+                        <label htmlFor="product_variant" className="input-label">
+                            Variant
+                        </label>
+                        <select
+                            name="product_variant"
+                            value={formData.product_variant || ''}
+                            onChange={handleChange}
+                        >
                             <option value="">Select a variant</option>
-                            {variants.map((variant) => (
+                            {variants.map(variant => (
                                 <option key={variant.id} value={variant.id}>
                                     {variant.variant_name}
                                 </option>
@@ -145,16 +287,32 @@ export function EditProductDialog({
                 </div>
 
                 <div className="input-group">
-                    <label htmlFor="status" className="input-label">Status</label>
+                    <label htmlFor="product_status" className="input-label">
+                        Status
+                    </label>
                     <label className="switch">
-                        <input name="status" type="checkbox" checked={formData.status} onChange={handleChange} />
+                        <input
+                            name="product_status"
+                            type="checkbox"
+                            checked={formData.product_status}
+                            onChange={handleChange}
+                        />
                         <span className="slider"></span>
                     </label>
                 </div>
 
                 <div className="dialog-buttons">
-                    <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary">Save</Button>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={onClose}
+                        disabled={submitting}
+                    >
+                        Cancel
+                    </Button>
+                    <Button type="submit" variant="primary" disabled={submitting}>
+                        {submitting ? 'Saving...' : 'Save'}
+                    </Button>
                 </div>
             </form>
         </Dialog>
