@@ -135,7 +135,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                                     <td>{product.variants?.variant_name || '-'}</td>
                                     <td>
                                         <div className="table-actions">
-                                            <DeleteProductButton productId={product.id} productName={product.product_name} />
+                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId} />
                                             <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
 
                                             <EditProductButton

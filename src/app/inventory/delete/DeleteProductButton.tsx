@@ -8,15 +8,19 @@ import { useState } from 'react';
 type Props = {
     productId: string;
     productName: string;
+    inventoryId: string; // 🔸 Add this prop
 };
 
-export const DeleteProductButton = ({ productId, productName }: Props) => {
+export const DeleteProductButton = ({ productId, productName, inventoryId }: Props) => {
     const [open, setOpen] = useState(false);
     const toast = useToast();
 
     const handleDelete = async () => {
         try {
-            const res = await fetch(`/api/inventory/deleteProduct?id=${productId}`, { method: 'DELETE' });
+            const res = await fetch(
+                `/api/inventory/deleteProduct?id=${productId}&inventory_id=${inventoryId}`,
+                { method: 'DELETE' }
+            );
             if (res.ok) {
                 toast('✅ Product successfully deleted');
             } else {
@@ -29,7 +33,11 @@ export const DeleteProductButton = ({ productId, productName }: Props) => {
 
     return (
         <>
-            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => setOpen(true)} title="Delete product" />
+            <IconButton
+                icon={<i className="fa-regular fa-trash-can"></i>}
+                onClick={() => setOpen(true)}
+                title="Delete product"
+            />
 
             {open && (
                 <DeleteConfirmationDialog

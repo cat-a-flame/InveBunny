@@ -52,15 +52,14 @@ export function EditProductButton({
 }: EditProductButtonProps) {
     const [open, setOpen] = useState(false);
 
-    // Prepare the product data structure that EditProductDialog expects
     const productData = {
         id,
         product_name,
         product_category,
         product_variant,
         product_status,
-        product_sku, // Pass directly
-        product_quantity, // Pass directly
+        product_sku,
+        product_quantity,
         inventories: productInventories.map(pi => ({
             inventory_id: pi.inventory_id,
             product_sku: pi.product_sku,
@@ -69,13 +68,9 @@ export function EditProductButton({
         currentInventoryId,
     };
 
-return (
+    return (
         <>
-            <IconButton
-                icon={<i className="fa-regular fa-pen-to-square"></i>}
-                onClick={() => setOpen(true)}
-                title="Edit"
-            />
+            <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} onClick={() => setOpen(true)} title="Edit" />
 
             {open && (
                 <EditProductDialog

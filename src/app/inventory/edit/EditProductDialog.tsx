@@ -211,7 +211,6 @@ export function EditProductDialog({
                             {inventories.map(inv => (
                                 <option key={inv.id} value={inv.id}>
                                     {inv.inventory_name}
-                                    {inv.id === product.currentInventoryId ? ' (Current)' : ''}
                                 </option>
                             ))}
                         </select>
@@ -223,27 +222,14 @@ export function EditProductDialog({
                         <label htmlFor="product_sku" className="input-label">
                             SKU
                         </label>
-                        <input
-                            name="product_sku"
-                            type="text"
-                            value={formData.product_sku}
-                            onChange={handleChange}
-                            required
-                        />
+                        <input name="product_sku" type="text" value={formData.product_sku} onChange={handleChange} required />
                     </div>
 
                     <div className="input-group">
                         <label htmlFor="product_quantity" className="input-label">
                             Quantity
                         </label>
-                        <input
-                            name="product_quantity"
-                            type="number"
-                            min="0"
-                            value={formData.product_quantity}
-                            onChange={handleChange}
-                            required
-                        />
+                        <input name="product_quantity" type="number" min="0" value={formData.product_quantity} onChange={handleChange} required />
                     </div>
                 </div>
 
@@ -252,12 +238,7 @@ export function EditProductDialog({
                         <label htmlFor="product_category" className="input-label">
                             Category
                         </label>
-                        <select
-                            name="product_category"
-                            value={formData.product_category}
-                            onChange={handleChange}
-                            required
-                        >
+                        <select name="product_category" value={formData.product_category} onChange={handleChange} required>
                             <option value="">Select a category</option>
                             {categories.map(cat => (
                                 <option key={cat.id} value={cat.id}>
@@ -271,11 +252,7 @@ export function EditProductDialog({
                         <label htmlFor="product_variant" className="input-label">
                             Variant
                         </label>
-                        <select
-                            name="product_variant"
-                            value={formData.product_variant || ''}
-                            onChange={handleChange}
-                        >
+                        <select name="product_variant" value={formData.product_variant || ''} onChange={handleChange}>
                             <option value="">Select a variant</option>
                             {variants.map(variant => (
                                 <option key={variant.id} value={variant.id}>
@@ -291,28 +268,14 @@ export function EditProductDialog({
                         Status
                     </label>
                     <label className="switch">
-                        <input
-                            name="product_status"
-                            type="checkbox"
-                            checked={formData.product_status}
-                            onChange={handleChange}
-                        />
+                        <input name="product_status" type="checkbox" checked={formData.product_status} onChange={handleChange} />
                         <span className="slider"></span>
                     </label>
                 </div>
 
                 <div className="dialog-buttons">
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={onClose}
-                        disabled={submitting}
-                    >
-                        Cancel
-                    </Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>
-                        {submitting ? 'Saving...' : 'Save'}
-                    </Button>
+                    <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>Cancel</Button>
+                    <Button type="submit" variant="primary" disabled={submitting}>Save</Button>
                 </div>
             </form>
         </Dialog>

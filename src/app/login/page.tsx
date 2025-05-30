@@ -6,7 +6,7 @@ export default function LoginPage() {
     return (
         <div className={styles["login-page"]}>
             <form className={styles["login-form"]}>
-                <h4>🐰 Ivenbunny</h4>
+                <h4>🐰 Invebunny</h4>
                 <div className="input-group">
                     <label className="input-label" htmlFor="email">Email</label>
                     <input id="email" name="email" type="email" required />
