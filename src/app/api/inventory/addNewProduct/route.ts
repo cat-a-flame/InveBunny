@@ -17,8 +17,9 @@ export async function POST(request: Request) {
             product_name,
             product_sku,
             product_category,
+            product_status,
             product_variant,
-            inventories // array of { inventory_id, product_quantity, product_status }
+            inventories
         } = body;
 
         if (!product_name?.trim()) {
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
                 product_name,
                 product_category,
                 product_variant,
+                product_status,
                 owner_id: user.id
             }])
             .select()
@@ -61,7 +63,6 @@ export async function POST(request: Request) {
             inventory_id: inv.inventoryId,
             product_sku: inv.sku,
             product_quantity: inv.quantity,
-            product_status: inv.status,
             owner_id: user.id
         }));
 

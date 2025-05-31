@@ -28,6 +28,10 @@
     display: none;
 }
 
-.input {
+.input-size-lg {
     width: 450px;
+}
+
+.input-size-md {
+    width: 320px;
 }

@@ -35,6 +35,7 @@ export async function PUT(request: Request) {
         product_name: body.product_name,
         product_category: body.product_category || null,
         product_variant: body.product_variant || null,
+        product_status: body.product_status || false,
       })
       .eq('id', body.id)
       .select()
@@ -49,7 +50,6 @@ export async function PUT(request: Request) {
         inventory_id: body.inventory_id,
         product_sku: body.product_sku || null,
         product_quantity: body.product_quantity || 0,
-        product_status: body.product_status || false,
         owner_id: user.id,
       }, { onConflict: ['product_id', 'inventory_id'] });
 

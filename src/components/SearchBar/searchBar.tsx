@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/src/utils/utils";
 import { useDebouncedCallback } from "use-debounce";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,15 +9,25 @@ import styles from "./searchBar.module.css";
 export function Search({
     query,
     placeholder = "Search for something nice",
+    size="lg"
 }: {
     query: string;
     placeholder?: string;
+    size?: "sm" | "md" | "lg";
 }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
     const [inputValue, setInputValue] = useState(query);
+
+    const searchBarSizes = {
+        sm: styles["input-size-sm"],
+        md: styles["input-size-md"],
+        lg: styles["input-size-lg"],
+    };
+
+    const sizeClass = searchBarSizes[size];
 
     useEffect(() => {
         setInputValue(query);
@@ -51,7 +62,7 @@ export function Search({
 
     return (
         <div className={styles.searchBar}>
-            <input type="search" placeholder={placeholder} value={inputValue} onChange={handleInputChange} className={styles.input} />
+            <input type="search" placeholder={placeholder} value={inputValue} onChange={handleInputChange} className={cn(styles.input, sizeClass)} />
 
             {!hasActiveSearch && (
                 <button type="button" onClick={handleManualSearch} className={styles.button}>

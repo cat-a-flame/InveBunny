@@ -1,42 +1,53 @@
 import { AddButton } from './add/AddButton';
-import { createClient } from '@/src/utils/supabase/server';
-import { IconButton } from '@/src/components/IconButton/iconButton';
 import { DeleteProductButton } from './delete/DeleteProductButton';
-import { Pagination } from '@/src/components/Pagination/pagination';
-import styles from './inventory.module.css';
 import { EditProductButton } from './edit/EditProductButton';
+import { FilterBar } from './FilterBar';
+import { IconButton } from '@/src/components/IconButton/iconButton';
+import { InventoryTabs } from './InventoryTabs';
+import { Pagination } from '@/src/components/Pagination/pagination';
+import { createClient } from '@/src/utils/supabase/server';
 import { slugify } from '@/src/utils/slugify';
+import styles from './inventory.module.css';
 
 type SearchParams = {
-    page?: string;
     query?: string;
+    page?: string;
     inventory?: string;
+    tab?: string;
+    statusFilter?: 'active' | 'inactive' | 'all';
+    categoryFilter?: string;
+    variantFilter?: string;
+    stockFilter?: 'all' | 'low' | 'out' | 'in';
 };
+
+// ========== CONSTANTS ==========
+const validStatusFilters = ['active', 'inactive', 'all'] as const;
+const validStockFilters = ['all', 'low', 'out', 'in'] as const;
+const PAGE_SIZE = 10;
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
     const supabase = await createClient();
 
-    const resolvedSearchParams = await searchParams;
-    const page = parseInt(resolvedSearchParams.page || '1');
-    const query = resolvedSearchParams.query || '';
-    const inventorySlug = resolvedSearchParams.inventory;
+    // ========== PARAM PROCESSING ==========
+    const statusFilterRaw = searchParams.statusFilter;
+    const stockFilterRaw = searchParams.stockFilter;
+    const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
+    const stockFilter = validStockFilters.includes(stockFilterRaw as any) ? stockFilterRaw : 'all';
 
+    const categoryFilter = searchParams.categoryFilter || 'all';
+    const variantFilter = searchParams.variantFilter || 'all';
+    const page = Math.max(1, parseInt(searchParams.page || '1'));
+    const query = searchParams.query || '';
+    const inventorySlug = searchParams.inventory;
+    const tab = searchParams.tab || 'active';
+
+    // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
         .from('inventories')
         .select('id, inventory_name, is_default')
         .order('inventory_name');
 
-    inventories.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
-
-    let selectedInventory = inventorySlug ? inventories.find(inv => slugify(inv.inventory_name) === inventorySlug) : undefined;
-
-    if (!selectedInventory) {
-        selectedInventory = inventories.find(inv => inv.is_default) || inventories[0];
-    }
-
-    const inventoryId = selectedInventory?.id;
-
-    if (!inventoryId) {
+    if (!inventories || inventories.length === 0) {
         return (
             <main>
                 <p>No inventories found.</p>
@@ -44,33 +55,120 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         );
     }
 
-    const pageSize = 10;
+    inventories.sort((a, b) => {
+        if (a.is_default && !b.is_default) return -1;
+        if (!a.is_default && b.is_default) return 1;
+        return 0;
+    });
 
-    const { data: productInventories, count: productInventoriesCount } = await supabase
+    let selectedInventory = inventorySlug
+        ? inventories.find((inv) => slugify(inv.inventory_name) === inventorySlug)
+        : undefined;
+
+    if (!selectedInventory) {
+        selectedInventory = inventories.find((inv) => inv.is_default) || inventories[0];
+    }
+
+    const inventoryId = selectedInventory?.id;
+
+    if (!inventoryId) {
+        return (
+            <main>
+                <p>No inventory selected.</p>
+            </main>
+        );
+    }
+
+    // ========== PRODUCT DATA FETCHING ==========
+    // Fetch all product inventories for the selected inventory
+    const { data: allProductInventories } = await supabase
         .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku, product_status', { count: 'exact' })
-        .eq('inventory_id', inventoryId)
-        .range((page - 1) * pageSize, page * pageSize - 1);
+        .select('id, product_id, product_quantity, product_sku')
+        .eq('inventory_id', inventoryId);
 
-    const productIds = productInventories?.map(pi => pi.product_id) || [];
+    // Filter by stock level if needed
+    let filteredByStock = allProductInventories || [];
+    if (stockFilter !== 'all') {
+        filteredByStock = filteredByStock.filter((pi) => {
+            if (stockFilter === 'low') return pi.product_quantity > 0 && pi.product_quantity <= 5;
+            if (stockFilter === 'out') return pi.product_quantity === 0;
+            if (stockFilter === 'in') return pi.product_quantity > 5;
+            return true;
+        });
+    }
 
-    const { data: products } = await supabase
+    const productIdsFromStockFilter = filteredByStock.map((pi) => pi.product_id);
+
+    // Search functionality
+    const { data: inventoryMatches } = query ? await supabase
+        .from('product_inventories')
+        .select('product_id')
+        .ilike('product_sku', `%${query}%`)
+        .eq('inventory_id', inventoryId) : { data: null };
+
+    // Build main products query
+    let productsQuery = supabase
         .from('products')
         .select(`
             id,
             product_name,
             product_category,
             product_variant,
+            product_status,
             categories(id, category_name),
             variants(id, variant_name)
         `)
-        .in('id', productIds)
-        .order('product_name', { ascending: true });
+        .in('id', productIdsFromStockFilter.length > 0 ? productIdsFromStockFilter : [0]);
 
-    const inventoryMap = new Map(productInventories?.map(pi => [pi.product_id, pi]));
+    if (query) {
+        const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
+        productsQuery = productsQuery.or(`product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`);
+    }
 
-    products?.sort((a, b) => a.product_name.localeCompare(b.product_name));
+    if (query) {
+        const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
+        productsQuery = productsQuery.or(`product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`);
+    }
 
+    // Apply filters
+    if (statusFilter === 'active') {
+        productsQuery = productsQuery.eq('product_status', true);
+    } else if (statusFilter === 'inactive') {
+        productsQuery = productsQuery.eq('product_status', false);
+    }
+
+    if (categoryFilter !== 'all') {
+        productsQuery = productsQuery.eq('product_category', categoryFilter);
+    }
+
+    if (variantFilter !== 'all') {
+        productsQuery = productsQuery.eq('product_variant', variantFilter);
+    }
+
+    const { data: products } = await productsQuery;
+
+    // ========== DATA PROCESSING ==========
+    const filteredProducts = products || [];
+    const totalCount = filteredProducts.length;
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+    const filteredProductIds = filteredProducts.map(p => p.id);
+    const filteredInventoryItems = (allProductInventories || []).filter(pi => filteredProductIds.includes(pi.product_id));
+
+    // Stock calculations
+    const lowStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity > 0 && pi.product_quantity <= 5).length;
+    const outOfStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity === 0).length;
+
+    // Pagination
+    const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    const inventoryMap = new Map(
+        (allProductInventories || [])
+            .filter(pi => pagedProducts.some(p => p.id === pi.product_id))
+            .map(pi => [pi.product_id, pi])
+    );
+
+    // ========== SUPPLEMENTARY DATA FETCHING ==========
     const { data: categories } = await supabase
         .from('categories')
         .select('id, category_name')
@@ -81,32 +179,30 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         .select('id, variant_name')
         .order('variant_name');
 
-    const totalProducts = productInventories?.length || 0;
-    const lowStockCount = productInventories?.filter(p => p.product_quantity > 0 && p.product_quantity <= 5).length || 0;
-    const outOfStockCount = productInventories?.filter(p => p.product_quantity === 0).length || 0;
-
-    const totalCount = productInventoriesCount ?? 0;
-    const totalPages = Math.ceil(totalCount / pageSize);
-
+    // ========== RENDER ==========
     return (
-        <main>
+        <main className="inventory-page">
+            {/* Header Section */}
             <div className="pageHeader">
                 <h2 className="heading-title">Inventory</h2>
-                <AddButton categories={categories || []} variants={variants} inventories={inventories} />
+                <AddButton categories={categories || []} variants={variants || []} inventories={inventories}/>
             </div>
 
-            <ul className="tabs">
-                {inventories.map(inv => {
-                    const invSlug = slugify(inv.inventory_name);
-                    return (
-                        <li key={inv.id} className={invSlug === slugify(selectedInventory.inventory_name) ? 'active' : ''}>
-                            <a href={`/inventory?inventory=${invSlug}`}>{inv.inventory_name}</a>
-                        </li>
-                    );
-                })}
-            </ul>
+            {/* Inventory Tabs */}
+            <InventoryTabs inventories={inventories} selectedInventory={selectedInventory} tab={tab}/>
 
+            {/* Main Content */}
             <div className="content inventory-content">
+                <FilterBar
+                    statusFilter={statusFilter}
+                    categoryFilter={categoryFilter}
+                    variantFilter={variantFilter}
+                    stockFilter={stockFilter}
+                    categories={categories || []}
+                    variants={variants || []}
+                />
+
+                {/* Products Table */}
                 <table>
                     <thead>
                         <tr>
@@ -118,7 +214,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                         </tr>
                     </thead>
                     <tbody>
-                        {products?.map(product => {
+                        {pagedProducts.map((product) => {
                             const inventoryInfo = inventoryMap.get(product.id);
                             return (
                                 <tr key={product.id}>
@@ -127,7 +223,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                                         <span className="item-sku">{inventoryInfo?.product_sku || '-'}</span>
                                     </td>
                                     <td>
-                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock' : inventoryInfo?.product_quantity <= 5 ? 'low-stock' : ''}`}>
+                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock': inventoryInfo?.product_quantity <= 5 ? 'low-stock': ''}`}>
                                             {inventoryInfo?.product_quantity ?? '-'}
                                         </div>
                                     </td>
@@ -135,7 +231,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                                     <td>{product.variants?.variant_name || '-'}</td>
                                     <td>
                                         <div className="table-actions">
-                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId} />
+                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
                                             <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
 
                                             <EditProductButton
@@ -143,16 +239,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
                                                 product_variant={product.product_variant || ''}
-                                                product_status={inventoryInfo?.product_status || false}
+                                                product_status={product.product_status || false}
                                                 product_sku={inventoryInfo?.product_sku || ''}
                                                 product_quantity={inventoryInfo?.product_quantity || 0}
-                                                categories={categories}
-                                                variants={variants}
+                                                categories={categories || []}
+                                                variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId={inventoryId}
-                                                productInventories={productInventories || []}
+                                                productInventories={filteredByStock}
                                             />
-
                                         </div>
                                     </td>
                                 </tr>
@@ -162,10 +257,11 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                 </table>
             </div>
 
+            {/* Footer Section */}
             <div className="pagination inventory-page">
                 <div className={styles['inventory-summary']}>
                     <div className={styles.total}>
-                        <strong>{totalProducts}</strong> products
+                        <strong>{totalCount}</strong> products
                     </div>
 
                     <div className={styles['stock-info']}>

@@ -55,12 +55,14 @@ main {
 
     &.inventory-content {
         border-top-left-radius: 0;
+        padding-top: 1.5rem;
     }
 }
 
 .filter-bar {
+    align-items: last baseline;
     display: flex;
-    gap: 1.25rem;
+    gap: 1rem;
     padding: 0 1.25rem 1.5rem;
 
     & .search-input {
@@ -69,6 +71,7 @@ main {
 
     & select {
         flex-grow: 1;
+        width: 160px;
     }
 }
 

@@ -59,7 +59,7 @@ export function EditProductDialog({
 }: EditProductDialogProps) {
     const toast = useToast();
     const [submitting, setSubmitting] = useState(false);
-    
+
     // Initialize selected inventory with current inventory or first available
     const [selectedInventoryId, setSelectedInventoryId] = useState(
         product.currentInventoryId || product.inventories[0]?.inventory_id || inventories[0]?.id || ''
@@ -85,9 +85,9 @@ export function EditProductDialog({
     // Reset form when opening or when product/inventories change
     useEffect(() => {
         if (open) {
-            const defaultInventoryId = product.currentInventoryId || 
-                                    product.inventories[0]?.inventory_id || 
-                                    inventories[0]?.id || '';
+            const defaultInventoryId = product.currentInventoryId ||
+                product.inventories[0]?.inventory_id ||
+                inventories[0]?.id || '';
             setSelectedInventoryId(defaultInventoryId);
 
             const selectedInventory = product.inventories.find(
@@ -140,7 +140,7 @@ export function EditProductDialog({
                 name === 'product_quantity'
                     ? Number(value)
                     : name === 'product_status'
-                        ? (e.target as HTMLInputElement).checked
+                        ? (e.target instanceof HTMLInputElement ? e.target.checked : false)
                         : value,
         }));
     };
@@ -267,9 +267,20 @@ export function EditProductDialog({
                     <label htmlFor="product_status" className="input-label">
                         Status
                     </label>
-                    <label className="switch">
-                        <input name="product_status" type="checkbox" checked={formData.product_status} onChange={handleChange} />
-                        <span className="slider"></span>
+                    <label>
+                        <input
+  name="product_status"
+  type="checkbox"
+  checked={formData.product_status}
+  onChange={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      product_status: e.target.checked,
+    }))
+  }
+/>
+
+                        Product is active
                     </label>
                 </div>
 
