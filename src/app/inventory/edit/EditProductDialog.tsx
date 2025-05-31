@@ -82,11 +82,9 @@ export function EditProductDialog({
         product_quantity: initialInventoryData.product_quantity,
     });
 
-    // Reset form when opening or when product/inventories change
     useEffect(() => {
         if (open) {
             const defaultInventoryId = product.currentInventoryId ||
-                product.inventories[0]?.inventory_id ||
                 inventories[0]?.id || '';
             setSelectedInventoryId(defaultInventoryId);
 
@@ -95,6 +93,7 @@ export function EditProductDialog({
             ) || {
                 product_sku: product.product_sku,
                 product_quantity: product.product_quantity,
+                inventory_id: defaultInventoryId
             };
 
             setFormData({
@@ -136,12 +135,7 @@ export function EditProductDialog({
 
         setFormData(prev => ({
             ...prev,
-            [name]:
-                name === 'product_quantity'
-                    ? Number(value)
-                    : name === 'product_status'
-                        ? (e.target instanceof HTMLInputElement ? e.target.checked : false)
-                        : value,
+            [name]: name === 'product_quantity' ? Number(value) : name === 'product_status' ? (e.target instanceof HTMLInputElement ? e.target.checked : false) : value,
         }));
     };
 
@@ -159,9 +153,10 @@ export function EditProductDialog({
                     product_category: formData.product_category,
                     product_variant: formData.product_variant,
                     product_status: formData.product_status,
+                    inventory_id: selectedInventoryId,
+                    current_inventory_id: product.currentInventoryId,
                     product_sku: formData.product_sku,
                     product_quantity: formData.product_quantity,
-                    inventory_id: selectedInventoryId,
                 }),
             });
 
@@ -175,7 +170,7 @@ export function EditProductDialog({
             onClose();
             if (onSuccess) onSuccess();
         } catch (error) {
-            toast('❌ Error updating product!');
+            toast(`❌ ${error.message || 'Error updating product!'}`);
         } finally {
             setSubmitting(false);
         }
@@ -188,13 +183,7 @@ export function EditProductDialog({
                     <label htmlFor="product_name" className="input-label">
                         Product name
                     </label>
-                    <input
-                        name="product_name"
-                        type="text"
-                        value={formData.product_name}
-                        onChange={handleChange}
-                        required
-                    />
+                    <input name="product_name" type="text" value={formData.product_name} onChange={handleChange} required />
                 </div>
 
                 <div className="double-input-group">
@@ -202,12 +191,7 @@ export function EditProductDialog({
                         <label htmlFor="selectedInventoryId" className="input-label">
                             Inventory
                         </label>
-                        <select
-                            name="selectedInventoryId"
-                            value={selectedInventoryId}
-                            onChange={handleChange}
-                            required
-                        >
+                        <select name="selectedInventoryId" value={selectedInventoryId} onChange={handleChange} required>
                             {inventories.map(inv => (
                                 <option key={inv.id} value={inv.id}>
                                     {inv.inventory_name}
@@ -268,18 +252,7 @@ export function EditProductDialog({
                         Status
                     </label>
                     <label>
-                        <input
-  name="product_status"
-  type="checkbox"
-  checked={formData.product_status}
-  onChange={(e) =>
-    setFormData((prev) => ({
-      ...prev,
-      product_status: e.target.checked,
-    }))
-  }
-/>
-
+                        <input name="product_status" type="checkbox" checked={formData.product_status} onChange={(e) => setFormData((prev) => ({ ...prev, product_status: e.target.checked, }))} />
                         Product is active
                     </label>
                 </div>

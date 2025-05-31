@@ -118,6 +118,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             categories(id, category_name),
             variants(id, variant_name)
         `)
+        .order('product_name', { ascending: true })
         .in('id', productIdsFromStockFilter.length > 0 ? productIdsFromStockFilter : [0]);
 
     if (query) {

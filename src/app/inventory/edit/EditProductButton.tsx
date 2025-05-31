@@ -68,6 +68,7 @@ export function EditProductButton({
         currentInventoryId,
     };
 
+
     return (
         <>
             <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} onClick={() => setOpen(true)} title="Edit" />
