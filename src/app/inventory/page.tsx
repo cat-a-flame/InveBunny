@@ -21,25 +21,25 @@ type SearchParams = {
 };
 
 // ========== CONSTANTS ==========
-const validStatusFilters = ['active', 'inactive', 'all'] as const;
 const validStockFilters = ['all', 'low', 'out', 'in'] as const;
 const PAGE_SIZE = 10;
 
-export default async function Home({ searchParams }: { searchParams: SearchParams }) {
+export default async function Home({ searchParams}: {searchParams: Promise<SearchParams>}) {
     const supabase = await createClient();
+    const resolvedSearchParams = await searchParams;
 
     // ========== PARAM PROCESSING ==========
-    const statusFilterRaw = searchParams.statusFilter;
-    const stockFilterRaw = searchParams.stockFilter;
+    const statusFilterRaw = resolvedSearchParams.statusFilter;
+    const stockFilterRaw = resolvedSearchParams.stockFilter;
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
     const stockFilter = validStockFilters.includes(stockFilterRaw as any) ? stockFilterRaw : 'all';
 
-    const categoryFilter = searchParams.categoryFilter || 'all';
-    const variantFilter = searchParams.variantFilter || 'all';
-    const page = Math.max(1, parseInt(searchParams.page || '1'));
-    const query = searchParams.query || '';
-    const inventorySlug = searchParams.inventory;
-    const tab = searchParams.tab || 'active';
+    const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
+    const variantFilter = resolvedSearchParams.variantFilter || 'all';
+    const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
+    const query = resolvedSearchParams.query || '';
+    const inventorySlug = resolvedSearchParams.inventory;
+    const tab = resolvedSearchParams.tab || 'active';
 
     // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
