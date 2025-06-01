@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Quicksand, PT_Serif } from "next/font/google";
+import { Quicksand } from "next/font/google";
 import Script from 'next/script';
 import { ToastProvider } from "../components/Toast/toast";
 import "../../styles/globals.css";

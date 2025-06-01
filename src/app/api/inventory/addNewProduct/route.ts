@@ -15,7 +15,6 @@ export async function POST(request: Request) {
         const body = await request.json();
         const {
             product_name,
-            product_sku,
             product_category,
             product_status,
             product_variant,

@@ -8,7 +8,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &{
     disabled?: boolean;
 }
 
-export function IconButton({ icon, className, title, size, disabled, ...props }: ButtonProps) {
+export function IconButton({ icon, title, size, disabled, ...props }: ButtonProps) {
     const sizeClass = size === "sm" ? styles["icon-button-sm"] : "";
 
     return (

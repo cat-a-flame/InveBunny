@@ -32,7 +32,7 @@ export async function PUT(request: Request) {
         }
 
         // 2. Get ALL current inventory associations for this product
-        const { data: currentInventories, error: inventoryError } = await supabase
+        const { error: inventoryError } = await supabase
             .from('product_inventories')
             .select('inventory_id')
             .eq('product_id', body.id);

@@ -24,7 +24,6 @@ type SupplyBatchDialogProps = {
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', day: 'numeric' };
     const month = date.toLocaleString('en-GB', { month: 'long' });
     const year = date.getFullYear();
     const day = date.getDate();

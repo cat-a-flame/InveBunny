@@ -3,7 +3,7 @@
 import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type EditVariantDialogProps = {
     id: string;

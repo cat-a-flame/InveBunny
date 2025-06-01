@@ -24,7 +24,7 @@ export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, productName
 
 	return (
 		<Dialog open={open} onClose={handleClose} title="Delete this product?">
-			<p>You are about to send <strong>"{productName}"</strong> to the digital abyss.</p>
+			<p>You are about to send <strong>{productName}</strong> to the digital abyss.</p>
 			<p>This will also delete all its batches.</p>
 
 			<div className="dialog-buttons">
