@@ -169,11 +169,16 @@ export function EditProductDialog({
             toast('✅ Product updated successfully!');
             onClose();
             if (onSuccess) onSuccess();
-        } catch (error) {
-            toast(`❌ ${error.message || 'Error updating product!'}`);
+        } catch (error: unknown) {
+            let errorMessage = 'Error updating product!';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            toast(`❌ ${errorMessage}`);
         } finally {
             setSubmitting(false);
         }
+
     };
 
     return (

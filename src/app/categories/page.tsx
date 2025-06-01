@@ -5,18 +5,13 @@ import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
 import { createClient } from '@/src/utils/supabase/server';
 
-type SearchParams = {
-    page?: string;
-    query?: string;
-};
-
-export default async function CategoriesPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function CategoriesPage({ searchParams }: { searchParams: any }) {
     const supabase = await createClient();
+    const params = await searchParams;
 
     // Pagination setup
-    const resolvedSearchParams = await searchParams;
-    const page = parseInt(resolvedSearchParams.page || "1");
-    const query = resolvedSearchParams.query || "";
+    const page = parseInt(params.page || "1");
+    const query = params.query || "";
     const pageSize = 12;
 
     const { data: categories, count } = await supabase

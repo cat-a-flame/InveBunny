@@ -9,7 +9,6 @@ type Category = {
     id: string;
     category_name: string;
     inventory_name?: string;
-    product_sku: string
 };
 
 type Variant = {

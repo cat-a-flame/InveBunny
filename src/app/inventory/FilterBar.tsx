@@ -135,7 +135,7 @@ export function FilterBar({
                 </select>
             </div>
 
-            <IconButton onClick={clearAllFilters} icon={<i className="fa-solid fa-filter-circle-xmark"></i>} title="Clear filters" disabled={!hasActiveFilters(searchParams)} />
+            <IconButton onClick={clearAllFilters} icon={<i className="fa-solid fa-filter-circle-xmark"></i>} title="Clear filters" disabled={!hasActiveFilters()} />
         </div>
     );
 }

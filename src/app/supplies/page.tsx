@@ -6,21 +6,14 @@ import { Search } from '../../components/SearchBar/searchBar';
 import { ViewBatchButton } from './batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
 
-type SearchParams = {
-    page?: string;
-    query?: string;
-};
-
-export default async function SuppliesPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function SuppliesPage({ searchParams }: { searchParams: any }) {
     const supabase = await createClient();
+    const params = await searchParams;
 
-    // Await searchParams before accessing
-    const resolvedSearchParams = await searchParams;
-    const page = parseInt(resolvedSearchParams.page || "1");
-    const query = resolvedSearchParams.query || "";
+    const page = parseInt(params.page || "1");
+    const query = params.query || "";
     const pageSize = 12;
 
-    // Query builder (as you already have it)
     const { data: supplies, count } = await supabase
         .from("supplies")
         .select("id, supply_name, supply_category", { count: 'exact' })

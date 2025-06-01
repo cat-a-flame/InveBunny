@@ -14,6 +14,7 @@ export function Search({
     query: string;
     placeholder?: string;
     size?: "sm" | "md" | "lg";
+    onChange?: (query: string) => void;
 }) {
     const router = useRouter();
     const pathname = usePathname();

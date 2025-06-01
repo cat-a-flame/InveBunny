@@ -209,7 +209,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                     variants={variants || []}
                 />
 
-                {/* Products Table */}
                 <table>
                     <thead>
                         <tr>
@@ -264,7 +263,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                 </table>
             </div>
 
-            {/* Footer Section */}
             <div className="pagination inventory-page">
                 <div className={styles['inventory-summary']}>
                     <div className={styles.total}>
