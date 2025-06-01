@@ -267,10 +267,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
                     <div className={styles['stock-info']}>
                         <span className={`${styles['low-stock']} ${styles['stock-status']}`}>
-                            <span></span> Low stock: {lowStockCount}
+                            <span className={styles.status}></span> Low stock: {lowStockCount}
                         </span>
                         <span className={`${styles['out-of-stock']} ${styles['stock-status']}`}>
-                            <span></span> Out of stock: {outOfStockCount}
+                            <span className={styles.status}></span> Out of stock: {outOfStockCount}
                         </span>
                     </div>
                 </div>

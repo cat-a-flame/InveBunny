@@ -17,16 +17,9 @@
 .scanned-items-list {
     background: #fff;
     box-shadow: 0 0 15px 0px #c1b2c740;
-    /*display: none;*/
     margin: 1.38rem .69rem 0;
     padding: .5rem 2rem 2rem;
     position: relative;
-
-    & li {
-        display: flex;
-        justify-content: space-between;
-        margin: 10px 0;
-    }
 
     &::before {
         background-color: #796486;
@@ -40,7 +33,7 @@
         top: -6px;
         z-index: -1;
     }
-    
+
     &::after {
         content: "";
         position: absolute;
@@ -53,15 +46,17 @@
     }
 }
 
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
 .list {
     list-style-type: none;
     padding: 0;
-    
-    & li {
-        margin: 10px 0;
-    }
 
-    & span {
+    & .counter {
         font-weight: 700;
     }
 }

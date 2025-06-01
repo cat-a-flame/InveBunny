@@ -21,7 +21,7 @@ export function InventoryTabs({ inventories, selectedInventory, tab }: TabsProps
                 const invSlug = slugify(inv.inventory_name);
                 return (
                     <li key={inv.id} className={invSlug === selectedSlug && tab === 'active' ? 'active' : ''}>
-                        <a href={`/inventory?inventory=${invSlug}`}>{inv.inventory_name}</a>
+                        <a href={`/inventory?inventory=${invSlug}`} className="tab-link">{inv.inventory_name}</a>
                     </li>
                 );
             })}

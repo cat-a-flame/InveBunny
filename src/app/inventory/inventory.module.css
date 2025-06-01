@@ -21,7 +21,7 @@
     display: flex;
     gap: .38rem;
     
-    span {
+    .status {
         border-radius: 20px;
         display: block;
         height: 8px;
@@ -29,10 +29,10 @@
     }
 }
 
-.low-stock span {
+.low-stock .status {
     background-color: #B795C2;
 }
 
-.out-of-stock span {
+.out-of-stock .status {
     background-color: #E04A6E;
 }
