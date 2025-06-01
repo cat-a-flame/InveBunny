@@ -22,6 +22,12 @@ type SearchParams = {
 
 // ========== CONSTANTS ==========
 const validStockFilters = ['all', 'low', 'out', 'in'] as const;
+type StockFilter = (typeof validStockFilters)[number];
+
+function isStockFilter(value: unknown): value is StockFilter {
+  return typeof value === 'string' && validStockFilters.includes(value as StockFilter);
+}
+
 const PAGE_SIZE = 10;
 
 export default async function Home({ searchParams}: {searchParams: Promise<SearchParams>}) {
@@ -32,7 +38,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const statusFilterRaw = resolvedSearchParams.statusFilter;
     const stockFilterRaw = resolvedSearchParams.stockFilter;
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
-    const stockFilter = validStockFilters.includes(stockFilterRaw as any) ? stockFilterRaw : 'all';
+    const stockFilter = isStockFilter(stockFilterRaw) ? stockFilterRaw : 'all';
 
     const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
     const variantFilter = resolvedSearchParams.variantFilter || 'all';

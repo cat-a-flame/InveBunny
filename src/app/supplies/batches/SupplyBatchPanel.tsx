@@ -34,7 +34,7 @@ const formatDate = (dateString: string) => {
 export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBatchDialogProps) {
     const [supplyBatches, setSupplyBatches] = useState<SupplyBatch[]>([]);
     const [supplyName, setSupplyName] = useState<string>('');
-    const [isMounted, setIsMounted] = useState(false);
+    const [_isMounted, setIsMounted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editBatch, setEditBatch] = useState<SupplyBatch | null>(null);
@@ -102,7 +102,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
             <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
                 <div className="side-panel-header">
-                    <h3 className="side-panel-title">Batches of '{supplyName}'</h3>
+                    <h3 className="side-panel-title">{supplyName}</h3>
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
 

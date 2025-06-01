@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
         const product_id = productData.id;
 
-        const inventoryRows = inventories.map((inv: any) => ({
+        const inventoryRows = inventories.map((inv: { inventoryId: string; sku: string; quantity: number }) => ({
             product_id,
             inventory_id: inv.inventoryId,
             product_sku: inv.sku,

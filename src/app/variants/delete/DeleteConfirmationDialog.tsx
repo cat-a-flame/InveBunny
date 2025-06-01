@@ -25,7 +25,7 @@ export const DeleteConfirmationDialog = ({ open, onClose, onConfirm, variantName
     return (
         <Dialog open={open} onClose={handleClose} title="Delete this variant?">
             <p>You are about to send <strong>{variantName}</strong> to the digital abyss.</p>
-            <p>Items assigned to this variant won't be deleted, but they'll be confused.</p>
+            <p>{"Items assigned to this variant won't be deleted, but they'll be confused."}</p>
 
             <div className="dialog-buttons">
                 <Button variant="ghost" onClick={handleClose} type="button">Never mind</Button>

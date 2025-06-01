@@ -94,7 +94,7 @@ export function FilterBar({
             <div>
                 <label htmlFor="status-filter" className="input-label">Status</label>
                 <select id="status-filter" value={statusFilter}
-                    onChange={(e) => { setStatusFilter(e.target.value as any); updateQueryParam("statusFilter", e.target.value); }} disabled={isLoading}>
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => { const value = e.target.value as "active" | "inactive" | "all"; setStatusFilter(value); updateQueryParam("statusFilter", value);}} disabled={isLoading}>
                     <option value="all">All</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -127,7 +127,7 @@ export function FilterBar({
 
             <div>
                 <label htmlFor="stock-filter" className="input-label">Stock</label>
-                <select id="stock-filter" value={stockFilter} onChange={(e) => { setStockFilter(e.target.value as any); updateQueryParam("stockFilter", e.target.value); }} disabled={isLoading}>
+                <select id="stock-filter" value={stockFilter} onChange={(e) => { setStockFilter(e.target.value as "all" | "low" | "out" | "in"); updateQueryParam("stockFilter", e.target.value); }} disabled={isLoading}>
                     <option value="all">All</option>
                     <option value="low">Low stock</option>
                     <option value="out">Out of stock</option>
@@ -135,7 +135,7 @@ export function FilterBar({
                 </select>
             </div>
 
-            <IconButton onClick={clearAllFilters} className="clear-filters-button" icon={<i className="fa-solid fa-filter-circle-xmark"></i>} title="Clear filters" disabled={!hasActiveFilters(searchParams)} />
+            <IconButton onClick={clearAllFilters} icon={<i className="fa-solid fa-filter-circle-xmark"></i>} title="Clear filters" disabled={!hasActiveFilters(searchParams)} />
         </div>
     );
 }

@@ -38,7 +38,7 @@ export default function DeleteBatchDialog({ open, onClose, batchName, batchId, o
     return (
         <Dialog open={open} onClose={onClose} title="Delete this batch?">
             <p>You are about to send <strong>{batchName}</strong> to the digital abyss.</p>
-            <p>Items using to this batch won't be deleted, but they'll be left empty-handed.</p>
+            <p>{"Items using to this batch won't be deleted, but they'll be left empty-handed."}</p>
 
             <div className="dialog-buttons">
                 <Button type="button" variant="ghost" onClick={onClose}>Never mind</Button>

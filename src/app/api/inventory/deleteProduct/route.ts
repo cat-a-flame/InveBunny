@@ -90,13 +90,14 @@ export async function DELETE(request: Request) {
             success: true,
             message: `Completely deleted product ${productId} and all its inventory associations`
         });
-
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Delete API error:', error);
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
         return NextResponse.json(
-            { error: 'Operation failed', details: error.message || error },
+            { error: 'Operation failed', details: errorMessage },
             { status: 500 }
         );
     }
-
 }

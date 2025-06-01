@@ -3,7 +3,7 @@
 import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { useState } from 'react';
-import { DeleteConfirmationDialog, DeleteConfirmationDialogHandle } from './DeleteConfirmationDialog';
+import { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
 
 type Props = {
     variantId: string;

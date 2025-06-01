@@ -16,7 +16,7 @@ export default async function ScanPage() {
 
                 <div className={styles["scanned-items-list"]}>
                     <ul className={styles.list} id="scannedItemsList">
-                        <li className={styles.item}>Dachshund Valentine's Day card <span className={styles.counter}>1</span></li>
+                        <li className={styles.item}>Dachshund Valentine Day card <span className={styles.counter}>1</span></li>
                         <li className={styles.item}>Illustarted calendar 2025 <span className={styles.counter}>10</span></li>
                         <li className={styles.item}>Pidgeon vinyl sticker <span className={styles.counter}>999</span></li>
                     </ul>

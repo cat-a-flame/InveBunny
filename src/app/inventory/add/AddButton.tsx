@@ -1,4 +1,3 @@
-// components/add/AddButton.tsx
 'use client';
 
 import { AddProductDialog } from './AddProductDialog';
@@ -13,22 +12,29 @@ type Category = {
     product_sku: string
 };
 
+type Variant = {
+    id: string;
+    variant_name: string;
+};
+
+type Inventory = {
+    id: string;
+    inventory_name: string;
+};
+
 type Props = {
     categories: Category[];
-    variants?: any[];
-    inventories?: any[];
+    variants?: Variant[];
+    inventories?: Inventory[];
 };
+
 
 export function AddButton({ categories, variants, inventories }: Props) {
     const [open, setOpen] = useState(false);
 
     return (
         <>
-            <Button
-                variant="cta"
-                onClick={() => setOpen(true)}
-                icon={<CgMathPlus />}
-            >
+            <Button variant="cta" onClick={() => setOpen(true)} icon={<CgMathPlus />}>
                 Add new product
             </Button>
             {open && (
