@@ -1,7 +1,7 @@
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
 import { IconButton } from '@/src/components/IconButton/iconButton';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import AddBatchDialog from './AddBatchDialog';
 import EditBatchDialog from './EditBatchDialog';
 import DeleteBatchDialog from './DeleteBatchDialog';
@@ -34,7 +34,7 @@ const formatDate = (dateString: string) => {
 export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBatchDialogProps) {
     const [supplyBatches, setSupplyBatches] = useState<SupplyBatch[]>([]);
     const [supplyName, setSupplyName] = useState<string>('');
-    const [_isMounted, setIsMounted] = useState(false);
+    const isMounted = useRef(false);
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editBatch, setEditBatch] = useState<SupplyBatch | null>(null);
@@ -85,12 +85,13 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
 
     useEffect(() => {
         if (open) {
-            setIsMounted(true);
+            isMounted.current = true;
             setTimeout(() => {
                 setIsOpen(true);
             }, 50);
         } else {
             setIsOpen(false);
+            isMounted.current = false;
         }
     }, [open, supplyId]);
 
