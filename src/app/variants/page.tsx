@@ -1,7 +1,7 @@
 import { createClient } from '@/src/utils/supabase/server';
-import { AddButton } from './add/AddButton';
-import { DeleteButton } from './delete/DeleteButton';
-import { EditVariantButton } from './edit/EditVariantButton';
+import { AddButton } from '@/src/features/variants/add/AddButton';
+import { DeleteButton } from '@/src/features/variants/delete/DeleteButton';
+import { EditVariantButton } from '@/src/features/variants/edit/EditVariantButton';
 
 export default async function VariantsPage() {
     const supabase = await createClient();

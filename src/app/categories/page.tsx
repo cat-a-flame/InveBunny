@@ -1,6 +1,6 @@
-import { AddButton } from './add/AddButton';
-import { DeleteButton } from './delete/DeleteButton';
-import { EditCategoryButton } from './edit/EditCategoryButton';
+import { AddButton } from '@/src/features/categories/add/AddButton';
+import { DeleteButton } from '@/src/features/categories/delete/DeleteButton';
+import { EditCategoryButton } from '@/src/features/categories/edit/EditCategoryButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
 import { createClient } from '@/src/utils/supabase/server';
