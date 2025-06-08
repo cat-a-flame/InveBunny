@@ -2,8 +2,11 @@ import { createClient } from '@/src/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 
-export async function PUT(request: NextRequest, context: any): Promise<NextResponse> {
-  const { id } = context.params;
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  const { id } = params;
 
   try {
     const supabase = await createClient();
@@ -36,8 +39,11 @@ export async function PUT(request: NextRequest, context: any): Promise<NextRespo
   }
 }
 
-export async function DELETE(request: NextRequest, context: any): Promise<NextResponse> {
-  const { id } = context.params;
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  const { id } = params;
 
   try {
     const supabase = await createClient();
