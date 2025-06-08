@@ -1,9 +1,9 @@
-import { AddButton } from './add/AddButton';
-import { DeleteProductButton } from './delete/DeleteProductButton';
-import { EditProductButton } from './edit/EditProductButton';
-import { FilterBar } from './FilterBar';
+import { AddButton } from '@/src/features/inventory/add/AddButton';
+import { DeleteProductButton } from '@/src/features/inventory/delete/DeleteProductButton';
+import { EditProductButton } from '@/src/features/inventory/edit/EditProductButton';
+import { FilterBar } from '@/src/features/inventory/FilterBar';
 import { IconButton } from '@/src/components/IconButton/iconButton';
-import { InventoryTabs } from './InventoryTabs';
+import { InventoryTabs } from '@/src/features/inventory/InventoryTabs';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
 import { slugify } from '@/src/utils/slugify';

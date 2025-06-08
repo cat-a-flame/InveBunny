@@ -82,7 +82,7 @@ export async function PUT(request: Request) {
                 product_sku: body.product_sku || null,
                 product_quantity: body.product_quantity || 0,
                 owner_id: user.id,
-            }, { onConflict: 'unique_product_inventory' });
+            }, { onConflict: 'product_id, inventory_id' });
 
 
         if (upsertInventoryError) throw upsertInventoryError;

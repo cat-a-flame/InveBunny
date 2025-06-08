@@ -1,9 +1,9 @@
-import { AddButton } from './add/AddButton';
-import { DeleteButton } from './delete/DeleteButton';
-import { EditSupplyButton } from './edit/EditSupplyButton';
+import { AddButton } from '@/src/features/supplies/add/AddButton';
+import { DeleteButton } from '@/src/features/supplies/delete/DeleteButton';
+import { EditSupplyButton } from '@/src/features/supplies/edit/EditSupplyButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
-import { ViewBatchButton } from './batches/ViewBatchButton';
+import { ViewBatchButton } from '@/src/features/supplies/batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
 
 export default async function SuppliesPage({ searchParams }: { searchParams: any }) {
