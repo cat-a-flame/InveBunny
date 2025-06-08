@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 
 export async function PUT(request: NextRequest, context: any): Promise<NextResponse> {
-  const { params } = context.params;
+  const { id } = context.params;
 
   try {
     const supabase = await createClient();
@@ -21,7 +21,7 @@ export async function PUT(request: NextRequest, context: any): Promise<NextRespo
     const { error } = await supabase
       .from('supply_batch')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('owner_id', user.id);
 
     if (error) {
@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, context: any): Promise<NextRespo
 }
 
 export async function DELETE(request: NextRequest, context: any): Promise<NextResponse> {
-  const { params } = context;
+  const { id } = context.params;
 
   try {
     const supabase = await createClient();
@@ -53,7 +53,7 @@ export async function DELETE(request: NextRequest, context: any): Promise<NextRe
     const { error } = await supabase
       .from('supply_batch')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('owner_id', user.id);
 
     if (error) {
