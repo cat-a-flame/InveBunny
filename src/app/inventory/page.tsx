@@ -129,12 +129,9 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
     if (query) {
         const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
-        productsQuery = productsQuery.or(`product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`);
-    }
-
-    if (query) {
-        const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
-        productsQuery = productsQuery.or(`product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`);
+        productsQuery = productsQuery.or(
+            `product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`
+        );
     }
 
     // Apply filters

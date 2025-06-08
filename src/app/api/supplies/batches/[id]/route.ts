@@ -2,8 +2,11 @@ import { createClient } from '@/src/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 
-export async function PUT(request: NextRequest, context: any): Promise<NextResponse> {
-  const { params } = context.params;
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  const { id } = params;
 
   try {
     const supabase = await createClient();
@@ -21,7 +24,7 @@ export async function PUT(request: NextRequest, context: any): Promise<NextRespo
     const { error } = await supabase
       .from('supply_batch')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('owner_id', user.id);
 
     if (error) {
@@ -36,8 +39,11 @@ export async function PUT(request: NextRequest, context: any): Promise<NextRespo
   }
 }
 
-export async function DELETE(request: NextRequest, context: any): Promise<NextResponse> {
-  const { params } = context;
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  const { id } = params;
 
   try {
     const supabase = await createClient();
@@ -53,7 +59,7 @@ export async function DELETE(request: NextRequest, context: any): Promise<NextRe
     const { error } = await supabase
       .from('supply_batch')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('owner_id', user.id);
 
     if (error) {
