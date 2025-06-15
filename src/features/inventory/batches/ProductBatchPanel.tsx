@@ -19,7 +19,7 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editBatch, setEditBatch] = useState<ProductBatch | null>(null);
-    const [deleteBatch, setDeleteBatch] = useState<{ id: string; batch_name: string } | null>(null);
+    const [deleteBatch, setDeleteBatch] = useState<{ id: string; p_batch_name: string } | null>(null);
 
     const refreshBatches = async () => {
         try {
@@ -67,8 +67,8 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
         }
     }, [open, productId]);
 
-    const activeBatches = productBatches.filter((batch) => batch.status);
-    const archivedBatches = productBatches.filter((batch) => !batch.status);
+    const activeBatches = productBatches.filter((batch) => batch.is_active);
+    const archivedBatches = productBatches.filter((batch) => !batch.is_active);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -100,11 +100,11 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
                                 <tbody>
                                     {activeBatches.map((batch) => (
                                         <tr key={batch.id}>
-                                            <td><span className="item-name">{batch.batch_name}</span></td>
+                                            <td><span className="item-name">{batch.p_batch_name}</span></td>
                                             <td><span className="item-details">{formatDate(batch.date_made)}</span></td>
-                                            <td>{/* Products list placeholder */}</td>
+                                            <td>{batch.supplies?.map(s => `${s.supplyName} (${s.batchName})`).join(', ')}</td>
                                             <td className="table-actions">
-                                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, batch_name: batch.batch_name })} />
+                                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
                                                 <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => setEditBatch(batch)} />
                                             </td>
                                         </tr>
@@ -131,11 +131,11 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
                                 <tbody>
                                     {archivedBatches.map((batch) => (
                                         <tr key={batch.id}>
-                                            <td><span className="item-name">{batch.batch_name}</span></td>
+                                            <td><span className="item-name">{batch.p_batch_name}</span></td>
                                             <td><span className="item-details">{formatDate(batch.date_made)}</span></td>
-                                            <td>{/* Products list placeholder */}</td>
+                                            <td>{batch.supplies?.map(s => `${s.supplyName} (${s.batchName})`).join(', ')}</td>
                                             <td className="table-actions">
-                                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, batch_name: batch.batch_name })} />
+                                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
                                                 <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => setEditBatch(batch)} />
                                             </td>
                                         </tr>
@@ -181,7 +181,7 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
                     open={true}
                     onClose={() => setDeleteBatch(null)}
                     batchId={deleteBatch.id}
-                    batchName={deleteBatch.batch_name}
+                    batchName={deleteBatch.p_batch_name}
                     onDeleted={() => {
                         refreshBatches();
                         setDeleteBatch(null);

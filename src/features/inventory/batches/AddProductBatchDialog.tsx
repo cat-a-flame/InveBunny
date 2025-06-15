@@ -28,9 +28,9 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
     const toast = useToast();
 
     const [form, setForm] = useState({
-        batch_name: '',
+        p_batch_name: '',
         date_made: '',
-        status: true,
+        is_active: true,
     });
 
     const [supplies, setSupplies] = useState<SupplyOption[]>([]);
@@ -87,10 +87,10 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     product_id: productId,
-                    batch_name: form.batch_name,
+                    p_batch_name: form.p_batch_name,
                     date_made: form.date_made,
-                    status: form.status,
-                    supplies: supplyEntries.map(se => ({ batch_id: se.batchId })),
+                    is_active: form.is_active,
+                    supplies: supplyEntries.map(se => ({ supply_batch_id: se.batchId })),
                 }),
             });
             if (res.ok) {
@@ -138,7 +138,7 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
 
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
-                    <input name="batch_name" value={form.batch_name} onChange={e => setForm(prev => ({ ...prev, batch_name: e.target.value }))} required />
+                    <input name="p_batch_name" value={form.p_batch_name} onChange={e => setForm(prev => ({ ...prev, p_batch_name: e.target.value }))} required />
                 </div>
 
                 <div className="double-input-group">
@@ -149,7 +149,7 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
                     <div className="input-shrink">
                         <label className="input-label">Active batch</label>
                         <label className="switch">
-                            <input type="checkbox" checked={form.status} onChange={e => setForm(prev => ({ ...prev, status: e.target.checked }))} />
+                            <input type="checkbox" checked={form.is_active} onChange={e => setForm(prev => ({ ...prev, is_active: e.target.checked }))} />
                             <span className="slider"></span>
                         </label>
                     </div>

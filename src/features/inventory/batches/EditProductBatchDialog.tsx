@@ -5,9 +5,10 @@ import { useToast } from '@/src/components/Toast/toast';
 
 export type ProductBatch = {
     id: string;
-    batch_name: string;
+    p_batch_name: string;
     date_made: string;
-    status: boolean;
+    is_active: boolean;
+    supplies?: { supplyName?: string; batchName?: string }[];
 };
 
 interface Props {
@@ -52,7 +53,7 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
             <form onSubmit={handleSubmit} className="form-grid">
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
-                    <input name="batch_name" value={formData.batch_name} onChange={e => setFormData({ ...formData, batch_name: e.target.value })} required />
+                    <input name="p_batch_name" value={formData.p_batch_name} onChange={e => setFormData({ ...formData, p_batch_name: e.target.value })} required />
                 </div>
 
                 <div className="input-group">
@@ -63,7 +64,7 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
                 <div className="input-group">
                     <label className="input-label">Active batch</label>
                     <label className="switch">
-                        <input type="checkbox" checked={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.checked }))} />
+                        <input type="checkbox" checked={formData.is_active} onChange={e => setFormData(prev => ({ ...prev, is_active: e.target.checked }))} />
                         <span className="slider"></span>
                     </label>
                 </div>
