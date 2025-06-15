@@ -10,15 +10,36 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   const body = await request.json();
-  const { p_batch_name, date_made, is_active } = body;
+  const { p_batch_name, date_made, is_active, supplies } = body;
 
   const { error } = await supabase
     .from('product_batch')
     .update({ p_batch_name, date_made, is_active })
-    .eq('id', params.id);
+    .eq('id', params.id)
+    .eq('owner_id', user.id);
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+
+  if (Array.isArray(supplies)) {
+    await supabase
+      .from('product_batch_to_supply_batch')
+      .delete()
+      .eq('product_batch_id', params.id);
+
+    if (supplies.length > 0) {
+      const rows = supplies.map((id: string) => ({
+        product_batch_id: params.id,
+        supply_batch_id: id,
+      }));
+      const { error: linkError } = await supabase
+        .from('product_batch_to_supply_batch')
+        .insert(rows);
+      if (linkError) {
+        return NextResponse.json({ success: false, error: linkError.message }, { status: 500 });
+      }
+    }
   }
 
   return NextResponse.json({ success: true }, { status: 200 });
@@ -40,7 +61,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   const { error } = await supabase
     .from('product_batch')
     .delete()
-    .eq('id', params.id);
+    .eq('id', params.id)
+    .eq('owner_id', user.id);
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

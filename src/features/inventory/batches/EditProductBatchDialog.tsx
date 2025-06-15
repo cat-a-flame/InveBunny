@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@/src/components/Dialog/dialog';
 import { Button } from '@/src/components/Button/button';
 import { useToast } from '@/src/components/Toast/toast';
+import { SupplyOption, SupplyBatchOption, ProductBatchSupply } from './AddProductBatchDialog';
 
 export type ProductBatch = {
     id: string;
     p_batch_name: string;
     date_made: string;
     is_active: boolean;
-    supplies?: { supplyName?: string; batchName?: string }[];
+    supplies: ProductBatchSupply[];
 };
 
 interface Props {
@@ -20,17 +21,87 @@ interface Props {
 
 export default function EditProductBatchDialog({ open, onClose, batch, onUpdated }: Props) {
     const toast = useToast();
-    const [formData, setFormData] = useState(batch);
+    const [formData, setFormData] = useState({
+        p_batch_name: batch.p_batch_name,
+        date_made: batch.date_made,
+        is_active: batch.is_active,
+    });
+    const [supplies, setSupplies] = useState<SupplyOption[]>([]);
+    const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>(batch.supplies || []);
+    const [selectedSupply, setSelectedSupply] = useState('');
+    const [availableBatches, setAvailableBatches] = useState<SupplyBatchOption[]>([]);
+    const [selectedBatch, setSelectedBatch] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!open) return;
+        const fetchSupplies = async () => {
+            try {
+                const res = await fetch('/api/supplies?fields=id,supply_name&withBatches=true');
+                if (res.ok) {
+                    const data = await res.json();
+                    setSupplies(data.supplies || []);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchSupplies();
+    }, [open]);
+
+    useEffect(() => {
+        if (!selectedSupply) {
+            setAvailableBatches([]);
+            return;
+        }
+        const fetchBatches = async () => {
+            try {
+                const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAvailableBatches(data.batches || []);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchBatches();
+    }, [selectedSupply]);
+
+    const addEntry = () => {
+        if (!selectedSupply || !selectedBatch) return;
+        const supplyName = supplies.find(s => s.id === selectedSupply)?.supply_name;
+        const batchName = availableBatches.find(b => b.id === selectedBatch)?.batch_name;
+        setSupplyEntries(prev => [...prev, {
+            supplyId: selectedSupply,
+            batchId: selectedBatch,
+            supplyName,
+            batchName,
+        }]);
+        setSelectedSupply('');
+        setAvailableBatches([]);
+        setSelectedBatch('');
+    };
+
+    const removeEntry = (index: number) => {
+        setSupplyEntries(prev => prev.filter((_, i) => i !== index));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (supplyEntries.length === 0) {
+            toast('Add at least one supply batch');
+            return;
+        }
         setSubmitting(true);
         try {
             const res = await fetch(`/api/products/batches/${batch.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    supplies: supplyEntries.map(se => se.batchId),
+                }),
             });
             const result = await res.json();
             if (res.ok && result.success) {
@@ -69,9 +140,44 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
                     </label>
                 </div>
 
+                <div className="double-input-group">
+                    <div className="input-grow">
+                        <label className="input-label">Supply</label>
+                        <select value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
+                            <option value="">Select supply</option>
+                            {supplies.map(s => (
+                                <option key={s.id} value={s.id}>{s.supply_name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="input-grow">
+                        <label className="input-label">Supply batch</label>
+                        <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
+                            <option value="">Select batch</option>
+                            {availableBatches.map(b => (
+                                <option key={b.id} value={b.id}>{b.batch_name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="input-shrink" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                        <Button type="button" variant="ghost" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
+                    </div>
+                </div>
+
+                {supplyEntries.length > 0 && (
+                    <ul>
+                        {supplyEntries.map((se, idx) => (
+                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <span>{se.supplyName} - {se.batchName}</span>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)}>&times;</Button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
                 <div className="dialog-buttons">
                     <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>Save</Button>
+                    <Button type="submit" variant="primary" disabled={submitting || supplyEntries.length === 0}>Save</Button>
                 </div>
             </form>
         </Dialog>
