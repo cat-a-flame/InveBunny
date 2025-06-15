@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Dialog } from '@/src/components/Dialog/dialog';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/src/components/Button/button';
+import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useToast } from '@/src/components/Toast/toast';
 import { SupplyOption, SupplyBatchOption, ProductBatchSupply } from './AddProductBatchDialog';
 
@@ -19,8 +19,10 @@ interface Props {
     onUpdated: () => void;
 }
 
-export default function EditProductBatchDialog({ open, onClose, batch, onUpdated }: Props) {
+export default function EditProductBatchPanel({ open, onClose, batch, onUpdated }: Props) {
     const toast = useToast();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         p_batch_name: batch.p_batch_name,
         date_made: batch.date_made,
@@ -32,6 +34,16 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
     const [availableBatches, setAvailableBatches] = useState<SupplyBatchOption[]>([]);
     const [selectedBatch, setSelectedBatch] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open, batch]);
 
     useEffect(() => {
         if (!open) return;
@@ -137,8 +149,14 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Edit product batch">
-            <form onSubmit={handleSubmit} className="form-grid">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title">Edit product batch</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
+                <form id="edit-batch-form" onSubmit={handleSubmit} className="side-panel-content form-grid">
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
                     <input name="p_batch_name" value={formData.p_batch_name} onChange={e => setFormData({ ...formData, p_batch_name: e.target.value })} required />
@@ -191,12 +209,12 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
                         ))}
                     </ul>
                 )}
-
-                <div className="dialog-buttons">
+                </form>
+                <div className="side-panel-footer">
                     <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting || supplyEntries.length === 0}>Save</Button>
+                    <Button type="submit" form="edit-batch-form" variant="primary" disabled={submitting || supplyEntries.length === 0}>Save</Button>
                 </div>
-            </form>
-        </Dialog>
+            </div>
+        </>
     );
 }

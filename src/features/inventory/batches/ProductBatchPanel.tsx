@@ -3,7 +3,7 @@ import { CgMathPlus } from 'react-icons/cg';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useEffect, useState, useRef } from 'react';
 import AddProductBatchDialog from './AddProductBatchDialog';
-import EditProductBatchDialog, { ProductBatch } from './EditProductBatchDialog';
+import EditProductBatchPanel, { ProductBatch } from './EditProductBatchPanel';
 import DeleteProductBatchDialog from './DeleteProductBatchDialog';
 
 interface Props {
@@ -165,7 +165,7 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
             )}
 
             {editBatch && (
-                <EditProductBatchDialog
+                <EditProductBatchPanel
                     open={true}
                     onClose={() => setEditBatch(null)}
                     batch={editBatch}
