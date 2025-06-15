@@ -2,23 +2,23 @@ import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useEffect, useState, useRef } from 'react';
-import AddProductBatchDialog from './AddProductBatchDialog';
-import EditProductBatchPanel, { ProductBatch } from './EditProductBatchPanel';
+import AddProductBatchPanel from './AddProductBatchPanel';
+import { ProductBatch } from './EditProductBatchPanel';
 import DeleteProductBatchDialog from './DeleteProductBatchDialog';
 
 interface Props {
     open: boolean;
     onClose: () => void;
     productId: string;
+    onEditBatch?: (batch: ProductBatch) => void;
 }
 
-export default function ProductBatchPanel({ open, onClose, productId }: Props) {
+export default function ProductBatchPanel({ open, onClose, productId, onEditBatch }: Props) {
     const [productBatches, setProductBatches] = useState<ProductBatch[]>([]);
     const [productName, setProductName] = useState<string>('');
     const isMounted = useRef(false);
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
-    const [editBatch, setEditBatch] = useState<ProductBatch | null>(null);
     const [deleteBatch, setDeleteBatch] = useState<{ id: string; p_batch_name: string } | null>(null);
 
     const refreshBatches = async () => {
@@ -105,7 +105,7 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
                                             <td>{batch.supplies?.map(s => `${s.supplyName} (${s.batchName})`).join(', ')}</td>
                                             <td className="table-actions">
                                                 <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                                <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => setEditBatch(batch)} />
+                                                <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
                                             </td>
                                         </tr>
                                     ))}
@@ -136,7 +136,7 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
                                             <td>{batch.supplies?.map(s => `${s.supplyName} (${s.batchName})`).join(', ')}</td>
                                             <td className="table-actions">
                                                 <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                                <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => setEditBatch(batch)} />
+                                                <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
                                             </td>
                                         </tr>
                                     ))}
@@ -152,7 +152,7 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
             </div>
 
             {showCreateDialog && (
-                <AddProductBatchDialog
+                <AddProductBatchPanel
                     open={true}
                     onClose={() => setShowCreateDialog(false)}
                     productId={productId}
@@ -164,17 +164,6 @@ export default function ProductBatchPanel({ open, onClose, productId }: Props) {
                 />
             )}
 
-            {editBatch && (
-                <EditProductBatchPanel
-                    open={true}
-                    onClose={() => setEditBatch(null)}
-                    batch={editBatch}
-                    onUpdated={() => {
-                        refreshBatches();
-                        setEditBatch(null);
-                    }}
-                />
-            )}
 
             {deleteBatch && (
                 <DeleteProductBatchDialog

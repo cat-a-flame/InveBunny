@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Dialog } from '@/src/components/Dialog/dialog';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/src/components/Button/button';
+import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useToast } from '@/src/components/Toast/toast';
 
 // Basic types for supply and batch options
@@ -24,8 +24,10 @@ interface Props {
     onCreated: () => void;
 }
 
-export default function AddProductBatchDialog({ open, onClose, productId, productName, onCreated }: Props) {
+export default function AddProductBatchPanel({ open, onClose, productId, productName, onCreated }: Props) {
     const toast = useToast();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     const [form, setForm] = useState({
         p_batch_name: '',
@@ -40,6 +42,16 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
     const [availableBatches, setAvailableBatches] = useState<SupplyBatchOption[]>([]);
     const [selectedBatch, setSelectedBatch] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
 
     // Fetch list of supplies when dialog opens
     useEffect(() => {
@@ -133,8 +145,14 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Create product batch">
-            <form onSubmit={handleSubmit} className="form-grid">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title">Create product batch</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
+                <form id="add-batch-form" onSubmit={handleSubmit} className="side-panel-content form-grid">
                 <div className="input-group">
                     <label className="input-label">Product name</label>
                     <input value={productName} readOnly />
@@ -194,11 +212,12 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
                     </ul>
                 )}
 
-                <div className="dialog-buttons">
+                </form>
+                <div className="side-panel-footer">
                     <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting || supplyEntries.length === 0}>Create batch</Button>
+                    <Button type="submit" form="add-batch-form" variant="primary" disabled={submitting || supplyEntries.length === 0}>Create batch</Button>
                 </div>
-            </form>
-        </Dialog>
+            </div>
+        </>
     );
 }

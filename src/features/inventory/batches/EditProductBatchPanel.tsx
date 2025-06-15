@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/src/components/Button/button';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useToast } from '@/src/components/Toast/toast';
-import { SupplyOption, SupplyBatchOption, ProductBatchSupply } from './AddProductBatchDialog';
+import { SupplyOption, SupplyBatchOption, ProductBatchSupply } from './AddProductBatchPanel';
 
 export type ProductBatch = {
     id: string;
