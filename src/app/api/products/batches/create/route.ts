@@ -20,14 +20,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Missing fields' }, { status: 400 });
     }
 
-    const { data: batchData, error } = await supabase
+  const { data: batchData, error } = await supabase
       .from('product_batch')
       .insert({
         product_id,
         p_batch_name,
         date_made,
         is_active,
-        owner_id: user.id,
       })
       .select()
       .single();

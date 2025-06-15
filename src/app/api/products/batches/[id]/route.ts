@@ -15,8 +15,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const { error } = await supabase
     .from('product_batch')
     .update({ p_batch_name, date_made, is_active })
-    .eq('id', params.id)
-    .eq('owner_id', user.id);
+    .eq('id', params.id);
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -41,8 +40,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   const { error } = await supabase
     .from('product_batch')
     .delete()
-    .eq('id', params.id)
-    .eq('owner_id', user.id);
+    .eq('id', params.id);
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

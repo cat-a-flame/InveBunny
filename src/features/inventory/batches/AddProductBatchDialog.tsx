@@ -46,7 +46,7 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
         if (!open) return;
         const fetchSupplies = async () => {
             try {
-                const res = await fetch('/api/supplies?fields=id,supply_name');
+                const res = await fetch('/api/supplies?fields=id,supply_name&withBatches=true');
                 if (res.ok) {
                     const data = await res.json();
                     setSupplies(data.supplies || []);
