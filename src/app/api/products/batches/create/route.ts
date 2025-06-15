@@ -20,6 +20,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Missing fields' }, { status: 400 });
     }
 
+  if (!Array.isArray(supplies) || supplies.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'At least one supply batch is required' },
+        { status: 400 }
+      );
+  }
+
   const { data: batchData, error } = await supabase
       .from('product_batch')
       .insert({
@@ -27,7 +34,6 @@ export async function POST(request: Request) {
         p_batch_name,
         date_made,
         is_active,
-        owner_id: user.id,
       })
       .select()
       .single();

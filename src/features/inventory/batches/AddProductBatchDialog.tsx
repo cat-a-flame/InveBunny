@@ -80,6 +80,10 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (supplyEntries.length === 0) {
+            toast('Add at least one supply batch');
+            return;
+        }
         setSubmitting(true);
         try {
             const res = await fetch('/api/products/batches/create', {
@@ -192,7 +196,7 @@ export default function AddProductBatchDialog({ open, onClose, productId, produc
 
                 <div className="dialog-buttons">
                     <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>Create batch</Button>
+                    <Button type="submit" variant="primary" disabled={submitting || supplyEntries.length === 0}>Create batch</Button>
                 </div>
             </form>
         </Dialog>
