@@ -1,7 +1,9 @@
 'use client';
 
 import { Button } from '../../../components/Button/button';
+import { CgMathPlus } from 'react-icons/cg';
 import { Dialog } from '../../../components/Dialog/dialog';
+import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { useState } from 'react';
 
@@ -142,10 +144,13 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     </label>
                 </div>
 
+<hr/>
+                <h3 className="section-subtitle">Inventories</h3>
+                
                 {inventoryEntries.map((entry, index) => (
                     <div key={index} className="double-input-group">
                         <div className="input-group-wrapper">
-                            <label className="input-label">Inventory</label>
+                            <label className="input-label">Inventory name</label>
                             <select value={entry.inventoryId} onChange={(e) => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
                                 <option value="">Select an inventory</option>
                                 {[...inventories]
@@ -165,10 +170,12 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                             <label className="input-label">Quantity</label>
                             <input type="number" min="0" value={entry.quantity} onChange={(e) => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
                         </div>
+
+                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Remove inventory" />
                     </div>
                 ))}
 
-                <Button type="button" variant="ghost" size="sm" onClick={addInventoryRow}>Add inventory</Button>
+                <Button type="button" variant="ghost" size="sm" icon={<CgMathPlus />} onClick={addInventoryRow}>Add inventory</Button>
 
                 <div className="dialog-buttons">
                     <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>

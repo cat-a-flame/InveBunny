@@ -255,7 +255,7 @@ textarea {
     &.input-group-quantity {
         flex-grow: 0;
         flex-shrink: 0;
-        width: 120px;
+        width: 90px;
     }
 }
 
@@ -265,9 +265,14 @@ textarea {
 }
 
 .double-input-group {
+    align-items: end;
     display: flex;
     gap: 1.25rem;
     margin-bottom: 1.25rem;
+
+    & button[class^="iconButton"] {
+        margin-bottom: 0.12rem;
+    }
 }
 
 .input-grow {
