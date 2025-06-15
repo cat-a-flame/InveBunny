@@ -60,7 +60,7 @@ export async function GET(request: Request) {
     date_made: b.date_made,
     is_active: b.is_active,
     supplies: (b.product_batch_to_supply_batch || []).map((r: any) => ({
-      supplyBatchId: r.supply_batch_id,
+      batchId: r.supply_batch_id,
       supplyId: r.supply_batch?.supply_id || r.supply_batch?.supplies?.id,
       batchName: r.supply_batch?.batch_name,
       supplyName: r.supply_batch?.supplies?.supply_name,

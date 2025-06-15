@@ -27,11 +27,28 @@ export default function EditProductBatchDialog({ open, onClose, batch, onUpdated
         is_active: batch.is_active,
     });
     const [supplies, setSupplies] = useState<SupplyOption[]>([]);
-    const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>(batch.supplies || []);
+    const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>([]);
     const [selectedSupply, setSelectedSupply] = useState('');
     const [availableBatches, setAvailableBatches] = useState<SupplyBatchOption[]>([]);
     const [selectedBatch, setSelectedBatch] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!open) return;
+        setFormData({
+            p_batch_name: batch.p_batch_name,
+            date_made: batch.date_made,
+            is_active: batch.is_active,
+        });
+        setSupplyEntries(
+            (batch.supplies || []).map((s) => ({
+                supplyId: s.supplyId,
+                batchId: (s as any).batchId ?? (s as any).supplyBatchId,
+                supplyName: s.supplyName,
+                batchName: s.batchName,
+            }))
+        );
+    }, [open, batch]);
 
     useEffect(() => {
         if (!open) return;
