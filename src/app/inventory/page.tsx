@@ -2,7 +2,7 @@ import { AddButton } from '@/src/features/inventory/add/AddButton';
 import { DeleteProductButton } from '@/src/features/inventory/delete/DeleteProductButton';
 import { EditProductButton } from '@/src/features/inventory/edit/EditProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
-import { IconButton } from '@/src/components/IconButton/iconButton';
+import { ViewBatchButton } from '@/src/features/inventory/batches/ViewBatchButton';
 import { InventoryTabs } from '@/src/features/inventory/InventoryTabs';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
@@ -235,7 +235,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                     <td>
                                         <div className="table-actions">
                                             <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
-                                            <IconButton icon={<i className="fa-solid fa-layer-group"></i>} title="Batches" />
+                                            <ViewBatchButton productId={product.id} />
 
                                             <EditProductButton
                                                 id={product.id}
