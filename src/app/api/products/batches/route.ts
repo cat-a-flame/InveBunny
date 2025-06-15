@@ -9,11 +9,20 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  }
 
   const { data: productData, error: productError } = await supabase
     .from('products')
     .select('product_name')
     .eq('id', productId)
+    .eq('owner_id', user.id)
     .single();
 
   if (productError) {
@@ -38,6 +47,7 @@ export async function GET(request: Request) {
       )
     `)
     .eq('product_id', productId)
+    .eq('owner_id', user.id)
     .order('date_made', { ascending: false });
 
   if (batchError) {

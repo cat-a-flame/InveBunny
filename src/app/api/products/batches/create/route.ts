@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       const rows = supplies.map((s: { supply_batch_id: string }) => ({
         product_batch_id: batchData.id,
         supply_batch_id: s.supply_batch_id,
+        owner_id: user.id,
       }));
       const { error: linkError } = await supabase
         .from('product_batch_to_supply_batch')

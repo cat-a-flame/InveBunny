@@ -26,12 +26,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     await supabase
       .from('product_batch_to_supply_batch')
       .delete()
-      .eq('product_batch_id', params.id);
+      .eq('product_batch_id', params.id)
+      .eq('owner_id', user.id);
 
     if (supplies.length > 0) {
       const rows = supplies.map((id: string) => ({
         product_batch_id: params.id,
         supply_batch_id: id,
+        owner_id: user.id,
       }));
       const { error: linkError } = await supabase
         .from('product_batch_to_supply_batch')
@@ -56,7 +58,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   await supabase
     .from('product_batch_to_supply_batch')
     .delete()
-    .eq('product_batch_id', params.id);
+    .eq('product_batch_id', params.id)
+    .eq('owner_id', user.id);
 
   const { error } = await supabase
     .from('product_batch')
