@@ -46,6 +46,7 @@ export async function GET(request: Request) {
       )
     `)
     .eq('product_id', productId)
+    .eq('owner_id', user.id)
     .order('date_made', { ascending: false });
 
   if (batchError) {

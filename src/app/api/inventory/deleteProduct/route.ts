@@ -3,6 +3,14 @@ import { NextResponse } from 'next/server';
 
 export async function DELETE(request: Request) {
     const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        return NextResponse.json(
+            { error: 'Unauthorized' },
+            { status: 401 }
+        );
+    }
     const { searchParams } = new URL(request.url);
     const productId = searchParams.get('id');
     const inventoryId = searchParams.get('inventory_id');
@@ -56,18 +64,21 @@ export async function DELETE(request: Request) {
                 const { data: batches } = await supabase
                     .from('product_batch')
                     .select('id')
-                    .eq('product_id', productId);
+                    .eq('product_id', productId)
+                    .eq('owner_id', user.id);
                 const batchIds = batches?.map(b => b.id) || [];
                 if (batchIds.length > 0) {
                     await supabase
                         .from('product_batch_to_supply_batch')
                         .delete()
+                        .eq('owner_id', user.id)
                         .in('product_batch_id', batchIds);
                 }
                 await supabase
                     .from('product_batch')
                     .delete()
-                    .eq('product_id', productId);
+                    .eq('product_id', productId)
+                    .eq('owner_id', user.id);
 
                 const { error: productError } = await supabase
                     .from('products')
@@ -91,25 +102,29 @@ export async function DELETE(request: Request) {
         const { error: piError } = await supabase
             .from('product_inventories')
             .delete()
-            .eq('product_id', productId);
+            .eq('product_id', productId)
+            .eq('owner_id', user.id);
 
         if (piError) throw piError;
 
         const { data: batches } = await supabase
             .from('product_batch')
             .select('id')
-            .eq('product_id', productId);
+            .eq('product_id', productId)
+            .eq('owner_id', user.id);
         const batchIds = batches?.map(b => b.id) || [];
         if (batchIds.length > 0) {
             await supabase
                 .from('product_batch_to_supply_batch')
                 .delete()
+                .eq('owner_id', user.id)
                 .in('product_batch_id', batchIds);
         }
         await supabase
             .from('product_batch')
             .delete()
-            .eq('product_id', productId);
+            .eq('product_id', productId)
+            .eq('owner_id', user.id);
 
         const { error: productError } = await supabase
             .from('products')
