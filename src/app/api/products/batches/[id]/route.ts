@@ -23,23 +23,43 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   if (Array.isArray(supplies)) {
-    await supabase
+    const { data: existing, error: fetchError } = await supabase
       .from('product_batch_to_supply_batch')
-      .delete()
+      .select('supply_batch_id')
       .eq('product_batch_id', params.id)
       .eq('owner_id', user.id);
 
-    if (supplies.length > 0) {
-      const rows = supplies.map((id: string) => ({
+    if (fetchError) {
+      return NextResponse.json({ success: false, error: fetchError.message }, { status: 500 });
+    }
+
+    const existingIds = (existing || []).map((r: any) => r.supply_batch_id);
+    const toInsert = supplies.filter((id: string) => !existingIds.includes(id));
+    const toDelete = existingIds.filter((id: string) => !supplies.includes(id));
+
+    if (toInsert.length > 0) {
+      const rows = toInsert.map((id: string) => ({
         product_batch_id: params.id,
         supply_batch_id: id,
         owner_id: user.id,
       }));
-      const { error: linkError } = await supabase
+      const { error: insertError } = await supabase
         .from('product_batch_to_supply_batch')
         .insert(rows);
-      if (linkError) {
-        return NextResponse.json({ success: false, error: linkError.message }, { status: 500 });
+      if (insertError) {
+        return NextResponse.json({ success: false, error: insertError.message }, { status: 500 });
+      }
+    }
+
+    if (toDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('product_batch_to_supply_batch')
+        .delete()
+        .eq('product_batch_id', params.id)
+        .eq('owner_id', user.id)
+        .in('supply_batch_id', toDelete);
+      if (deleteError) {
+        return NextResponse.json({ success: false, error: deleteError.message }, { status: 500 });
       }
     }
   }
