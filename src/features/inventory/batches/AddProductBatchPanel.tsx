@@ -147,7 +147,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
     return (
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
                 <div className="side-panel-header">
                     <h3 className="side-panel-title">Create product batch</h3>
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
@@ -177,35 +177,38 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                     </div>
                 </div>
 
-                <div className="double-input-group">
-                    <div className="input-grow">
-                        <label className="input-label">Supply</label>
-                        <select value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
-                            <option value="">Select supply</option>
-                            {supplies.map(s => (
-                                <option key={s.id} value={s.id}>{s.supply_name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="input-grow">
-                        <label className="input-label">Supply batch</label>
-                        <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
-                            <option value="">Select batch</option>
-                            {availableBatches.map(b => (
-                                <option key={b.id} value={b.id}>{b.batch_name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="input-shrink" style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <Button type="button" variant="ghost" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
-                    </div>
+                <h4 className="section-subtitle">Supplies</h4>
+
+                <div className="input-group">
+                    <label className="input-label">Supply name</label>
+                    <select value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
+                        <option value="">Select supply</option>
+                        {supplies.map(s => (
+                            <option key={s.id} value={s.id}>{s.supply_name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <label className="input-label">Supply batch</label>
+                    <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
+                        <option value="">Select batch</option>
+                        {availableBatches.map(b => (
+                            <option key={b.id} value={b.id}>{b.batch_name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <Button type="button" variant="ghost" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
                 </div>
 
                 {supplyEntries.length > 0 && (
-                    <ul>
+                    <ul className="supply-entries">
                         {supplyEntries.map((se, idx) => (
-                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span>{se.supplyName} - {se.batchName}</span>
+                            <li key={idx} className="supply-entry">
+                                <div>
+                                    <span className="supply-entry-name">{se.supplyName}</span>
+                                    <span className="supply-entry-batch">{se.batchName}</span>
+                                </div>
                                 <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)}>&times;</Button>
                             </li>
                         ))}

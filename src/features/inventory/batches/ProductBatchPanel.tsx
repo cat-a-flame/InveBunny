@@ -88,29 +88,30 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
                     {activeBatches.length > 0 ? (
                         <>
                             <h4 className="section-subtitle">Active batches</h4>
-                            <table className="batch-list">
-                                <thead>
-                                    <tr>
-                                        <th>Batch name</th>
-                                        <th>Date made</th>
-                                        <th>Products</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {activeBatches.map((batch) => (
-                                        <tr key={batch.id}>
-                                            <td><span className="item-name">{batch.p_batch_name}</span></td>
-                                            <td><span className="item-details">{formatDate(batch.date_made)}</span></td>
-                                            <td>{batch.supplies?.map(s => `${s.supplyName} (${s.batchName})`).join(', ')}</td>
-                                            <td className="table-actions">
-                                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                                <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+
+                            {activeBatches.map((batch) => (
+                                <details className="batch-list-details" key={batch.id}>
+                                    <summary className="batch-list-header">
+                                        <div>
+                                            <span className="batch-list-name">{batch.p_batch_name}</span>
+                                            <span className="batch-list-date"> - {formatDate(batch.date_made)}</span>
+                                        </div>
+                                        
+                                        <div className="table-actions">
+                                            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
+                                            <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
+                                        </div>
+                                    </summary>
+
+                                    <ul>
+                                        {batch.supplies?.map((s, index) => (
+                                            <li key={index} className="batch-list-item">
+                                                <span>{s.supplyName}</span> <span className="list-batch-name">{s.batchName}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </details>
+                            ))}
                         </>
                     ) : (
                         <p>No active batches yet.</p>
