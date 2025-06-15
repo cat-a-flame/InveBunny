@@ -27,6 +27,7 @@ export async function POST(request: Request) {
         p_batch_name,
         date_made,
         is_active,
+        owner_id: user.id,
       })
       .select()
       .single();
