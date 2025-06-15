@@ -52,7 +52,23 @@ export async function DELETE(request: Request) {
             if (countError) throw countError;
 
             if (count === 0) {
-                // Safe to delete the product
+                // Remove all product batches tied to this product
+                const { data: batches } = await supabase
+                    .from('product_batch')
+                    .select('id')
+                    .eq('product_id', productId);
+                const batchIds = batches?.map(b => b.id) || [];
+                if (batchIds.length > 0) {
+                    await supabase
+                        .from('product_batch_to_supply_batch')
+                        .delete()
+                        .in('product_batch_id', batchIds);
+                }
+                await supabase
+                    .from('product_batch')
+                    .delete()
+                    .eq('product_id', productId);
+
                 const { error: productError } = await supabase
                     .from('products')
                     .delete()
@@ -78,6 +94,22 @@ export async function DELETE(request: Request) {
             .eq('product_id', productId);
 
         if (piError) throw piError;
+
+        const { data: batches } = await supabase
+            .from('product_batch')
+            .select('id')
+            .eq('product_id', productId);
+        const batchIds = batches?.map(b => b.id) || [];
+        if (batchIds.length > 0) {
+            await supabase
+                .from('product_batch_to_supply_batch')
+                .delete()
+                .in('product_batch_id', batchIds);
+        }
+        await supabase
+            .from('product_batch')
+            .delete()
+            .eq('product_id', productId);
 
         const { error: productError } = await supabase
             .from('products')

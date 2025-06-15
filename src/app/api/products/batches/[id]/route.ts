@@ -15,8 +15,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const { error } = await supabase
     .from('product_batch')
     .update({ p_batch_name, date_made, is_active })
-    .eq('id', params.id)
-    .eq('owner_id', user.id);
+    .eq('id', params.id);
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -26,8 +25,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const { data: existing, error: fetchError } = await supabase
       .from('product_batch_to_supply_batch')
       .select('supply_batch_id')
-      .eq('product_batch_id', params.id)
-      .eq('owner_id', user.id);
+      .eq('product_batch_id', params.id);
 
     if (fetchError) {
       return NextResponse.json({ success: false, error: fetchError.message }, { status: 500 });
@@ -41,7 +39,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       const rows = toInsert.map((id: string) => ({
         product_batch_id: params.id,
         supply_batch_id: id,
-        owner_id: user.id,
       }));
       const { error: insertError } = await supabase
         .from('product_batch_to_supply_batch')
@@ -56,7 +53,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         .from('product_batch_to_supply_batch')
         .delete()
         .eq('product_batch_id', params.id)
-        .eq('owner_id', user.id)
         .in('supply_batch_id', toDelete);
       if (deleteError) {
         return NextResponse.json({ success: false, error: deleteError.message }, { status: 500 });
@@ -78,14 +74,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   await supabase
     .from('product_batch_to_supply_batch')
     .delete()
-    .eq('product_batch_id', params.id)
-    .eq('owner_id', user.id);
+    .eq('product_batch_id', params.id);
 
   const { error } = await supabase
     .from('product_batch')
     .delete()
-    .eq('id', params.id)
-    .eq('owner_id', user.id);
+    .eq('id', params.id);
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

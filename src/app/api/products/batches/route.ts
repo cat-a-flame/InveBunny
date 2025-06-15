@@ -22,7 +22,6 @@ export async function GET(request: Request) {
     .from('products')
     .select('product_name')
     .eq('id', productId)
-    .eq('owner_id', user.id)
     .single();
 
   if (productError) {
@@ -47,7 +46,6 @@ export async function GET(request: Request) {
       )
     `)
     .eq('product_id', productId)
-    .eq('owner_id', user.id)
     .order('date_made', { ascending: false });
 
   if (batchError) {
