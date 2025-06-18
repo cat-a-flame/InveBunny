@@ -70,25 +70,33 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
         fetchSupplies();
     }, [open]);
 
-    // Fetch batches for selected supply
+    // Fetch batches for selected supply and filter out already added ones
     useEffect(() => {
         if (!selectedSupply) {
             setAvailableBatches([]);
             return;
         }
+
         const fetchBatches = async () => {
             try {
                 const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setAvailableBatches(data.batches || []);
+                    const usedBatchIds = supplyEntries
+                        .filter((se) => se.supplyId === selectedSupply)
+                        .map((se) => se.batchId);
+                    const filtered = (data.batches || []).filter(
+                        (b: SupplyBatchOption) => !usedBatchIds.includes(b.id)
+                    );
+                    setAvailableBatches(filtered);
                 }
             } catch (err) {
                 console.error(err);
             }
         };
+
         fetchBatches();
-    }, [selectedSupply]);
+    }, [selectedSupply, supplyEntries]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
