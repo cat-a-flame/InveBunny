@@ -86,11 +86,32 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     }
 
     // ========== PRODUCT DATA FETCHING ==========
-    // Fetch all product inventories for the selected inventory
-    const { data: allProductInventories } = await supabase
+    // Prepare queries that don't depend on each other's results
+    const productInventoriesPromise = supabase
         .from('product_inventories')
         .select('id, product_id, product_quantity, product_sku')
         .eq('inventory_id', inventoryId);
+
+    const inventoryMatchesPromise = query ?
+        supabase
+            .from('product_inventories')
+            .select('product_id')
+            .ilike('product_sku', `%${query}%`)
+            .eq('inventory_id', inventoryId) :
+        Promise.resolve({ data: null });
+
+    const categoriesPromise = supabase
+        .from('categories')
+        .select('id, category_name')
+        .order('category_name');
+
+    const variantsPromise = supabase
+        .from('variants')
+        .select('id, variant_name')
+        .order('variant_name');
+
+    const [{ data: allProductInventories }, { data: inventoryMatches }, { data: categories }, { data: variants }] =
+        await Promise.all([productInventoriesPromise, inventoryMatchesPromise, categoriesPromise, variantsPromise]);
 
     // Filter by stock level if needed
     let filteredByStock = allProductInventories || [];
@@ -104,13 +125,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     }
 
     const productIdsFromStockFilter = filteredByStock.map((pi) => pi.product_id);
-
-    // Search functionality
-    const { data: inventoryMatches } = query ? await supabase
-        .from('product_inventories')
-        .select('product_id')
-        .ilike('product_sku', `%${query}%`)
-        .eq('inventory_id', inventoryId) : { data: null };
 
     // Build main products query
     let productsQuery = supabase
@@ -171,17 +185,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             .filter(pi => pagedProducts.some(p => p.id === pi.product_id))
             .map(pi => [pi.product_id, pi])
     );
-
-    // ========== SUPPLEMENTARY DATA FETCHING ==========
-    const { data: categories } = await supabase
-        .from('categories')
-        .select('id, category_name')
-        .order('category_name');
-
-    const { data: variants } = await supabase
-        .from('variants')
-        .select('id, variant_name')
-        .order('variant_name');
 
     // ========== RENDER ==========
     return (
