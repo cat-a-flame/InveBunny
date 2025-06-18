@@ -1,6 +1,7 @@
 import { Button } from "../../../components/Button/button";
 import { Dialog } from '@/src/components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
+import { useEffect, useState } from 'react';
 
 type DeleteBatchDialogProps = {
     open: boolean;
@@ -12,6 +13,23 @@ type DeleteBatchDialogProps = {
 
 export default function DeleteBatchDialog({ open, onClose, batchName, batchId, onDeleted }: DeleteBatchDialogProps) {
     const toast = useToast();
+    const [usage, setUsage] = useState<{ id: string; p_batch_name: string }[]>([]);
+
+    useEffect(() => {
+        if (!open) return;
+        const fetchUsage = async () => {
+            try {
+                const res = await fetch(`/api/supplies/batches/usage?batchId=${batchId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setUsage(data.batches || []);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchUsage();
+    }, [open, batchId]);
 
     const handleDelete = async () => {
         try {
@@ -38,7 +56,17 @@ export default function DeleteBatchDialog({ open, onClose, batchName, batchId, o
     return (
         <Dialog open={open} onClose={onClose} title="Delete this batch?">
             <p>You are about to send <strong>{batchName}</strong> to the digital abyss.</p>
-            <p>{"Items using to this batch won't be deleted, but they'll be left empty-handed."}</p>
+            {usage.length > 0 && (
+                <>
+                    <p>This batch is used in the following product batches:</p>
+                    <ul>
+                        {usage.map(u => (
+                            <li key={u.id}>{u.p_batch_name}</li>
+                        ))}
+                    </ul>
+                </>
+            )}
+            <p>{"Items using this batch won't be deleted, but they'll lose this supply batch."}</p>
 
             <div className="dialog-buttons">
                 <Button type="button" variant="ghost" onClick={onClose}>Never mind</Button>

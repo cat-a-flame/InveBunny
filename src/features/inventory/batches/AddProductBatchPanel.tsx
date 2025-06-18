@@ -1,0 +1,226 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/src/components/Button/button';
+import { IconButton } from '@/src/components/IconButton/iconButton';
+import { useToast } from '@/src/components/Toast/toast';
+
+// Basic types for supply and batch options
+export type SupplyOption = { id: string; supply_name: string };
+export type SupplyBatchOption = { id: string; batch_name: string };
+
+export type ProductBatchSupply = {
+    supplyId: string;
+    batchId: string;
+    supplyName?: string;
+    batchName?: string;
+};
+
+interface Props {
+    open: boolean;
+    onClose: () => void;
+    productId: string;
+    productName: string;
+    onCreated: () => void;
+}
+
+export default function AddProductBatchPanel({ open, onClose, productId, productName, onCreated }: Props) {
+    const toast = useToast();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const [form, setForm] = useState({
+        p_batch_name: '',
+        date_made: '',
+        is_active: true,
+    });
+
+    const [supplies, setSupplies] = useState<SupplyOption[]>([]);
+    const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>([]);
+
+    const [selectedSupply, setSelectedSupply] = useState('');
+    const [availableBatches, setAvailableBatches] = useState<SupplyBatchOption[]>([]);
+    const [selectedBatch, setSelectedBatch] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
+
+    // Fetch list of supplies when dialog opens
+    useEffect(() => {
+        if (!open) return;
+        const fetchSupplies = async () => {
+            try {
+                const res = await fetch('/api/supplies?fields=id,supply_name&withBatches=true');
+                if (res.ok) {
+                    const data = await res.json();
+                    setSupplies(data.supplies || []);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchSupplies();
+    }, [open]);
+
+    // Fetch batches for selected supply
+    useEffect(() => {
+        if (!selectedSupply) {
+            setAvailableBatches([]);
+            return;
+        }
+        const fetchBatches = async () => {
+            try {
+                const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAvailableBatches(data.batches || []);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchBatches();
+    }, [selectedSupply]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (supplyEntries.length === 0) {
+            toast('Add at least one supply batch');
+            return;
+        }
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/products/batches/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    product_id: productId,
+                    p_batch_name: form.p_batch_name,
+                    date_made: form.date_made,
+                    is_active: form.is_active,
+                    supplies: supplyEntries.map(se => ({ supply_batch_id: se.batchId })),
+                }),
+            });
+            if (res.ok) {
+                toast('Product batch created!');
+                onCreated();
+                onClose();
+            } else {
+                console.error(await res.json());
+                toast('Failed to create batch');
+            }
+        } catch (err) {
+            console.error(err);
+            toast('Failed to create batch');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const addEntry = () => {
+        if (!selectedSupply || !selectedBatch) return;
+        const supplyName = supplies.find(s => s.id === selectedSupply)?.supply_name;
+        const batchName = availableBatches.find(b => b.id === selectedBatch)?.batch_name;
+        setSupplyEntries(prev => [...prev, {
+            supplyId: selectedSupply,
+            batchId: selectedBatch,
+            supplyName,
+            batchName,
+        }]);
+        setSelectedSupply('');
+        setAvailableBatches([]);
+        setSelectedBatch('');
+    };
+
+    const removeEntry = (index: number) => {
+        setSupplyEntries(prev => prev.filter((_, i) => i !== index));
+    };
+
+    return (
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title">Create product batch</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
+                <form id="add-batch-form" onSubmit={handleSubmit} className="side-panel-content form-grid">
+                <div className="input-group">
+                    <label className="input-label">Product name</label>
+                    <input className="input-max-width" value={productName} readOnly />
+                </div>
+
+                <div className="input-group">
+                    <label className="input-label">Batch name</label>
+                    <input className="input-max-width" name="p_batch_name" value={form.p_batch_name} onChange={e => setForm(prev => ({ ...prev, p_batch_name: e.target.value }))} required />
+                </div>
+
+                <div className="double-input-group">
+                    <div className="input-grow">
+                        <label className="input-label">Date made</label>
+                        <input className="input-max-width" type="date" name="date_made" value={form.date_made} onChange={e => setForm(prev => ({ ...prev, date_made: e.target.value }))} required />
+                    </div>
+                    <div className="input-shrink">
+                        <label className="input-label">Active batch</label>
+                        <label className="switch">
+                            <input type="checkbox" checked={form.is_active} onChange={e => setForm(prev => ({ ...prev, is_active: e.target.checked }))} />
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <h4 className="section-subtitle">Supplies</h4>
+
+                <div className="input-group">
+                    <label className="input-label">Supply name</label>
+                    <select className="input-max-width" value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
+                        <option value="">Select supply</option>
+                        {supplies.map(s => (
+                            <option key={s.id} value={s.id}>{s.supply_name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <label className="input-label">Supply batch</label>
+                    <select className="input-max-width" value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
+                        <option value="">Select batch</option>
+                        {availableBatches.map(b => (
+                            <option key={b.id} value={b.id}>{b.batch_name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <Button type="button" variant="secondary" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
+                </div>
+
+                {supplyEntries.length > 0 && (
+                    <ul className="supply-entries">
+                        {supplyEntries.map((se, idx) => (
+                            <li key={idx} className="supply-entry">
+                                <div>
+                                    <span className="supply-entry-name">{se.supplyName}</span>
+                                    <span className="supply-entry-batch">{se.batchName}</span>
+                                </div>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)}>&times;</Button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                </form>
+                <div className="side-panel-footer">
+                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" form="add-batch-form" variant="primary" disabled={submitting || supplyEntries.length === 0}>Create batch</Button>
+                </div>
+            </div>
+        </>
+    );
+}
