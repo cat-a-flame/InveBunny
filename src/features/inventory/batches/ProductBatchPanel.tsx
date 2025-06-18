@@ -72,7 +72,10 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString();
+        const month = date.toLocaleString('en-GB', { month: 'long' });
+        const year = date.getFullYear();
+        const day = date.getDate();
+        return `${year} ${month} ${day}`;
     };
 
     return (
