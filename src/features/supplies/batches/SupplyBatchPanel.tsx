@@ -28,7 +28,7 @@ const formatDate = (dateString: string) => {
     const year = date.getFullYear();
     const day = date.getDate();
 
-    return `${year} ${month} ${day}`;
+    return `${year} ${month} ${day}.`;
 };
 
 export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBatchDialogProps) {
