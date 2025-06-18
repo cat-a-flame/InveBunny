@@ -78,6 +78,10 @@ main {
 .section-subtitle {
     font-weight: 700;
     margin-bottom: 1rem;
+
+    &:not(:first-of-type) {
+        margin-top: 3rem;
+    }
 }
 
 /* TABLE */
@@ -199,12 +203,18 @@ select {
     font-weight: 600;
     font-size: 1rem;
     padding: .75rem 1rem;
-    width: 100%;
 
     &:focus-visible {
         border: 1px solid #C9B7F0;
         outline: none;
         box-shadow: 0 0px 8px #c8b7ee75;
+    }
+
+    &:disabled {
+        background-color: #F7F3FF;
+        color: #8b7393;
+        cursor: not-allowed;
+        pointer-events: none;
     }
 }
 
@@ -242,7 +252,7 @@ textarea {
     }
 }
 
-input {
+.input-max-width {
     width: 100%;
 }
 
@@ -414,6 +424,7 @@ input {
 .side-panel-footer {
     display: flex;
     justify-content: end;
+    gap: 1rem;
     padding: 0 2rem;
 }
 
@@ -469,14 +480,31 @@ input {
     border-radius: 6px;
     box-shadow: 0 2px 4px #a2a6bb82;
     margin-bottom: 1rem;
+    overflow: hidden;
 }
 
 .batch-list-header {
     align-items: center;
     background-color: #EEE5FF;
+    cursor: pointer;
     display: flex;
     justify-content: space-between;
-    padding: .25rem 1rem;
+    padding: .25rem 1rem .25rem 2.5rem;
+    position: relative;
+
+    &::before {
+        content: url('../public/images/chevron-down.svg');
+        height: 8px;
+        left: .875rem;
+        position: absolute;
+        top: 14px;
+        width: 14px;
+    }
+}
+
+.batch-list-details[open] .batch-list-header::before {
+    top: 27px;
+    transform: rotate(180deg);
 }
 
 .batch-list-name {

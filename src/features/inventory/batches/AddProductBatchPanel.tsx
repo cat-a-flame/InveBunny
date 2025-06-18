@@ -155,18 +155,18 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                 <form id="add-batch-form" onSubmit={handleSubmit} className="side-panel-content form-grid">
                 <div className="input-group">
                     <label className="input-label">Product name</label>
-                    <input value={productName} readOnly />
+                    <input className="input-max-width" value={productName} readOnly />
                 </div>
 
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
-                    <input name="p_batch_name" value={form.p_batch_name} onChange={e => setForm(prev => ({ ...prev, p_batch_name: e.target.value }))} required />
+                    <input className="input-max-width" name="p_batch_name" value={form.p_batch_name} onChange={e => setForm(prev => ({ ...prev, p_batch_name: e.target.value }))} required />
                 </div>
 
                 <div className="double-input-group">
                     <div className="input-grow">
                         <label className="input-label">Date made</label>
-                        <input type="date" name="date_made" value={form.date_made} onChange={e => setForm(prev => ({ ...prev, date_made: e.target.value }))} required />
+                        <input className="input-max-width" type="date" name="date_made" value={form.date_made} onChange={e => setForm(prev => ({ ...prev, date_made: e.target.value }))} required />
                     </div>
                     <div className="input-shrink">
                         <label className="input-label">Active batch</label>
@@ -181,7 +181,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
 
                 <div className="input-group">
                     <label className="input-label">Supply name</label>
-                    <select value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
+                    <select className="input-max-width" value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
                         <option value="">Select supply</option>
                         {supplies.map(s => (
                             <option key={s.id} value={s.id}>{s.supply_name}</option>
@@ -190,7 +190,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                 </div>
                 <div className="input-group">
                     <label className="input-label">Supply batch</label>
-                    <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
+                    <select className="input-max-width" value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
                         <option value="">Select batch</option>
                         {availableBatches.map(b => (
                             <option key={b.id} value={b.id}>{b.batch_name}</option>
@@ -198,7 +198,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                     </select>
                 </div>
                 <div className="input-group">
-                    <Button type="button" variant="ghost" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
+                    <Button type="button" variant="secondary" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
                 </div>
 
                 {supplyEntries.length > 0 && (

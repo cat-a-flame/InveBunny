@@ -159,51 +159,57 @@ export default function EditProductBatchPanel({ open, onClose, batch, onUpdated 
                 <form id="edit-batch-form" onSubmit={handleSubmit} className="side-panel-content form-grid">
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
-                    <input name="p_batch_name" value={formData.p_batch_name} onChange={e => setFormData({ ...formData, p_batch_name: e.target.value })} required />
-                </div>
-
-                <div className="input-group">
-                    <label className="input-label">Date made</label>
-                    <input type="date" name="date_made" value={formData.date_made ? new Date(formData.date_made).toISOString().split('T')[0] : ''} onChange={e => setFormData({ ...formData, date_made: e.target.value })} required />
-                </div>
-
-                <div className="input-group">
-                    <label className="input-label">Active batch</label>
-                    <label className="switch">
-                        <input type="checkbox" checked={formData.is_active} onChange={e => setFormData(prev => ({ ...prev, is_active: e.target.checked }))} />
-                        <span className="slider"></span>
-                    </label>
+                    <input className="input-max-width" name="p_batch_name" value={formData.p_batch_name} onChange={e => setFormData({ ...formData, p_batch_name: e.target.value })} required />
                 </div>
 
                 <div className="double-input-group">
                     <div className="input-grow">
-                        <label className="input-label">Supply</label>
-                        <select value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
-                            <option value="">Select supply</option>
-                            {supplies.map(s => (
-                                <option key={s.id} value={s.id}>{s.supply_name}</option>
-                            ))}
-                        </select>
+                        <label className="input-label">Date made</label>
+                        <input className="input-max-width" type="date" name="date_made" value={formData.date_made ? new Date(formData.date_made).toISOString().split('T')[0] : ''} onChange={e => setFormData({ ...formData, date_made: e.target.value })} required />
                     </div>
-                    <div className="input-grow">
-                        <label className="input-label">Supply batch</label>
-                        <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
-                            <option value="">Select batch</option>
-                            {availableBatches.map(b => (
-                                <option key={b.id} value={b.id}>{b.batch_name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="input-shrink" style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <Button type="button" variant="ghost" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
+
+                    <div className="input-shrink">
+                        <label className="input-label">Active batch</label>
+                        <label className="switch">
+                            <input type="checkbox" checked={formData.is_active} onChange={e => setFormData(prev => ({ ...prev, is_active: e.target.checked }))} />
+                            <span className="slider"></span>
+                        </label>
                     </div>
                 </div>
 
+                <h4 className="section-subtitle">Supplies</h4>
+
+                <div className="input-group">
+                    <label className="input-label">Supply</label>
+                    <select className="input-max-width" value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
+                        <option value="">Select supply</option>
+                        {supplies.map(s => (
+                            <option key={s.id} value={s.id}>{s.supply_name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="input-group">
+                    <label className="input-label">Supply batch</label>
+                    <select className="input-max-width" value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} disabled={!selectedSupply}>
+                        <option value="">Select batch</option>
+                        {availableBatches.map(b => (
+                            <option key={b.id} value={b.id}>{b.batch_name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="input-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <Button type="button" variant="secondary" size="sm" onClick={addEntry} disabled={!selectedSupply || !selectedBatch}>Add</Button>
+                </div>
+
                 {supplyEntries.length > 0 && (
-                    <ul>
+                    <ul className="supply-entries">
                         {supplyEntries.map((se, idx) => (
-                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span>{se.supplyName} - {se.batchName}</span>
+                            <li className="supply-entry" key={idx}>
+                                <div>
+                                    <span className="supply-entry-name">{se.supplyName}</span>
+                                    <span className="supply-entry-batch">{se.batchName}</span>
+                                </div>
                                 <Button type="button" variant="ghost" size="sm" onClick={() => removeEntry(idx)}>&times;</Button>
                             </li>
                         ))}
