@@ -36,6 +36,8 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
     });
 
     const [supplies, setSupplies] = useState<SupplyOption[]>([]);
+    const [filteredSupplies, setFilteredSupplies] = useState<SupplyOption[]>([]);
+    const [supplyBatches, setSupplyBatches] = useState<Record<string, SupplyBatchOption[]>>({});
     const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>([]);
 
     const [selectedSupply, setSelectedSupply] = useState('');
@@ -70,6 +72,47 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
         fetchSupplies();
     }, [open]);
 
+    // Recompute which supplies have available batches
+    useEffect(() => {
+        if (!open) return;
+        const filtered = supplies.filter((s) => {
+            const batches = supplyBatches[s.id] || [];
+            const usedBatchIds = supplyEntries
+                .filter((se) => se.supplyId === s.id)
+                .map((se) => se.batchId);
+            return batches.some((b) => !usedBatchIds.includes(b.id));
+        });
+        setFilteredSupplies(filtered);
+        if (selectedSupply && !filtered.find((s) => s.id === selectedSupply)) {
+            setSelectedSupply('');
+            setAvailableBatches([]);
+            setSelectedBatch('');
+        }
+    }, [open, supplies, supplyBatches, supplyEntries, selectedSupply]);
+
+    // After supplies load, fetch batches for each supply
+    useEffect(() => {
+        if (!open || supplies.length === 0) return;
+        const fetchAllBatches = async () => {
+            const map: Record<string, SupplyBatchOption[]> = {};
+            await Promise.all(
+                supplies.map(async (s) => {
+                    try {
+                        const res = await fetch(`/api/supplies/batches/?supplyId=${s.id}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            map[s.id] = data.batches || [];
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                })
+            );
+            setSupplyBatches(map);
+        };
+        fetchAllBatches();
+    }, [open, supplies]);
+
     // Fetch batches for selected supply and filter out already added ones
     useEffect(() => {
         if (!selectedSupply) {
@@ -77,26 +120,34 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
             return;
         }
 
-        const fetchBatches = async () => {
-            try {
-                const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const usedBatchIds = supplyEntries
-                        .filter((se) => se.supplyId === selectedSupply)
-                        .map((se) => se.batchId);
-                    const filtered = (data.batches || []).filter(
-                        (b: SupplyBatchOption) => !usedBatchIds.includes(b.id)
-                    );
-                    setAvailableBatches(filtered);
+        const loadBatches = async () => {
+            let batches = supplyBatches[selectedSupply];
+            if (!batches) {
+                try {
+                    const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        batches = data.batches || [];
+                        setSupplyBatches((prev) => ({ ...prev, [selectedSupply]: batches! }));
+                    }
+                } catch (err) {
+                    console.error(err);
                 }
-            } catch (err) {
-                console.error(err);
+            }
+
+            if (batches) {
+                const usedBatchIds = supplyEntries
+                    .filter((se) => se.supplyId === selectedSupply)
+                    .map((se) => se.batchId);
+                const filtered = batches.filter(
+                    (b: SupplyBatchOption) => !usedBatchIds.includes(b.id)
+                );
+                setAvailableBatches(filtered);
             }
         };
 
-        fetchBatches();
-    }, [selectedSupply, supplyEntries]);
+        loadBatches();
+    }, [selectedSupply, supplyEntries, supplyBatches]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -191,7 +242,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                     <label className="input-label">Supply name</label>
                     <select className="input-max-width" value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
                         <option value="">Select supply</option>
-                        {supplies.map(s => (
+                        {filteredSupplies.map(s => (
                             <option key={s.id} value={s.id}>{s.supply_name}</option>
                         ))}
                     </select>
