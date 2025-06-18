@@ -61,25 +61,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
     // Fetch supply batches and supply name when dialog opens
     useEffect(() => {
         if (open) {
-            const fetchSupplyBatches = async () => {
-                try {
-                    const response = await fetch(`/api/supplies/batches/?supplyId=${supplyId}`);
-                    const data = await response.json();
-
-                    if (data?.batches) {
-                        setSupplyBatches(data.batches);
-                    } else {
-                        console.error('No batches found or incorrect data structure');
-                    }
-
-                    setSupplyName(data?.supplyName || 'Unknown Supply');
-                } catch (error) {
-                    console.error('Error fetching supply batches:', error);
-                }
-            };
-
             refreshBatches();
-            fetchSupplyBatches();
         }
     }, [open, supplyId]);
 

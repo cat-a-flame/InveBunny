@@ -10,23 +10,25 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  // Fetch supply name from the supplies table
-  const { data: supplyData, error: supplyError } = await supabase
-    .from('supplies')
-    .select('supply_name')
-    .eq('id', supplyId)
-    .single();
+  const [
+    { data: supplyData, error: supplyError },
+    { data: batches, error: batchError },
+  ] = await Promise.all([
+    supabase
+      .from('supplies')
+      .select('supply_name')
+      .eq('id', supplyId)
+      .single(),
+    supabase
+      .from('supply_batch')
+      .select('id, supplier_name, order_date, vendor_name, order_id, batch_name, status')
+      .eq('supply_id', supplyId)
+      .order('order_date', { ascending: false }),
+  ]);
 
   if (supplyError) {
     return new Response(JSON.stringify({ error: supplyError.message }), { status: 500 });
   }
-
-  // Fetch batches
-  const { data: batches, error: batchError } = await supabase
-    .from('supply_batch')
-    .select('id, supplier_name, order_date, vendor_name, order_id, batch_name, status')
-    .eq('supply_id', supplyId)
-    .order('order_date', { ascending: false });
 
   if (batchError) {
     return new Response(JSON.stringify({ error: batchError.message }), { status: 500 });

@@ -10,7 +10,7 @@ export default async function VariantsPage() {
     .select(`
             id,
             variant_name,
-            products (id)
+            products(count)
         `).order('variant_name', { ascending: true });
 
     return (
@@ -33,7 +33,7 @@ export default async function VariantsPage() {
                         {variants && variants.map(variant => (
                             <tr key={variant.id}>
                                 <td><span className="item-name">{variant.variant_name}</span></td>
-                                <td>{variant.products ? variant.products.length : 0}</td>
+                                <td>{variant.products ? variant.products[0]?.count ?? 0 : 0}</td>
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton variantId={variant.id} variantName={variant.variant_name} />
