@@ -136,14 +136,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                                 </tbody>
                             </table>
                         </>
-                    ) : (
-                        <EmptyState
-                            title="You have no supply batches yet"
-                            subtitle="Create a new batch to get started."
-                            image="/images/empty-batch.svg">
-                            <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
-                        </EmptyState>
-                    )}
+                    ) : null }
 
                     {archivedBatches.length > 0 ? (
                         <>
@@ -180,13 +173,22 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                             </table>
                         </>
                     ) : null}
+                    
+                    {activeBatches.length == 0 && archivedBatches.length == 0 ? (
+                        <EmptyState
+                            title="You have no supply batches yet"
+                            subtitle="Create a new batch to get started."
+                            image="/images/empty-batch.svg">
+                            <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                        </EmptyState>
+                    ) : null}
                 </div>
 
-                {activeBatches.length > 0 ? (
-                    <div className="side-panel-footer">
-                        <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
-                    </div>
-                ) : null}
+                    {activeBatches.length > 0 || archivedBatches.length > 0 ? (
+                        <div className="side-panel-footer">
+                            <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                        </div>
+                    ) : null}
             </div>
 
             {showCreateDialog && (
