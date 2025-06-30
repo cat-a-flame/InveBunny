@@ -75,6 +75,10 @@ main {
     }
 }
 
+.supplies-filter-bar {
+    justify-content: space-between;
+}
+
 .section-subtitle {
     font-weight: 700;
     margin-bottom: 1rem;

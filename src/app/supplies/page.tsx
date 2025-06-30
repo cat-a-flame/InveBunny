@@ -5,6 +5,7 @@ import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
 import { ViewBatchButton } from '@/src/features/supplies/batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
+import { IconButton } from '@/src/components/IconButton/iconButton';
 
 export default async function SuppliesPage({ searchParams }: { searchParams: any }) {
     const supabase = await createClient();
@@ -33,8 +34,10 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
 
 
             <div className="content">
-                <div className="filter-bar">
+                <div className="filter-bar supplies-filter-bar">
                     <Search placeholder="Search for supply name or category" query={query} />
+
+                    <IconButton icon={<i className="fa-solid fa-cog"></i>} title="Settings" />
                 </div>
 
                 <table>
@@ -42,7 +45,6 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                         <tr>
                             <th>Supply name</th>
                             <th>Supply category</th>
-                            <th># assigned products</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -55,7 +57,6 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                                         {supply.supply_category}
                                     </div>
                                 </td>
-                                <td>{/*supply.products ? supply.products.length : 0*/}</td>
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} supplyName={supply.supply_name} />
