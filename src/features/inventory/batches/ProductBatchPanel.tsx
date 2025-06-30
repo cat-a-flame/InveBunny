@@ -1,5 +1,6 @@
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
+import { EmptyState } from '../../../components/EmptyState/emptyState';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useEffect, useState, useRef } from 'react';
 import AddProductBatchPanel from './AddProductBatchPanel';
@@ -104,7 +105,18 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
                             ))}
                         </>
                     ) : (
-                        <p>No active batches yet.</p>
+                        /* div className="loading">
+                            <div className="loading-title"></div>
+                            <div className="loading-batch"></div>
+                            <div className="loading-batch"></div>
+                            <div className="loading-batch"></div>
+                        </div> */
+
+                        <EmptyState
+                            title="No active batches"
+                            subtitle="Create a new batch to get started."
+                            image="/images/empty-batch.svg"
+                        />
                     )}
 
                     {archivedBatches.length > 0 ? (
@@ -138,9 +150,11 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
                     ) : null}
                 </div>
 
-                <div className="side-panel-footer">
-                    <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
-                </div>
+                {activeBatches.length > 0 ? (
+                    <div className="side-panel-footer">
+                        <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                    </div>
+                ) : null}
             </div>
 
             {showCreateDialog && (
