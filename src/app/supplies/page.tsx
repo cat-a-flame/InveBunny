@@ -16,7 +16,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
 
     const { data: supplies, count } = await supabase
         .from("supplies")
-        .select("id, supply_name, supply_category", { count: 'exact' })
+        .select("id, supply_name, supply_category, products(count)", { count: 'exact' })
         .or(`supply_name.ilike.%${query}%,supply_category.ilike.%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('supply_name', { ascending: true });
@@ -55,7 +55,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                                         {supply.supply_category}
                                     </div>
                                 </td>
-                                <td>{/*supply.products ? supply.products.length : 0*/}</td>
+                                <td>{supply.products ? supply.products[0]?.count ?? 0 : 0}</td>
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} supplyName={supply.supply_name} />
