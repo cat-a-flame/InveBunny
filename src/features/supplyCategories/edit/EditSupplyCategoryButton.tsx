@@ -1,29 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { EditSupplyDialog } from './EditSupplyDialog';
-import { IconButton } from '../../../components/IconButton/iconButton';
+import { IconButton } from '@/src/components/IconButton/iconButton';
+import { EditSupplyCategoryDialog } from './EditSupplyCategoryDialog';
 
 type Props = {
-    supplyId: string;
+    uuid: string;
     currentName: string;
-    currentCategoryId: string;
+    onUpdated?: () => void;
 };
 
-export function EditSupplyButton({ supplyId, currentName, currentCategoryId }: Props) {
+export function EditSupplyCategoryButton({ uuid, currentName, onUpdated }: Props) {
     const [open, setOpen] = useState(false);
 
     return (
         <>
             <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} onClick={() => setOpen(true)} title="Edit" />
-
             {open && (
-                <EditSupplyDialog
-                    id={supplyId}
+                <EditSupplyCategoryDialog
+                    uuid={uuid}
                     currentName={currentName}
-                    currentCategoryId={currentCategoryId}
                     open={open}
                     onClose={() => setOpen(false)}
+                    onUpdated={onUpdated}
                 />
             )}
         </>

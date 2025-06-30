@@ -5,7 +5,7 @@ import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
 import { ViewBatchButton } from '@/src/features/supplies/batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
-import { IconButton } from '@/src/components/IconButton/iconButton';
+import { SettingsButton } from '@/src/features/supplyCategories/SettingsButton';
 
 export default async function SuppliesPage({ searchParams }: { searchParams: any }) {
     const supabase = await createClient();
@@ -16,9 +16,12 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
     const pageSize = 12;
 
     const { data: supplies, count } = await supabase
-        .from("supplies")
-        .select("id, supply_name, supply_category", { count: 'exact' })
-        .or(`supply_name.ilike.%${query}%,supply_category.ilike.%${query}%`)
+        .from('supplies')
+        .select(
+            `id, supply_name, supply_category_id, supply_categories(uuid, category_name)`,
+            { count: 'exact' }
+        )
+        .or(`supply_name.ilike.%${query}%,supply_categories.category_name.ilike.%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('supply_name', { ascending: true });
 
@@ -37,7 +40,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                 <div className="filter-bar supplies-filter-bar">
                     <Search placeholder="Search for supply name or category" query={query} />
 
-                    <IconButton icon={<i className="fa-solid fa-cog"></i>} title="Settings" />
+                    <SettingsButton />
                 </div>
 
                 <table>
@@ -54,14 +57,14 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                                 <td><span className="item-name">{supply.supply_name}</span></td>
                                 <td>
                                     <div className="category-badge">
-                                        {supply.supply_category}
+                                        {supply.supply_categories?.category_name}
                                     </div>
                                 </td>
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} supplyName={supply.supply_name} />
                                         <ViewBatchButton supplyId={supply.id} />
-                                        <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} currentCategory={supply.supply_category} />
+                                        <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} currentCategoryId={supply.supply_category_id} />
                                     </div>
                                 </td>
                             </tr>

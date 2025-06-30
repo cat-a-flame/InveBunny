@@ -9,23 +9,36 @@ import { useRouter } from 'next/navigation';
 type EditSupplyDialogProps = {
     id: string;
     currentName: string;
-    currentCategory: string;
+    currentCategoryId: string;
     open: boolean;
     onClose: () => void;
 };
 
-export function EditSupplyDialog({ id, currentName, currentCategory, open, onClose }: EditSupplyDialogProps) {
+export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onClose }: EditSupplyDialogProps) {
     const [supplyName, setSupplyName] = useState(currentName);
-    const [supplyCategory, setSupplyCategory] = useState(currentCategory);
+    const [supplyCategoryId, setSupplyCategoryId] = useState(currentCategoryId);
+    const [categories, setCategories] = useState<{ uuid: string; category_name: string }[]>([]);
     const toast = useToast();
     const router = useRouter();
 
     useEffect(() => {
         if (open) {
             setSupplyName(currentName);
-            setSupplyCategory(currentCategory);
+            setSupplyCategoryId(currentCategoryId);
+            const load = async () => {
+                try {
+                    const res = await fetch('/api/supplyCategories');
+                    if (res.ok) {
+                        const data = await res.json();
+                        setCategories(data.categories || []);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+            load();
         }
-    }, [open, currentName, currentCategory]);
+    }, [open, currentName, currentCategoryId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +48,7 @@ export function EditSupplyDialog({ id, currentName, currentCategory, open, onClo
             body: JSON.stringify({
                 id,
                 supply_name: supplyName,
-                supply_category: supplyCategory,
+                supply_category_id: supplyCategoryId,
             }),
             headers: {
                 'Content-Type': 'application/json',
@@ -63,7 +76,12 @@ export function EditSupplyDialog({ id, currentName, currentCategory, open, onClo
 
                 <div className="input-group">
                     <label className="input-label">Category</label>
-                    <input value={supplyCategory} onChange={(e) => setSupplyCategory(e.target.value)} required />
+                    <select value={supplyCategoryId} onChange={(e) => setSupplyCategoryId(e.target.value)} required>
+                        <option value="">Select category</option>
+                        {categories.map(c => (
+                            <option key={c.uuid} value={c.uuid}>{c.category_name}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="dialog-buttons">

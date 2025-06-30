@@ -2,7 +2,7 @@
 
 import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '../../../components/Toast/toast';
 
@@ -13,16 +13,33 @@ type Props = {
 
 export function AddSupplyDialog({ open, onClose }: Props) {
     const [supplyName, setSupplyName] = useState('');
-    const [supplyCategory, setsupplyCategory] = useState('');
+    const [supplyCategoryId, setSupplyCategoryId] = useState('');
+    const [categories, setCategories] = useState<{ uuid: string; category_name: string }[]>([]);
     const toast = useToast();
     const router = useRouter();
+
+    useEffect(() => {
+        if (!open) return;
+        const load = async () => {
+            try {
+                const res = await fetch('/api/supplyCategories');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCategories(data.categories || []);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        load();
+    }, [open]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const response = await fetch('/api/supplies/addNewSupply', {
             method: 'POST',
-            body: JSON.stringify({ supply_name: supplyName, supply_category: supplyCategory }),
+            body: JSON.stringify({ supply_name: supplyName, supply_category_id: supplyCategoryId }),
             headers: { 'Content-Type': 'application/json' },
         });
 
@@ -32,6 +49,8 @@ export function AddSupplyDialog({ open, onClose }: Props) {
             toast('✅ Supply created!');
             router.refresh();
             onClose();
+            setSupplyName('');
+            setSupplyCategoryId('');
         } else {
             toast(`Error: ${result.error}`);
         }
@@ -47,7 +66,12 @@ export function AddSupplyDialog({ open, onClose }: Props) {
 
                 <div className="input-group">
                     <label className="input-label">Category</label>
-                    <input value={supplyCategory} onChange={(e) => setsupplyCategory(e.target.value)} required />
+                    <select value={supplyCategoryId} onChange={(e) => setSupplyCategoryId(e.target.value)} required>
+                        <option value="">Select category</option>
+                        {categories.map((c) => (
+                            <option key={c.uuid} value={c.uuid}>{c.category_name}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="dialog-buttons">
