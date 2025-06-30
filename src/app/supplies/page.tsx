@@ -16,10 +16,30 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
 
     const { data: supplies, count } = await supabase
         .from("supplies")
-        .select("id, supply_name, supply_category, products(count)", { count: 'exact' })
+        .select(`
+            id,
+            supply_name,
+            supply_category,
+            supply_batch(
+                product_batch_to_supply_batch(
+                    product_batch(product_id)
+                )
+            )
+        `, { count: 'exact' })
         .or(`supply_name.ilike.%${query}%,supply_category.ilike.%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('supply_name', { ascending: true });
+
+    const suppliesWithCounts = (supplies || []).map((supply: any) => {
+        const productIds = new Set<string>();
+        (supply.supply_batch || []).forEach((batch: any) => {
+            (batch.product_batch_to_supply_batch || []).forEach((rel: any) => {
+                const pid = rel.product_batch?.product_id;
+                if (pid) productIds.add(pid);
+            });
+        });
+        return { ...supply, productCount: productIds.size };
+    });
 
     const totalCount = count ?? 0;
     const totalPages = Math.ceil(totalCount / pageSize);
@@ -47,7 +67,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                         </tr>
                     </thead>
                     <tbody>
-                        {supplies && supplies.map(supply => (
+                        {suppliesWithCounts && suppliesWithCounts.map(supply => (
                             <tr key={supply.id}>
                                 <td><span className="item-name">{supply.supply_name}</span></td>
                                 <td>
@@ -55,7 +75,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                                         {supply.supply_category}
                                     </div>
                                 </td>
-                                <td>{supply.products ? supply.products[0]?.count ?? 0 : 0}</td>
+                                <td>{supply.productCount}</td>
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} supplyName={supply.supply_name} />
