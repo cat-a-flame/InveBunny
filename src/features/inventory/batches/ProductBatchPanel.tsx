@@ -38,20 +38,7 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
 
     useEffect(() => {
         if (open) {
-            const fetchBatches = async () => {
-                try {
-                    const response = await fetch(`/api/products/batches/?productId=${productId}`);
-                    const data = await response.json();
-                    if (data?.batches) {
-                        setProductBatches(data.batches);
-                    }
-                    setProductName(data?.productName || 'Unknown Product');
-                } catch (error) {
-                    console.error('Error fetching product batches:', error);
-                }
-            };
             refreshBatches();
-            fetchBatches();
         }
     }, [open, productId]);
 

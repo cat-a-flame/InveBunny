@@ -18,36 +18,40 @@ export async function GET(request: Request) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
-  const { data: productData, error: productError } = await supabase
-    .from('products')
-    .select('product_name')
-    .eq('id', productId)
-    .single();
+  const [
+    { data: productData, error: productError },
+    { data: batchesRaw, error: batchError },
+  ] = await Promise.all([
+    supabase
+      .from('products')
+      .select('product_name')
+      .eq('id', productId)
+      .single(),
+    supabase
+      .from('product_batch')
+      .select(`
+        id,
+        p_batch_name,
+        date_made,
+        is_active,
+        product_batch_to_supply_batch(
+          supply_batch_id,
+          supply_batch(
+            id,
+            batch_name,
+            supply_id,
+            supplies(id, supply_name)
+          )
+        )
+      `)
+      .eq('product_id', productId)
+      .eq('owner_id', user.id)
+      .order('date_made', { ascending: false }),
+  ]);
 
   if (productError) {
     return new Response(JSON.stringify({ error: productError.message }), { status: 500 });
   }
-
-  const { data: batchesRaw, error: batchError } = await supabase
-    .from('product_batch')
-    .select(`
-      id,
-      p_batch_name,
-      date_made,
-      is_active,
-      product_batch_to_supply_batch(
-        supply_batch_id,
-        supply_batch(
-          id,
-          batch_name,
-          supply_id,
-          supplies(id, supply_name)
-        )
-      )
-    `)
-    .eq('product_id', productId)
-    .eq('owner_id', user.id)
-    .order('date_made', { ascending: false });
 
   if (batchError) {
     return new Response(JSON.stringify({ error: batchError.message }), { status: 500 });

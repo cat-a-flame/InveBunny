@@ -16,7 +16,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: a
 
     const { data: categories, count } = await supabase
         .from("categories")
-        .select("id, category_name, products (id)", { count: 'exact' })
+        .select("id, category_name, products(count)", { count: 'exact' })
         .ilike('category_name', `%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('category_name', { ascending: true });
@@ -48,7 +48,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: a
                         {categories && categories.map(category => (
                             <tr key={category.id}>
                                 <td><span className="item-name">{category.category_name}</span></td>
-                                <td>{category.products ? category.products.length : 0}</td>
+                                <td>{category.products ? category.products[0]?.count ?? 0 : 0}</td>
                                 <td>
                                     <div className="table-actions">
                                         <DeleteButton categoryId={category.id} categoryName={category.category_name} />
