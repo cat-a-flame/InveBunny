@@ -4,6 +4,7 @@ import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type EditVariantDialogProps = {
     id: string;
@@ -15,6 +16,7 @@ type EditVariantDialogProps = {
 export function EditVariantDialog({ id, currentName, open, onClose }: EditVariantDialogProps) {
     const [variantName, setVariantName] = useState(currentName);
     const toast = useToast();
+    const router = useRouter();
 
     useEffect(() => {
         if (open) {
@@ -40,6 +42,7 @@ export function EditVariantDialog({ id, currentName, open, onClose }: EditVarian
 
         if (result.success) {
             toast('✅ Variant updated!');
+            router.refresh();
             onClose();
         } else {
             toast(`Error: ${result.error}`);

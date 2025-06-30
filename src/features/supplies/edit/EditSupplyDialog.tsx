@@ -4,6 +4,7 @@ import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 type EditSupplyDialogProps = {
     id: string;
@@ -17,6 +18,7 @@ export function EditSupplyDialog({ id, currentName, currentCategory, open, onClo
     const [supplyName, setSupplyName] = useState(currentName);
     const [supplyCategory, setSupplyCategory] = useState(currentCategory);
     const toast = useToast();
+    const router = useRouter();
 
     useEffect(() => {
         if (open) {
@@ -44,6 +46,7 @@ export function EditSupplyDialog({ id, currentName, currentCategory, open, onClo
 
         if (result.success) {
             toast('✅ Supply updated!');
+            router.refresh();
             onClose();
         } else {
             toast(`Error: ${result.error}`);

@@ -4,6 +4,7 @@ import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Category = {
     id: string;
@@ -59,6 +60,7 @@ export function EditProductDialog({
 }: EditProductDialogProps) {
     const toast = useToast();
     const [submitting, setSubmitting] = useState(false);
+    const router = useRouter();
 
     // Initialize selected inventory with current inventory or first available
     const [selectedInventoryId, setSelectedInventoryId] = useState(
@@ -167,6 +169,7 @@ export function EditProductDialog({
             }
 
             toast('✅ Product updated successfully!');
+            router.refresh();
             onClose();
             if (onSuccess) onSuccess();
         } catch (error: unknown) {
