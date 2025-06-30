@@ -7,14 +7,14 @@ import { Dialog } from '@/src/components/Dialog/dialog';
 import { useToast } from '@/src/components/Toast/toast';
 
 type Props = {
-    uuid: string;
+    id: string;
     currentName: string;
     open: boolean;
     onClose: () => void;
     onUpdated?: () => void;
 };
 
-export function EditSupplyCategoryDialog({ uuid, currentName, open, onClose, onUpdated }: Props) {
+export function EditSupplyCategoryDialog({ id, currentName, open, onClose, onUpdated }: Props) {
     const [categoryName, setCategoryName] = useState(currentName);
     const toast = useToast();
     const router = useRouter();
@@ -27,7 +27,7 @@ export function EditSupplyCategoryDialog({ uuid, currentName, open, onClose, onU
         e.preventDefault();
         const response = await fetch('/api/supplyCategories/updateCategory', {
             method: 'PUT',
-            body: JSON.stringify({ uuid, category_name: categoryName }),
+            body: JSON.stringify({ id, category_name: categoryName }),
             headers: { 'Content-Type': 'application/json' },
         });
         const result = await response.json();

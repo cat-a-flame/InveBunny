@@ -18,7 +18,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
     const { data: supplies, count } = await supabase
         .from('supplies')
         .select(
-            `id, supply_name, supply_category_id, supply_categories(uuid, category_name)`,
+            `id, supply_name, supply_category_id, supply_categories(id, category_name)`,
             { count: 'exact' }
         )
         .or(`supply_name.ilike.%${query}%,supply_categories.category_name.ilike.%${query}%`)

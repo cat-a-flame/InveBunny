@@ -5,12 +5,12 @@ import { IconButton } from '@/src/components/IconButton/iconButton';
 import { EditSupplyCategoryDialog } from './EditSupplyCategoryDialog';
 
 type Props = {
-    uuid: string;
+    id: string;
     currentName: string;
     onUpdated?: () => void;
 };
 
-export function EditSupplyCategoryButton({ uuid, currentName, onUpdated }: Props) {
+export function EditSupplyCategoryButton({ id, currentName, onUpdated }: Props) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -18,7 +18,7 @@ export function EditSupplyCategoryButton({ uuid, currentName, onUpdated }: Props
             <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} onClick={() => setOpen(true)} title="Edit" />
             {open && (
                 <EditSupplyCategoryDialog
-                    uuid={uuid}
+                    id={id}
                     currentName={currentName}
                     open={open}
                     onClose={() => setOpen(false)}

@@ -17,7 +17,7 @@ type EditSupplyDialogProps = {
 export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onClose }: EditSupplyDialogProps) {
     const [supplyName, setSupplyName] = useState(currentName);
     const [supplyCategoryId, setSupplyCategoryId] = useState(currentCategoryId);
-    const [categories, setCategories] = useState<{ uuid: string; category_name: string }[]>([]);
+    const [categories, setCategories] = useState<{ id: string; category_name: string }[]>([]);
     const toast = useToast();
     const router = useRouter();
 
@@ -79,7 +79,7 @@ export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onC
                     <select value={supplyCategoryId} onChange={(e) => setSupplyCategoryId(e.target.value)} required>
                         <option value="">Select category</option>
                         {categories.map(c => (
-                            <option key={c.uuid} value={c.uuid}>{c.category_name}</option>
+                            <option key={c.id} value={c.id}>{c.category_name}</option>
                         ))}
                     </select>
                 </div>

@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server';
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
-  const uuid = searchParams.get('uuid');
+  const id = searchParams.get('id');
 
-  if (!uuid) {
+  if (!id) {
     return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from('supply_categories').delete().eq('uuid', uuid);
+  const { error } = await supabase.from('supply_categories').delete().eq('id', id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

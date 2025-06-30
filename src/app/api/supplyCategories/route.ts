@@ -4,7 +4,7 @@ export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('supply_categories')
-    .select('uuid, category_name')
+    .select('id, category_name')
     .order('category_name');
 
   if (error) {

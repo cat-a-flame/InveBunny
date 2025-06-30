@@ -7,7 +7,7 @@ import { DeleteButton } from './delete/DeleteButton';
 import { EditSupplyCategoryButton } from './edit/EditSupplyCategoryButton';
 import { AddSupplyCategoryDialog } from './add/AddSupplyCategoryDialog';
 
-export type SupplyCategory = { uuid: string; category_name: string };
+export type SupplyCategory = { id: string; category_name: string };
 
 type Props = {
     open: boolean;
@@ -54,12 +54,12 @@ export function SupplyCategorySettingsDialog({ open, onClose }: Props) {
                     </thead>
                     <tbody>
                         {categories.map(cat => (
-                            <tr key={cat.uuid}>
+                            <tr key={cat.id}>
                                 <td><span className="item-name">{cat.category_name}</span></td>
                                 <td>
                                     <div className="table-actions">
-                                        <DeleteButton categoryId={cat.uuid} categoryName={cat.category_name} onDeleted={handleUpdated} />
-                                        <EditSupplyCategoryButton uuid={cat.uuid} currentName={cat.category_name} onUpdated={handleUpdated} />
+                                        <DeleteButton categoryId={cat.id} categoryName={cat.category_name} onDeleted={handleUpdated} />
+                                        <EditSupplyCategoryButton id={cat.id} currentName={cat.category_name} onUpdated={handleUpdated} />
                                     </div>
                                 </td>
                             </tr>

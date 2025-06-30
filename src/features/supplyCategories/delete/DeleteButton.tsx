@@ -19,7 +19,7 @@ export const DeleteButton = ({ categoryId, categoryName, onDeleted }: Props) => 
 
     const handleDelete = async () => {
         try {
-            const res = await fetch(`/api/supplyCategories/deleteCategory?uuid=${categoryId}`, { method: 'DELETE' });
+            const res = await fetch(`/api/supplyCategories/deleteCategory?id=${categoryId}`, { method: 'DELETE' });
             if (res.ok) {
                 toast('✅ Category successfully deleted');
                 router.refresh();

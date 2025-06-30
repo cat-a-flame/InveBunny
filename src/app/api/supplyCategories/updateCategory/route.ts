@@ -4,16 +4,16 @@ import { NextResponse } from 'next/server';
 export async function PUT(request: Request) {
   const supabase = await createClient();
   const body = await request.json();
-  const { uuid, category_name } = body;
+  const { id, category_name } = body;
 
-  if (!uuid || !category_name) {
+  if (!id || !category_name) {
     return NextResponse.json({ error: 'Missing data' }, { status: 400 });
   }
 
   const { data, error } = await supabase
     .from('supply_categories')
     .update({ category_name })
-    .eq('uuid', uuid)
+    .eq('id', id)
     .select();
 
   if (error) {
