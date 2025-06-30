@@ -1,0 +1,29 @@
+.box {
+    align-items: center;
+    background-color: #fbf4ff;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.image {
+    height: 120px;
+    object-fit: contain;
+    width: 120px;
+}
+
+.title {
+    font-weight: 700;
+}
+
+.subtitle {
+    color: #725a79;
+    font-size: .876rem;
+}
+
+.actions {
+    margin-top: 1rem;
+}

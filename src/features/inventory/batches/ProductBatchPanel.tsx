@@ -1,5 +1,6 @@
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
+import { EmptyState } from '../../../components/EmptyState/emptyState';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useEffect, useState, useRef } from 'react';
 import AddProductBatchPanel from './AddProductBatchPanel';
@@ -19,9 +20,11 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
     const isMounted = useRef(false);
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [deleteBatch, setDeleteBatch] = useState<{ id: string; p_batch_name: string } | null>(null);
 
     const refreshBatches = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/products/batches/?productId=${productId}`);
             const data = await response.json();
@@ -33,6 +36,8 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
             setProductName(data?.productName || 'Unknown Product');
         } catch (error) {
             console.error('Error fetching product batches:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -75,75 +80,89 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
                 </div>
 
                 <div className="side-panel-content">
-                    {activeBatches.length > 0 ? (
-                        <>
-                            <h4 className="section-subtitle">Active batches</h4>
+                    {isLoading?(
+                        <div className = "loading" >
+                            <div className="loading-title"></div>
+                            <div className="loading-batch"></div>
+                            <div className="loading-batch"></div>
+                            <div className="loading-batch"></div>
+                        </div>
+                    ) : activeBatches.length > 0 ? (
+                <>
+                    <h4 className="section-subtitle">Active batches</h4>
 
-                            {activeBatches.map((batch) => (
-                                <details className="batch-list-details" key={batch.id}>
-                                    <summary className="batch-list-header">
-                                        <div>
-                                            <span className="batch-list-name">{batch.p_batch_name}</span>
-                                            <span className="batch-list-date"> - {formatDate(batch.date_made)}</span>
-                                        </div>
+                    {activeBatches.map((batch) => (
+                        <details className="batch-list-details" key={batch.id}>
+                            <summary className="batch-list-header">
+                                <div>
+                                    <span className="batch-list-name">{batch.p_batch_name}</span>
+                                    <span className="batch-list-date"> - {formatDate(batch.date_made)}</span>
+                                </div>
 
-                                        <div className="table-actions">
-                                            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                            <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
-                                        </div>
-                                    </summary>
+                                <div className="table-actions">
+                                    <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
+                                    <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
+                                </div>
+                            </summary>
 
-                                    <ul>
-                                        {batch.supplies?.map((s, index) => (
-                                            <li key={index} className="batch-list-item">
-                                                <span>{s.supplyName}</span> <span className="list-batch-name">{s.batchName}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </details>
-                            ))}
-                        </>
-                    ) : (
-                        <p>No active batches yet.</p>
-                    )}
+                            <ul>
+                                {batch.supplies?.map((s, index) => (
+                                    <li key={index} className="batch-list-item">
+                                        <span>{s.supplyName}</span> <span className="list-batch-name">{s.batchName}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </details>
+                    ))}
+                </>
+                ) : (
+                    <EmptyState
+                        title="You have no product batches yet"
+                        subtitle="Create a new batch to get started."
+                        image="/images/empty-batch.svg">
+                        <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                    </EmptyState>
+                )}
 
-                    {archivedBatches.length > 0 ? (
-                        <>
-                            <h4 className="section-subtitle">Archived batches</h4>
+                {archivedBatches.length > 0 ? (
+                    <>
+                        <h4 className="section-subtitle">Archived batches</h4>
 
-                            {archivedBatches.map((batch) => (
-                                <details className="batch-list-details" key={batch.id}>
-                                    <summary className="batch-list-header">
-                                        <div>
-                                            <span className="batch-list-name">{batch.p_batch_name}</span>
-                                            <span className="batch-list-date"> - {formatDate(batch.date_made)}</span>
-                                        </div>
+                        {archivedBatches.map((batch) => (
+                            <details className="batch-list-details" key={batch.id}>
+                                <summary className="batch-list-header">
+                                    <div>
+                                        <span className="batch-list-name">{batch.p_batch_name}</span>
+                                        <span className="batch-list-date"> - {formatDate(batch.date_made)}</span>
+                                    </div>
 
-                                        <div className="table-actions">
-                                            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                            <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
-                                        </div>
-                                    </summary>
+                                    <div className="table-actions">
+                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
+                                        <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
+                                    </div>
+                                </summary>
 
-                                    <ul>
-                                        {batch.supplies?.map((s, index) => (
-                                            <li key={index} className="batch-list-item">
-                                                <span>{s.supplyName}</span> <span className="list-batch-name">{s.batchName}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </details>
-                            ))}
-                        </>
-                    ) : null}
-                </div>
+                                <ul>
+                                    {batch.supplies?.map((s, index) => (
+                                        <li key={index} className="batch-list-item">
+                                            <span>{s.supplyName}</span> <span className="list-batch-name">{s.batchName}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </details>
+                        ))}
+                    </>
+                ) : null}
+            </div>
 
+            {activeBatches.length > 0 ? (
                 <div className="side-panel-footer">
                     <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
                 </div>
-            </div>
+            ) : null}
+        </div >
 
-            {showCreateDialog && (
+            { showCreateDialog && (
                 <AddProductBatchPanel
                     open={true}
                     onClose={() => setShowCreateDialog(false)}
@@ -154,21 +173,24 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
                         setShowCreateDialog(false);
                     }}
                 />
-            )}
+            )
+}
 
 
-            {deleteBatch && (
-                <DeleteProductBatchDialog
-                    open={true}
-                    onClose={() => setDeleteBatch(null)}
-                    batchId={deleteBatch.id}
-                    batchName={deleteBatch.p_batch_name}
-                    onDeleted={() => {
-                        refreshBatches();
-                        setDeleteBatch(null);
-                    }}
-                />
-            )}
+{
+    deleteBatch && (
+        <DeleteProductBatchDialog
+            open={true}
+            onClose={() => setDeleteBatch(null)}
+            batchId={deleteBatch.id}
+            batchName={deleteBatch.p_batch_name}
+            onDeleted={() => {
+                refreshBatches();
+                setDeleteBatch(null);
+            }}
+        />
+    )
+}
         </>
     );
 }

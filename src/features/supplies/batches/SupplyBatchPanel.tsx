@@ -1,6 +1,7 @@
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
 import { IconButton } from '@/src/components/IconButton/iconButton';
+import { EmptyState } from '../../../components/EmptyState/emptyState';
 import { useEffect, useState, useRef } from 'react';
 import AddBatchDialog from './AddBatchDialog';
 import EditBatchDialog from './EditBatchDialog';
@@ -38,9 +39,11 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editBatch, setEditBatch] = useState<SupplyBatch | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [deleteBatch, setDeleteBatch] = useState<{ id: string; batch_name: string } | null>(null);
 
     const refreshBatches = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/supplies/batches/?supplyId=${supplyId}`);
             const data = await response.json();
@@ -54,6 +57,8 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
             setSupplyName(data?.supplyName || 'Unknown Supply');
         } catch (error) {
             console.error('Error fetching supply batches:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -90,7 +95,14 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                 </div>
 
                 <div className="side-panel-content">
-                    {activeBatches.length > 0 ? (
+                    {isLoading?(
+                        <div className = "loading" >
+                            <div className="loading-title"></div>
+                            <div className="loading-batch"></div>
+                            <div className="loading-batch"></div>
+                            <div className="loading-batch"></div>
+                        </div>
+                    ) : activeBatches.length > 0 ? (
                         <>
                             <h4 className="section-subtitle">Active batches</h4>
                             <table className="batch-list">
@@ -125,7 +137,12 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                             </table>
                         </>
                     ) : (
-                        <p>No active batches yet.</p>
+                        <EmptyState
+                            title="You have no supply batches yet"
+                            subtitle="Create a new batch to get started."
+                            image="/images/empty-batch.svg">
+                            <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                        </EmptyState>
                     )}
 
                     {archivedBatches.length > 0 ? (
@@ -165,9 +182,11 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                     ) : null}
                 </div>
 
-                <div className="side-panel-footer">
-                    <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
-                </div>
+                {activeBatches.length > 0 ? (
+                    <div className="side-panel-footer">
+                        <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                    </div>
+                ) : null}
             </div>
 
             {showCreateDialog && (

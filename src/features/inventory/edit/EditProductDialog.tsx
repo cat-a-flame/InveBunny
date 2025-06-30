@@ -217,7 +217,7 @@ export function EditProductDialog({
                         <input name="product_sku" type="text" value={formData.product_sku} onChange={handleChange} required />
                     </div>
 
-                    <div className="input-group">
+                    <div className="input-shrink">
                         <label htmlFor="product_quantity" className="input-label">
                             Quantity
                         </label>
