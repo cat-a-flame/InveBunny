@@ -113,17 +113,11 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
                         </div> */
 
                         <EmptyState
-                            title="No active batches"
+                            title="You have no product batches yet"
                             subtitle="Create a new batch to get started."
                             image="/images/empty-batch.svg"
                         >
-                            <Button
-                                variant="primary"
-                                icon={<CgMathPlus />}
-                                onClick={() => setShowCreateDialog(true)}
-                            >
-                                Create new batch
-                            </Button>
+                            <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
                         </EmptyState>
                     )}
 

@@ -1,32 +1,27 @@
 .box {
     align-items: center;
+    background-color: #fbf4ff;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: .5rem;
     padding: 2rem 1rem;
     text-align: center;
 }
 
-.icon {
-    color: var(--icon-color);
-    font-size: 2rem;
-}
-
 .image {
     height: 120px;
-    width: 120px;
     object-fit: contain;
+    width: 120px;
 }
 
 .title {
-    font-size: 1.25rem;
     font-weight: 700;
-    margin: 0;
 }
 
 .subtitle {
     color: #725a79;
-    margin: 0;
+    font-size: .876rem;
 }
 
 .actions {
