@@ -3,6 +3,7 @@
 import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useToast } from '../../../components/Toast/toast';
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 export function AddVariantDialog({ open, onClose }: Props) {
     const [variantName, setVariantName] = useState('');
     const toast = useToast();
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,6 +29,7 @@ export function AddVariantDialog({ open, onClose }: Props) {
 
         if (result.success) {
             toast('✅ Variant created!');
+            router.refresh();
             onClose();
         } else {
             toast(`Error: ${result.error}`);

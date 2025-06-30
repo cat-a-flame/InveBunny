@@ -3,6 +3,7 @@
 import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useToast } from '../../../components/Toast/toast';
 
 type Props = {
@@ -14,6 +15,7 @@ export function AddSupplyDialog({ open, onClose }: Props) {
     const [supplyName, setSupplyName] = useState('');
     const [supplyCategory, setsupplyCategory] = useState('');
     const toast = useToast();
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,6 +30,7 @@ export function AddSupplyDialog({ open, onClose }: Props) {
 
         if (result.success) {
             toast('✅ Supply created!');
+            router.refresh();
             onClose();
         } else {
             toast(`Error: ${result.error}`);

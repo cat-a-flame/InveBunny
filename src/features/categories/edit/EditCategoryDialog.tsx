@@ -4,6 +4,7 @@ import { Button } from '../../../components/Button/button';
 import { Dialog } from '../../../components/Dialog/dialog';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type EditCategoryDialogProps = {
     id: string;
@@ -15,6 +16,7 @@ type EditCategoryDialogProps = {
 export function EditCategoryDialog({ id, currentName, open, onClose }: EditCategoryDialogProps) {
     const [categoryName, setCategoryName] = useState(currentName);
     const toast = useToast();
+    const router = useRouter();
 
     useEffect(() => {
         if (open) {
@@ -40,6 +42,7 @@ export function EditCategoryDialog({ id, currentName, open, onClose }: EditCateg
 
         if (result.success) {
             toast('✅ Category updated!');
+            router.refresh();
             onClose();
         } else {
             toast(`Error: ${result.error}`);

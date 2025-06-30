@@ -4,6 +4,7 @@ import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Props = {
     productId: string;
@@ -14,6 +15,7 @@ type Props = {
 export const DeleteProductButton = ({ productId, productName, inventoryId }: Props) => {
     const [open, setOpen] = useState(false);
     const toast = useToast();
+    const router = useRouter();
 
     const handleDelete = async () => {
         try {
@@ -23,6 +25,7 @@ export const DeleteProductButton = ({ productId, productName, inventoryId }: Pro
             );
             if (res.ok) {
                 toast('✅ Product successfully deleted');
+                router.refresh();
             } else {
                 toast('🚫 Failed to delete product');
             }

@@ -6,6 +6,7 @@ import { Dialog } from '../../../components/Dialog/dialog';
 import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Category = {
     id: string;
@@ -45,6 +46,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
 
     const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -91,6 +93,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
             }
 
             toast('✅ Product created successfully!');
+            router.refresh();
             onClose();
             setFormData({
                 productName: '',
