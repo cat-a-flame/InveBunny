@@ -2,10 +2,9 @@
 
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
-import { Dialog } from '../../../components/Dialog/dialog';
 import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Category = {
@@ -47,6 +46,18 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
     const router = useRouter();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -112,8 +123,14 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Add new product" size="md">
-            <form onSubmit={handleSubmit} className="dialog-form">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title" id="dialog-title">Add new product</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
+            <form onSubmit={handleSubmit} className="side-panel-content">
                 <div className="input-group">
                     <label htmlFor="productName" className="input-label">Product name</label>
                     <input name="productName" type="text" value={formData.productName} onChange={handleChange} required />
@@ -180,11 +197,12 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
 
                 <Button type="button" variant="ghost" size="sm" icon={<CgMathPlus />} onClick={addInventoryRow}>Add inventory</Button>
 
-                <div className="dialog-buttons">
-                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>Add product</Button>
-                </div>
-            </form>
-        </Dialog>
+                <div className="side-panel-footer">
+                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" variant="primary" disabled={submitting}>Add product</Button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 }
