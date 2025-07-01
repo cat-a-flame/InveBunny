@@ -2,7 +2,7 @@
 
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
-import { Dialog } from '../../../components/Dialog/dialog';
+import { Panel } from '../../../components/Panel/panel';
 import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { useState } from 'react';
@@ -112,7 +112,9 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Add new product" size="md">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <Panel isOpen={open} onClose={onClose} title="Add new product">
             <form onSubmit={handleSubmit} className="dialog-form">
                 <div className="input-group">
                     <label htmlFor="productName" className="input-label">Product name</label>
@@ -185,6 +187,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     <Button type="submit" variant="primary" disabled={submitting}>Add product</Button>
                 </div>
             </form>
-        </Dialog>
+            </Panel>
+        </>
     );
 }

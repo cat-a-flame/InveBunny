@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog } from '@/src/components/Dialog/dialog';
+import { Panel } from '@/src/components/Panel/panel';
 import { Button } from '@/src/components/Button/button';
 import { useToast } from '../../../components/Toast/toast';
 
@@ -54,7 +54,9 @@ export default function CreateBatchDialog({ open, onClose, supplyId, supplyName,
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Create new batch">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <Panel isOpen={open} onClose={onClose} title="Create new batch">
             <form onSubmit={handleSubmit} className="form-grid">
                 <div className="input-group">
                     <label className="input-label">Supply name</label>
@@ -101,6 +103,7 @@ export default function CreateBatchDialog({ open, onClose, supplyId, supplyName,
                     <Button type="submit" variant="primary" disabled={submitting}>Create batch</Button>
                 </div>
             </form>
-        </Dialog>
+            </Panel>
+        </>
     );
 }

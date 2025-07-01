@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '../../../components/Button/button';
-import { Dialog } from '../../../components/Dialog/dialog';
+import { Panel } from '../../../components/Panel/panel';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -185,7 +185,9 @@ export function EditProductDialog({
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Edit product">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <Panel isOpen={open} onClose={onClose} title="Edit product">
             <form onSubmit={handleSubmit} className="dialog-form">
                 <div className="input-group">
                     <label htmlFor="product_name" className="input-label">
@@ -270,6 +272,7 @@ export function EditProductDialog({
                     <Button type="submit" variant="primary" disabled={submitting}>Save</Button>
                 </div>
             </form>
-        </Dialog>
+            </Panel>
+        </>
     );
 }

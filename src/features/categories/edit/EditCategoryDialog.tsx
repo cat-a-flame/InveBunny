@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '../../../components/Button/button';
-import { Dialog } from '../../../components/Dialog/dialog';
+import { Panel } from '../../../components/Panel/panel';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -50,7 +50,9 @@ export function EditCategoryDialog({ id, currentName, open, onClose }: EditCateg
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Edit category">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <Panel isOpen={open} onClose={onClose} title="Edit category">
             <form onSubmit={handleSubmit} method="dialog">
                 <div className="input-group">
                     <label className="input-label">Name</label>
@@ -66,6 +68,7 @@ export function EditCategoryDialog({ id, currentName, open, onClose }: EditCateg
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-        </Dialog>
+            </Panel>
+        </>
     );
 }
