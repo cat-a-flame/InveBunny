@@ -294,22 +294,20 @@ textarea {
     width: 100%;
 }
 
+.input-quantity {
+    width: 90px;
+}
+
+.input-sku {
+    width: 180px;
+}
+
 .input-label {
     display: block;
     color: #957D9D;
     font-size: 0.875rem;
     font-weight: 700;
     margin-bottom: 4px;
-}
-
-.input-group-wrapper {
-    flex-grow: 1;
-
-    &.input-group-quantity {
-        flex-grow: 0;
-        flex-shrink: 0;
-        width: 90px;
-    }
 }
 
 .input-group {
@@ -320,7 +318,7 @@ textarea {
 .double-input-group {
     align-items: end;
     display: flex;
-    gap: 1.25rem;
+    gap: 1rem;
     margin-bottom: 1.25rem;
 
     & button[class^="iconButton"] {
@@ -428,7 +426,7 @@ textarea {
 }
 
 .side-panel-md {
-    width: 600px;
+    width: 650px;
 }
 
 .side-panel-sm {
@@ -464,6 +462,12 @@ textarea {
     padding: 0 2rem;
 }
 
+.side-panel-form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
 .side-panel-footer {
     display: flex;
     justify-content: end;
@@ -474,6 +478,12 @@ textarea {
 .side-panel-title {
     font-family: titleFont;
     font-size: 1.5rem;
+}
+
+.boxed-section {
+    background-color: #F7F3FF;
+    border-radius: 4px;
+    padding: 1rem;
 }
 
 /* BATCH TABLE */

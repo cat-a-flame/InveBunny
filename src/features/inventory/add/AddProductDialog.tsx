@@ -2,10 +2,9 @@
 
 import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
-import { Dialog } from '../../../components/Dialog/dialog';
 import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Category = {
@@ -47,6 +46,18 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
     const router = useRouter();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -65,7 +76,14 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     };
 
     const addInventoryRow = () => {
-        setInventoryEntries(prev => [...prev, { inventoryId: '', quantity: 0, status: true, sku: '' }]);
+        setInventoryEntries(prev => [
+            ...prev,
+            { inventoryId: '', quantity: 0, status: true, sku: '' },
+        ]);
+    };
+
+    const removeInventoryRow = (index: number) => {
+        setInventoryEntries(prev => prev.filter((_, i) => i !== index));
     };
 
 
@@ -112,79 +130,92 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Add new product" size="md">
-            <form onSubmit={handleSubmit} className="dialog-form">
-                <div className="input-group">
-                    <label htmlFor="productName" className="input-label">Product name</label>
-                    <input name="productName" type="text" value={formData.productName} onChange={handleChange} required />
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel side-panel-md ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title" id="dialog-title">Add new product</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
 
-                <div className="double-input-group">
-                    <div className="input-equal">
-                        <label htmlFor="categoryId" className="input-label">Category</label>
-                        <select name="categoryId" value={formData.categoryId} onChange={handleChange} required>
-                            <option value="">Select a category</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>{cat.category_name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="input-equal">
-                        <label htmlFor="variantId" className="input-label">Variant</label>
-                        <select name="variantId" value={formData.variantId} onChange={handleChange} required>
-                            <option value="">Select a variant</option>
-                            {variants.map((variant) => (
-                                <option key={variant.id} value={variant.id}>{variant.variant_name}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                <form onSubmit={handleSubmit} className="side-panel-form">
+                    <div className="side-panel-content">
+                        <div className="input-group">
+                            <label htmlFor="productName" className="input-label">Product name</label>
+                            <input name="productName" type="text" className="input-max-width" value={formData.productName} onChange={handleChange} required />
+                        </div>
 
-                <div className="input-group">
-                    <label>
-                        <input type="checkbox" checked={formData.status} onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked }))} />
-                        Product is active
-                    </label>
-                </div>
-
-<hr/>
-                <h3 className="section-subtitle">Inventories</h3>
-                
-                {inventoryEntries.map((entry, index) => (
-                    <div key={index} className="double-input-group">
-                        <div className="input-group-wrapper">
-                            <label className="input-label">Inventory name</label>
-                            <select value={entry.inventoryId} onChange={(e) => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
-                                <option value="">Select an inventory</option>
-                                {[...inventories]
-                                    .sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0))
-                                    .map((inv) => (
-                                        <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                        <div className="double-input-group">
+                            <div className="input-equal">
+                                <label htmlFor="categoryId" className="input-label">Category</label>
+                                <select name="categoryId" className="input-max-width" value={formData.categoryId} onChange={handleChange} required>
+                                    <option value="">Select a category</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.category_name}</option>
                                     ))}
-                            </select>
+                                </select>
+                            </div>
+                            <div className="input-equal">
+                                <label htmlFor="variantId" className="input-label">Variant</label>
+                                <select name="variantId" className="input-max-width" value={formData.variantId} onChange={handleChange} required>
+                                    <option value="">Select a variant</option>
+                                    {variants.map((variant) => (
+                                        <option key={variant.id} value={variant.id}>{variant.variant_name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="input-group-wrapper">
-                            <label className="input-label">SKU</label>
-                            <input type="text" value={entry.sku} onChange={(e) => handleInventoryChange(index, 'sku', e.target.value)} required />
+                        <div className="input-group">
+                            <label>
+                                <input type="checkbox" checked={formData.status} onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked }))} />
+                                Product is active
+                            </label>
                         </div>
 
-                        <div className="input-group-wrapper input-group-quantity">
-                            <label className="input-label">Quantity</label>
-                            <input type="number" min="0" value={entry.quantity} onChange={(e) => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
-                        </div>
+                        <div className="boxed-section">
+                            <h3 className="section-subtitle">Inventories</h3>
 
-                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Remove inventory" />
+                            {inventoryEntries.map((entry, index) => (
+                                <div key={index} className="double-input-group">
+                                    <div>
+                                        <label className="input-label">Inventory name</label>
+                                        <select value={entry.inventoryId} onChange={(e) => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
+                                            <option value="">Select an inventory</option>
+                                            {[...inventories]
+                                                .sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0))
+                                                .map((inv) => (
+                                                    <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                                                ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="input-label">SKU</label>
+                                        <input type="text" className="input-sku" value={entry.sku} onChange={(e) => handleInventoryChange(index, 'sku', e.target.value)} required />
+                                    </div>
+
+                                    <div>
+                                        <label className="input-label">Quantity</label>
+                                        <input type="number" min="0" className="input-quantity" value={entry.quantity} onChange={(e) => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
+                                    </div>
+
+                                    {index > 0 && (
+                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
+                                    )}
+                                </div>
+                            ))}
+
+                            <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
+                        </div>
                     </div>
-                ))}
 
-                <Button type="button" variant="ghost" size="sm" icon={<CgMathPlus />} onClick={addInventoryRow}>Add inventory</Button>
-
-                <div className="dialog-buttons">
-                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>Add product</Button>
-                </div>
-            </form>
-        </Dialog>
+                    <div className="side-panel-footer">
+                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" variant="primary" disabled={submitting}>Add product</Button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 }
