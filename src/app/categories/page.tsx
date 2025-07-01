@@ -4,6 +4,7 @@ import { EditCategoryButton } from '@/src/features/categories/edit/EditCategoryB
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { Search } from '../../components/SearchBar/searchBar';
 import { createClient } from '@/src/utils/supabase/server';
+import styles from './categories.module.css';
 
 export default async function CategoriesPage({ searchParams }: { searchParams: any }) {
     const supabase = await createClient();
@@ -61,7 +62,13 @@ export default async function CategoriesPage({ searchParams }: { searchParams: a
                 </table>
             </div>
 
-            <div className="pagination">
+            <div className="pagination total-count">
+                <div className={styles.summary}>
+                    <div className={styles.total}>
+                        Total <strong>{totalCount}</strong> categories
+                    </div>
+                </div>
+
                 <Pagination totalPages={totalPages} currentPage={page} />
             </div>
         </>
