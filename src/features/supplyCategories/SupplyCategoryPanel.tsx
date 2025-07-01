@@ -6,6 +6,7 @@ import { Button } from '@/src/components/Button/button';
 import { DeleteButton } from './delete/DeleteButton';
 import { EditSupplyCategoryButton } from './edit/EditSupplyCategoryButton';
 import { AddSupplyCategoryDialog } from './add/AddSupplyCategoryDialog';
+import { CgMathPlus } from 'react-icons/cg';
 
 export type SupplyCategory = { id: string; category_name: string };
 
@@ -49,14 +50,7 @@ export default function SupplyCategoryPanel({ open, onClose }: Props) {
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
             {addOpen && (
-                <AddSupplyCategoryDialog
-                    open={addOpen}
-                    onClose={() => {
-                        setAddOpen(false);
-                        handleUpdated();
-                    }}
-                    onAdded={handleUpdated}
-                />
+                <AddSupplyCategoryDialog open={addOpen} onClose={() => { setAddOpen(false); handleUpdated(); }} onAdded={handleUpdated} />
             )}
             <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="panel-title">
                 <div className="side-panel-header">
@@ -64,10 +58,7 @@ export default function SupplyCategoryPanel({ open, onClose }: Props) {
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
                 <div className="side-panel-content">
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-                        <Button variant="primary" onClick={() => setAddOpen(true)}>Add category</Button>
-                    </div>
-                    <table>
+                    <table className="batch-list">
                         <thead>
                             <tr>
                                 <th>Category name</th>
@@ -88,6 +79,10 @@ export default function SupplyCategoryPanel({ open, onClose }: Props) {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                <div className="side-panel-footer">
+                    <Button variant="primary" icon={<CgMathPlus />} onClick={() => setAddOpen(true)}>Create new category</Button>
                 </div>
             </div>
         </>

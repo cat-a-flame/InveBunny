@@ -9,7 +9,7 @@ export function SettingsButton() {
 
     return (
         <>
-            <IconButton icon={<i className="fa-solid fa-cog"></i>} title="Settings" onClick={() => setOpen(true)} />
+            <IconButton icon={<i className="fa-solid fa-list"></i>} title="Supply categories" onClick={() => setOpen(true)} />
             {open && <SupplyCategoryPanel open={open} onClose={() => setOpen(false)} />}
         </>
     );
