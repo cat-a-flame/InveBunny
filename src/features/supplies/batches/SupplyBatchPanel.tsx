@@ -174,7 +174,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                         </>
                     ) : null}
                     
-                    {activeBatches.length == 0 && archivedBatches.length == 0 ? (
+                    {activeBatches.length == 0 && archivedBatches.length == 0 && !isLoading ? (
                         <EmptyState
                             title="You have no supply batches yet"
                             subtitle="Create a new batch to get started."
@@ -184,11 +184,11 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
                     ) : null}
                 </div>
 
-                    {activeBatches.length > 0 || archivedBatches.length > 0 ? (
-                        <div className="side-panel-footer">
-                            <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
-                        </div>
-                    ) : null}
+                {activeBatches.length > 0 || archivedBatches.length > 0 ? (
+                    <div className="side-panel-footer">
+                        <Button variant="primary" icon={<CgMathPlus />} onClick={() => setShowCreateDialog(true)}>Create new batch</Button>
+                    </div>
+                ) : null}
             </div>
 
             {showCreateDialog && (

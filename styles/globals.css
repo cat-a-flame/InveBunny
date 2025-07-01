@@ -224,7 +224,7 @@ td {
     margin-top: 1rem;
     padding: .75rem 1.25rem;
 
-    &.inventory-page {
+    &.total-count {
         justify-content: space-between;
     }
 }

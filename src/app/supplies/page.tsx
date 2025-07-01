@@ -6,6 +6,7 @@ import { Search } from '../../components/SearchBar/searchBar';
 import { ViewBatchButton } from '@/src/features/supplies/batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
 import { SettingsButton } from '@/src/features/supplyCategories/SettingsButton';
+import styles from './supplies.module.css';
 
 export default async function SuppliesPage({ searchParams }: { searchParams: any }) {
     const supabase = await createClient();
@@ -18,10 +19,13 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
     const { data: supplies, count } = await supabase
         .from('supplies')
         .select(
-            `id, supply_name, supply_category_id, supply_categories(id, category_name)`,
+            `id,
+            supply_name,
+            supply_category_id,
+            supply_categories(id, category_name)`,
             { count: 'exact' }
         )
-        .or(`supply_name.ilike.%${query}%,supply_categories.category_name.ilike.%${query}%`)
+        .ilike('supply_name', `%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('supply_name', { ascending: true });
 
@@ -38,7 +42,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
 
             <div className="content">
                 <div className="filter-bar supplies-filter-bar">
-                    <Search placeholder="Search for supply name or category" query={query} />
+                    <Search placeholder="Search for supply name" query={query} />
 
                     <SettingsButton />
                 </div>
@@ -73,7 +77,13 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                 </table>
             </div>
 
-            <div className="pagination">
+            <div className="pagination total-count">
+                <div className={styles.summary}>
+                    <div className={styles.total}>
+                        Total <strong>{totalCount}</strong> supplies
+                    </div>
+                </div>
+
                 <Pagination totalPages={totalPages} currentPage={page} />
             </div>
         </>
