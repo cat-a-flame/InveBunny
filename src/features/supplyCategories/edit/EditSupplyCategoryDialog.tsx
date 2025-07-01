@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/src/components/Button/button';
-import { Panel } from '@/src/components/Panel/panel';
+import { Dialog } from '@/src/components/Dialog/dialog';
 import { useToast } from '@/src/components/Toast/toast';
 
 type Props = {
@@ -42,9 +42,7 @@ export function EditSupplyCategoryDialog({ id, currentName, open, onClose, onUpd
     };
 
     return (
-        <>
-            {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <Panel isOpen={open} onClose={onClose} title="Edit category">
+        <Dialog open={open} onClose={onClose} title="Edit category">
             <form onSubmit={handleSubmit} method="dialog">
                 <div className="input-group">
                     <label className="input-label">Name</label>
@@ -55,7 +53,6 @@ export function EditSupplyCategoryDialog({ id, currentName, open, onClose, onUpd
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-            </Panel>
-        </>
+        </Dialog>
     );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '../../../components/Button/button';
-import { Panel } from '../../../components/Panel/panel';
+import { Dialog } from '../../../components/Dialog/dialog';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '../../../components/Toast/toast';
@@ -37,9 +37,7 @@ export function AddVariantDialog({ open, onClose }: Props) {
     };
 
     return (
-        <>
-            {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <Panel isOpen={open} onClose={onClose} title="Add new variant">
+        <Dialog open={open} onClose={onClose} title="Add new variant">
             <form onSubmit={handleSubmit} method="dialog">
                 <div className="input-group">
                     <label className="input-label">Name</label>
@@ -51,7 +49,6 @@ export function AddVariantDialog({ open, onClose }: Props) {
                     <Button variant="primary" type="submit">Save</Button>
                 </div>
             </form>
-            </Panel>
-        </>
+        </Dialog>
     );
 }

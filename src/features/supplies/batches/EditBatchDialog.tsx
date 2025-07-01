@@ -1,5 +1,5 @@
 import { Button } from '../../../components/Button/button';
-import { Panel } from '@/src/components/Panel/panel';
+import { Dialog } from '@/src/components/Dialog/dialog';
 import { useState } from 'react';
 import { useToast } from '../../../components/Toast/toast';
 
@@ -46,9 +46,7 @@ export default function EditBatchDialog({ open, onClose, batch, onUpdated }: Edi
     };
 
     return (
-        <>
-            {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <Panel isOpen={open} onClose={onClose} title="Edit batch">
+        <Dialog open={open} onClose={onClose} title="Edit batch">
             <form onSubmit={handleSubmit} className="form-grid">
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
@@ -90,7 +88,6 @@ export default function EditBatchDialog({ open, onClose, batch, onUpdated }: Edi
                     <Button type="button" variant="primary" onClick={handleSubmit}>Save</Button>
                 </div>
             </form>
-            </Panel>
-        </>
+        </Dialog>
     );
 }
