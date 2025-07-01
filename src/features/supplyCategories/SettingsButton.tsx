@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import { IconButton } from '@/src/components/IconButton/iconButton';
-import { SupplyCategorySettingsDialog } from './SupplyCategorySettingsDialog';
+import SupplyCategoryPanel from './SupplyCategoryPanel';
 
 export function SettingsButton() {
     const [open, setOpen] = useState(false);
 
     return (
         <>
-            <IconButton icon={<i className="fa-solid fa-cog"></i>} title="Settings" onClick={() => setOpen(true)} />
-            {open && <SupplyCategorySettingsDialog open={open} onClose={() => setOpen(false)} />}
+            <IconButton icon={<i className="fa-solid fa-list"></i>} title="Supply categories" onClick={() => setOpen(true)} />
+            {open && <SupplyCategoryPanel open={open} onClose={() => setOpen(false)} />}
         </>
     );
 }
