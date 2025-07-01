@@ -204,7 +204,7 @@ export function EditProductDialog({
                     <h3 className="side-panel-title" id="dialog-title">Edit product</h3>
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
-            <form onSubmit={handleSubmit} className="dialog-form">
+            <form onSubmit={handleSubmit} className="side-panel-content">
                 <div className="input-group">
                     <label htmlFor="product_name" className="input-label">
                         Product name

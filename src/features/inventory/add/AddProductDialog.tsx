@@ -130,7 +130,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     <h3 className="side-panel-title" id="dialog-title">Add new product</h3>
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
-            <form onSubmit={handleSubmit} className="dialog-form">
+            <form onSubmit={handleSubmit} className="side-panel-content">
                 <div className="input-group">
                     <label htmlFor="productName" className="input-label">Product name</label>
                     <input name="productName" type="text" value={formData.productName} onChange={handleChange} required />
