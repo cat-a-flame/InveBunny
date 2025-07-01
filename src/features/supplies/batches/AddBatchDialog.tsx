@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Dialog } from '@/src/components/Dialog/dialog';
+import { useState, useEffect, useRef } from 'react';
+import { IconButton } from '@/src/components/IconButton/iconButton';
 import { Button } from '@/src/components/Button/button';
 import { useToast } from '../../../components/Toast/toast';
 
@@ -15,6 +15,8 @@ type Props = {
 
 export default function CreateBatchDialog({ open, onClose, supplyId, supplyName, onCreated }: Props) {
     const toast = useToast();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     const [form, setForm] = useState({
         supplier_name: '',
@@ -26,6 +28,16 @@ export default function CreateBatchDialog({ open, onClose, supplyId, supplyName,
     });
 
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -54,8 +66,14 @@ export default function CreateBatchDialog({ open, onClose, supplyId, supplyName,
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Create new batch">
-            <form onSubmit={handleSubmit} className="form-grid">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title" id="dialog-title">Create new batch</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
+                <form onSubmit={handleSubmit} className="side-panel-content form-grid">
                 <div className="input-group">
                     <label className="input-label">Supply name</label>
                     <input name="supply_name" value={supplyName} readOnly />
@@ -96,11 +114,12 @@ export default function CreateBatchDialog({ open, onClose, supplyId, supplyName,
                     </div>
                 </div>
 
-                <div className="dialog-buttons">
-                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>Create batch</Button>
-                </div>
-            </form>
-        </Dialog>
+                    <div className="side-panel-footer">
+                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" variant="primary" disabled={submitting}>Create batch</Button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 }

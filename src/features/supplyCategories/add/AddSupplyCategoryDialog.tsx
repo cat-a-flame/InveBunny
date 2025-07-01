@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/src/components/Button/button';
-import { Dialog } from '@/src/components/Dialog/dialog';
+import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useToast } from '@/src/components/Toast/toast';
 
 type Props = {
@@ -16,6 +16,18 @@ export function AddSupplyCategoryDialog({ open, onClose, onAdded }: Props) {
     const [categoryName, setCategoryName] = useState('');
     const toast = useToast();
     const router = useRouter();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,17 +51,24 @@ export function AddSupplyCategoryDialog({ open, onClose, onAdded }: Props) {
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Add supply category">
-            <form onSubmit={handleSubmit} method="dialog">
-                <div className="input-group">
-                    <label className="input-label">Name</label>
-                    <input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title" id="dialog-title">Add supply category</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
                 </div>
-                <div className="dialog-buttons">
-                    <Button variant="ghost" onClick={onClose} type="button">Cancel</Button>
-                    <Button variant="primary" type="submit">Save</Button>
-                </div>
-            </form>
-        </Dialog>
+                <form onSubmit={handleSubmit} className="side-panel-content">
+                    <div className="input-group">
+                        <label className="input-label">Name</label>
+                        <input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} required />
+                    </div>
+                    <div className="side-panel-footer">
+                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" variant="primary">Save</Button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 }

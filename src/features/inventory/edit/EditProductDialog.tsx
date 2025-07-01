@@ -1,9 +1,9 @@
 'use client';
 
 import { Button } from '../../../components/Button/button';
-import { Panel } from '../../../components/Panel/panel';
+import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Category = {
@@ -61,6 +61,18 @@ export function EditProductDialog({
     const toast = useToast();
     const [submitting, setSubmitting] = useState(false);
     const router = useRouter();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open]);
 
     // Initialize selected inventory with current inventory or first available
     const [selectedInventoryId, setSelectedInventoryId] = useState(
@@ -187,7 +199,11 @@ export function EditProductDialog({
     return (
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <Panel isOpen={open} onClose={onClose} title="Edit product">
+            <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title" id="dialog-title">Edit product</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
             <form onSubmit={handleSubmit} className="dialog-form">
                 <div className="input-group">
                     <label htmlFor="product_name" className="input-label">
@@ -267,12 +283,12 @@ export function EditProductDialog({
                     </label>
                 </div>
 
-                <div className="dialog-buttons">
+                <div className="side-panel-footer">
                     <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>Cancel</Button>
                     <Button type="submit" variant="primary" disabled={submitting}>Save</Button>
                 </div>
             </form>
-            </Panel>
+            </div>
         </>
     );
 }

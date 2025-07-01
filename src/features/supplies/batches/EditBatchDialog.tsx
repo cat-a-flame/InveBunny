@@ -1,6 +1,6 @@
 import { Button } from '../../../components/Button/button';
-import { Dialog } from '@/src/components/Dialog/dialog';
-import { useState } from 'react';
+import { IconButton } from '@/src/components/IconButton/iconButton';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../../../components/Toast/toast';
 
 type EditBatchDialogProps = {
@@ -21,6 +21,19 @@ type EditBatchDialogProps = {
 export default function EditBatchDialog({ open, onClose, batch, onUpdated }: EditBatchDialogProps) {
     const [formData, setFormData] = useState(batch);
     const toast = useToast();
+    const isMounted = useRef(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            isMounted.current = true;
+            setTimeout(() => setIsOpen(true), 50);
+            setFormData(batch);
+        } else {
+            setIsOpen(false);
+            isMounted.current = false;
+        }
+    }, [open, batch]);
 
     const handleSubmit = async () => {
         try {
@@ -46,8 +59,14 @@ export default function EditBatchDialog({ open, onClose, batch, onUpdated }: Edi
     };
 
     return (
-        <Dialog open={open} onClose={onClose} title="Edit batch">
-            <form onSubmit={handleSubmit} className="form-grid">
+        <>
+            {open && <div className="side-panel-backdrop" onClick={onClose} />}
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+                <div className="side-panel-header">
+                    <h3 className="side-panel-title" id="dialog-title">Edit batch</h3>
+                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
+                </div>
+                <form onSubmit={handleSubmit} className="side-panel-content form-grid">
                 <div className="input-group">
                     <label className="input-label">Batch name</label>
                     <input name="batch_name" value={formData.batch_name} onChange={(e) => setFormData({ ...formData, batch_name: e.target.value })} required />
@@ -83,11 +102,12 @@ export default function EditBatchDialog({ open, onClose, batch, onUpdated }: Edi
                     </div>
                 </div>
 
-                <div className="dialog-buttons">
-                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="button" variant="primary" onClick={handleSubmit}>Save</Button>
-                </div>
-            </form>
-        </Dialog>
+                    <div className="side-panel-footer">
+                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button type="button" variant="primary" onClick={handleSubmit}>Save</Button>
+                    </div>
+                </form>
+            </div>
+        </>
     );
 }
