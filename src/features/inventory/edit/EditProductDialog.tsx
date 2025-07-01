@@ -2,6 +2,7 @@
 
 import { Button } from '../../../components/Button/button';
 import { IconButton } from '../../../components/IconButton/iconButton';
+import { CgMathPlus } from 'react-icons/cg';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -74,83 +75,84 @@ export function EditProductDialog({
         }
     }, [open]);
 
-    // Initialize selected inventory with current inventory or first available
-    const [selectedInventoryId, setSelectedInventoryId] = useState(
-        product.currentInventoryId || product.inventories[0]?.inventory_id || inventories[0]?.id || ''
-    );
-
-    // Find the initial inventory data
-    const initialInventoryData = product.inventories.find(
-        pi => pi.inventory_id === selectedInventoryId
-    ) || {
-        product_sku: product.product_sku,
-        product_quantity: product.product_quantity,
-    };
-
     const [formData, setFormData] = useState({
         product_name: product.product_name || '',
         product_category: product.product_category || '',
         product_variant: product.product_variant || '',
         product_status: product.product_status ?? false,
-        product_sku: initialInventoryData.product_sku,
-        product_quantity: initialInventoryData.product_quantity,
     });
 
+    const [inventoryEntries, setInventoryEntries] = useState<Array<{ inventoryId: string; sku: string; quantity: number }>>([]);
+
     useEffect(() => {
-        if (open) {
-            const defaultInventoryId = product.currentInventoryId ||
-                inventories[0]?.id || '';
-            setSelectedInventoryId(defaultInventoryId);
+        if (!open) return;
 
-            const selectedInventory = product.inventories.find(
-                pi => pi.inventory_id === defaultInventoryId
-            ) || {
-                product_sku: product.product_sku,
-                product_quantity: product.product_quantity,
-                inventory_id: defaultInventoryId
-            };
+        setFormData({
+            product_name: product.product_name || '',
+            product_category: product.product_category || '',
+            product_variant: product.product_variant || '',
+            product_status: product.product_status ?? false,
+        });
 
-            setFormData({
-                product_name: product.product_name || '',
-                product_category: product.product_category || '',
-                product_variant: product.product_variant || '',
-                product_status: product.product_status ?? false,
-                product_sku: selectedInventory.product_sku,
-                product_quantity: selectedInventory.product_quantity,
-            });
-        }
-    }, [open, product, inventories]);
-
-    // Update form data when selected inventory changes
-    useEffect(() => {
-        const selectedInventory = product.inventories.find(
-            pi => pi.inventory_id === selectedInventoryId
-        ) || {
-            product_sku: product.product_sku,
-            product_quantity: product.product_quantity,
+        const loadInventories = async () => {
+            try {
+                const res = await fetch(`/api/inventory/productInventories?productId=${product.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const entries = (data.inventories || []).map((inv: any) => ({
+                        inventoryId: inv.inventory_id,
+                        sku: inv.product_sku || '',
+                        quantity: inv.product_quantity || 0,
+                    }));
+                    setInventoryEntries(entries.length > 0 ? entries : [{ inventoryId: '', sku: '', quantity: 0 }]);
+                } else {
+                    const fallback = product.inventories.map(pi => ({
+                        inventoryId: pi.inventory_id,
+                        sku: pi.product_sku,
+                        quantity: pi.product_quantity,
+                    }));
+                    setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '', sku: '', quantity: 0 }]);
+                }
+            } catch {
+                const fallback = product.inventories.map(pi => ({
+                    inventoryId: pi.inventory_id,
+                    sku: pi.product_sku,
+                    quantity: pi.product_quantity,
+                }));
+                setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '', sku: '', quantity: 0 }]);
+            }
         };
 
-        setFormData(prev => ({
-            ...prev,
-            product_sku: selectedInventory.product_sku,
-            product_quantity: selectedInventory.product_quantity,
-        }));
-    }, [selectedInventoryId, product.inventories]);
+        loadInventories();
+    }, [open, product, inventories]);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
 
-        if (name === 'selectedInventoryId') {
-            setSelectedInventoryId(value);
-            return;
-        }
-
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'product_quantity' ? Number(value) : name === 'product_status' ? (e.target instanceof HTMLInputElement ? e.target.checked : false) : value,
+            [name]: name === 'product_status'
+                ? (e.target instanceof HTMLInputElement ? e.target.checked : false)
+                : value,
         }));
+    };
+
+    const handleInventoryChange = (index: number, field: string, value: string | number) => {
+        setInventoryEntries(prev => {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], [field]: value };
+            return updated;
+        });
+    };
+
+    const addInventoryRow = () => {
+        setInventoryEntries(prev => [...prev, { inventoryId: '', sku: '', quantity: 0 }]);
+    };
+
+    const removeInventoryRow = (index: number) => {
+        setInventoryEntries(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -158,7 +160,7 @@ export function EditProductDialog({
         setSubmitting(true);
 
         try {
-            const response = await fetch('/api/inventory/updateProduct', {
+            const response = await fetch('/api/inventory/updateProductInventories', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -167,10 +169,11 @@ export function EditProductDialog({
                     product_category: formData.product_category,
                     product_variant: formData.product_variant,
                     product_status: formData.product_status,
-                    inventory_id: selectedInventoryId,
-                    current_inventory_id: product.currentInventoryId,
-                    product_sku: formData.product_sku,
-                    product_quantity: formData.product_quantity,
+                    inventories: inventoryEntries.map(entry => ({
+                        inventory_id: entry.inventoryId,
+                        product_sku: entry.sku,
+                        product_quantity: entry.quantity,
+                    }))
                 }),
             });
 
@@ -212,36 +215,37 @@ export function EditProductDialog({
                     <input name="product_name" type="text" value={formData.product_name} onChange={handleChange} required />
                 </div>
 
-                <div className="double-input-group">
-                    <div className="input-grow">
-                        <label htmlFor="selectedInventoryId" className="input-label">
-                            Inventory
-                        </label>
-                        <select name="selectedInventoryId" value={selectedInventoryId} onChange={handleChange} required>
-                            {inventories.map(inv => (
-                                <option key={inv.id} value={inv.id}>
-                                    {inv.inventory_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+                <h4 className="section-subtitle">Inventories</h4>
 
-                <div className="double-input-group">
-                    <div className="input-grow">
-                        <label htmlFor="product_sku" className="input-label">
-                            SKU
-                        </label>
-                        <input name="product_sku" type="text" value={formData.product_sku} onChange={handleChange} required />
-                    </div>
+                {inventoryEntries.map((entry, index) => (
+                    <div key={index} className="double-input-group">
+                        <div className="input-group-wrapper">
+                            <label className="input-label">Inventory name</label>
+                            <select value={entry.inventoryId} onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
+                                <option value="">Select an inventory</option>
+                                {inventories.map(inv => (
+                                    <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div className="input-shrink">
-                        <label htmlFor="product_quantity" className="input-label">
-                            Quantity
-                        </label>
-                        <input name="product_quantity" type="number" min="0" value={formData.product_quantity} onChange={handleChange} required />
+                        <div className="input-group-wrapper">
+                            <label className="input-label">SKU</label>
+                            <input type="text" value={entry.sku} onChange={e => handleInventoryChange(index, 'sku', e.target.value)} required />
+                        </div>
+
+                        <div className="input-group-wrapper input-group-quantity">
+                            <label className="input-label">Quantity</label>
+                            <input type="number" min="0" value={entry.quantity} onChange={e => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
+                        </div>
+
+                        {inventoryEntries.length > 1 && (
+                            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
+                        )}
                     </div>
-                </div>
+                ))}
+
+                <Button type="button" variant="ghost" size="sm" icon={<CgMathPlus />} onClick={addInventoryRow}>Add inventory</Button>
 
                 <div className="double-input-group">
                     <div className="input-equal">
