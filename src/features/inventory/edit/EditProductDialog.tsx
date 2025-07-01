@@ -202,103 +202,102 @@ export function EditProductDialog({
     return (
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <div className={`side-panel ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+            <div className={`side-panel side-panel-md ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
                 <div className="side-panel-header">
                     <h3 className="side-panel-title" id="dialog-title">Edit product</h3>
-                    <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
-                </div>
-            <form onSubmit={handleSubmit} className="side-panel-content">
-                <div className="input-group">
-                    <label htmlFor="product_name" className="input-label">
-                        Product name
-                    </label>
-                    <input name="product_name" type="text" value={formData.product_name} onChange={handleChange} required />
                 </div>
 
-                <h4 className="section-subtitle">Inventories</h4>
+                <form onSubmit={handleSubmit} className="side-panel-form">
+                    <div className="side-panel-content">
+                        <div className="input-group">
+                            <label htmlFor="product_name" className="input-label">Product name</label>
+                            <input name="product_name" type="text" className="input-max-width" value={formData.product_name} onChange={handleChange} required />
+                        </div>
 
-                {inventoryEntries.map((entry, index) => (
-                    <div key={index} className="double-input-group">
-                        <div className="input-group-wrapper">
-                            <label className="input-label">Inventory name</label>
-                            <select value={entry.inventoryId} onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
-                                <option value="">Select an inventory</option>
-                                {inventories
-                                    .filter(inv =>
-                                        inv.id === entry.inventoryId ||
-                                        !inventoryEntries.some(
-                                            (e, idx) => idx !== index && e.inventoryId === inv.id
-                                        )
-                                    )
-                                    .map(inv => (
-                                        <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                        <div className="double-input-group">
+                            <div className="input-equal">
+                                <label htmlFor="product_category" className="input-label">
+                                    Category
+                                </label>
+                                <select name="product_category" className="input-max-width" value={formData.product_category} onChange={handleChange} required>
+                                    <option value="">Select a category</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.category_name}
+                                        </option>
                                     ))}
-                            </select>
+                                </select>
+                            </div>
+
+                            <div className="input-equal">
+                                <label htmlFor="product_variant" className="input-label">Variant</label>
+                                <select name="product_variant" className="input-max-width" value={formData.product_variant || ''} onChange={handleChange}>
+                                    <option value="">Select a variant</option>
+                                    {variants.map(variant => (
+                                        <option key={variant.id} value={variant.id}>
+                                            {variant.variant_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="input-group-wrapper">
-                            <label className="input-label">SKU</label>
-                            <input type="text" value={entry.sku} onChange={e => handleInventoryChange(index, 'sku', e.target.value)} required />
+                        <div className="input-group">
+                            <label htmlFor="product_status" className="input-label">Status</label>
+                            <label>
+                                <input name="product_status" type="checkbox" checked={formData.product_status} onChange={(e) => setFormData((prev) => ({ ...prev, product_status: e.target.checked, }))} />
+                                Product is active
+                            </label>
                         </div>
 
-                        <div className="input-group-wrapper input-group-quantity">
-                            <label className="input-label">Quantity</label>
-                            <input type="number" min="0" value={entry.quantity} onChange={e => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
-                        </div>
+                        <div className="boxed-section">
+                            <h4 className="section-subtitle">Inventories</h4>
 
-                        {inventoryEntries.length > 1 && (
-                            <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
-                        )}
-                    </div>
-                ))}
+                            {inventoryEntries.map((entry, index) => (
+                                <div key={index} className="double-input-group">
+                                    <div>
+                                        <label className="input-label">Inventory name</label>
+                                        <select value={entry.inventoryId} onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
+                                            <option value="">Select an inventory</option>
+                                            {inventories
+                                                .filter(inv =>
+                                                    inv.id === entry.inventoryId ||
+                                                    !inventoryEntries.some(
+                                                        (e, idx) => idx !== index && e.inventoryId === inv.id
+                                                    )
+                                                )
+                                                .map(inv => (
+                                                    <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                                                ))}
+                                        </select>
+                                    </div>
 
-                <Button type="button" variant="ghost" size="sm" icon={<CgMathPlus />} onClick={addInventoryRow}>Add inventory</Button>
+                                    <div>
+                                        <label className="input-label">SKU</label>
+                                        <input type="text" value={entry.sku} className="input-sku" onChange={e => handleInventoryChange(index, 'sku', e.target.value)} required />
+                                    </div>
 
-                <div className="double-input-group">
-                    <div className="input-equal">
-                        <label htmlFor="product_category" className="input-label">
-                            Category
-                        </label>
-                        <select name="product_category" value={formData.product_category} onChange={handleChange} required>
-                            <option value="">Select a category</option>
-                            {categories.map(cat => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.category_name}
-                                </option>
+                                    <div>
+                                        <label className="input-label">Quantity</label>
+                                        <input type="number" min="0" value={entry.quantity} className="input-quantity" onChange={e => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
+                                    </div>
+
+                                    {inventoryEntries.length > 1 && (
+                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
+                                    )}
+                                </div>
                             ))}
-                        </select>
+
+                            <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
+                        </div>
+
                     </div>
 
-                    <div className="input-equal">
-                        <label htmlFor="product_variant" className="input-label">
-                            Variant
-                        </label>
-                        <select name="product_variant" value={formData.product_variant || ''} onChange={handleChange}>
-                            <option value="">Select a variant</option>
-                            {variants.map(variant => (
-                                <option key={variant.id} value={variant.id}>
-                                    {variant.variant_name}
-                                </option>
-                            ))}
-                        </select>
+                    <div className="side-panel-footer">
+                        <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>Cancel</Button>
+                        <Button type="submit" variant="primary" disabled={submitting}>Save</Button>
                     </div>
-                </div>
-
-                <div className="input-group">
-                    <label htmlFor="product_status" className="input-label">
-                        Status
-                    </label>
-                    <label>
-                        <input name="product_status" type="checkbox" checked={formData.product_status} onChange={(e) => setFormData((prev) => ({ ...prev, product_status: e.target.checked, }))} />
-                        Product is active
-                    </label>
-                </div>
-
-                <div className="side-panel-footer">
-                    <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>Cancel</Button>
-                    <Button type="submit" variant="primary" disabled={submitting}>Save</Button>
-                </div>
-            </form>
+                </form>
             </div>
         </>
     );
