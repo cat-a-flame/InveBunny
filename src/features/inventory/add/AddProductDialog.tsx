@@ -76,7 +76,14 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     };
 
     const addInventoryRow = () => {
-        setInventoryEntries(prev => [...prev, { inventoryId: '', quantity: 0, status: true, sku: '' }]);
+        setInventoryEntries(prev => [
+            ...prev,
+            { inventoryId: '', quantity: 0, status: true, sku: '' },
+        ]);
+    };
+
+    const removeInventoryRow = (index: number) => {
+        setInventoryEntries(prev => prev.filter((_, i) => i !== index));
     };
 
 
@@ -191,7 +198,13 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                             <input type="number" min="0" value={entry.quantity} onChange={(e) => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
                         </div>
 
-                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Remove inventory" />
+                        {index > 0 && (
+                            <IconButton
+                                icon={<i className="fa-regular fa-trash-can"></i>}
+                                onClick={() => removeInventoryRow(index)}
+                                title="Remove inventory"
+                            />
+                        )}
                     </div>
                 ))}
 

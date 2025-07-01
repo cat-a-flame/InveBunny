@@ -223,9 +223,16 @@ export function EditProductDialog({
                             <label className="input-label">Inventory name</label>
                             <select value={entry.inventoryId} onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
                                 <option value="">Select an inventory</option>
-                                {inventories.map(inv => (
-                                    <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
-                                ))}
+                                {inventories
+                                    .filter(inv =>
+                                        inv.id === entry.inventoryId ||
+                                        !inventoryEntries.some(
+                                            (e, idx) => idx !== index && e.inventoryId === inv.id
+                                        )
+                                    )
+                                    .map(inv => (
+                                        <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                                    ))}
                             </select>
                         </div>
 
