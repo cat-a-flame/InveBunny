@@ -1,4 +1,5 @@
 import { Button } from '@/src/components/Button/button';
+import Image from 'next/image';
 import styles from './scan.module.css';
 
 export default async function ScanPage() {
@@ -10,7 +11,7 @@ export default async function ScanPage() {
             </div>
 
             <div className={styles["scanning-area"]}>
-                <img src="/images/scan_barcode.png" className={styles["barcode-image"]} alt="Scan items" />
+                <Image src="/images/scan_barcode.png" alt="Scan items" className={styles["barcode-image"]} width={200} height={200} />
 
                 <input type="text" className={styles["barcode-input"]} placeholder="Scan an item" />
 
