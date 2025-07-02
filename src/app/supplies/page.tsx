@@ -61,7 +61,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                                 <td><span className="item-name">{supply.supply_name}</span></td>
                                 <td>
                                     <div className="category-badge">
-                                        {supply.supply_categories?.category_name}
+                                        {(supply.supply_categories as any)?.category_name}
                                     </div>
                                 </td>
                                 <td>

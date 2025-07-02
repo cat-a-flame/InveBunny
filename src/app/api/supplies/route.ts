@@ -6,12 +6,9 @@ export async function GET(request: Request) {
   const withBatches = searchParams.get('withBatches') === 'true';
   const supabase = await createClient();
 
-  let query = supabase.from('supplies');
-  if (withBatches) {
-    query = query.select(`${fields}, supply_batch!inner(id)`);
-  } else {
-    query = query.select(fields);
-  }
+  const query = withBatches
+    ? supabase.from('supplies').select(`${fields}, supply_batch!inner(id)`)
+    : supabase.from('supplies').select(fields);
 
   const { data, error } = await query.order('supply_name');
 

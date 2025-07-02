@@ -89,7 +89,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     // Prepare queries that don't depend on each other's results
     const productInventoriesPromise = supabase
         .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku')
+        .select('id, product_id, product_quantity, product_sku, inventory_id')
         .eq('inventory_id', inventoryId);
 
     const inventoryMatchesPromise = query ?
@@ -233,8 +233,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                             {inventoryInfo?.product_quantity ?? '-'}
                                         </div>
                                     </td>
-                                    <td>{product.categories?.category_name || '-'}</td>
-                                    <td>{product.variants?.variant_name || '-'}</td>
+                                    <td>{(product.categories as any)?.category_name || '-'}</td>
+                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
                                     <td>
                                         <div className="table-actions">
                                             <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>

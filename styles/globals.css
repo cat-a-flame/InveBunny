@@ -316,7 +316,7 @@ textarea {
 }
 
 .double-input-group {
-    align-items: end;
+    align-items: flex-end;
     display: flex;
     gap: 1rem;
     margin-bottom: 1.25rem;
@@ -470,7 +470,7 @@ textarea {
 
 .side-panel-footer {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     gap: 1rem;
     padding: 0 2rem;
 }

@@ -16,7 +16,6 @@ type ProductInventory = {
     product_id: string;
     product_sku: string;
     product_quantity: number;
-    product_status: boolean;
 };
 
 type EditProductButtonProps = {
