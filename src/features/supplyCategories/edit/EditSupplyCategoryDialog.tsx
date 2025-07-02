@@ -35,7 +35,7 @@ export function EditSupplyCategoryDialog({ id, currentName, open, onClose, onUpd
             toast('✅ Category updated!');
             router.refresh();
             onClose();
-            onUpdated && onUpdated();
+            onUpdated?.();
         } else {
             toast(`Error: ${result.error}`);
         }

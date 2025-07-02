@@ -2,7 +2,7 @@ import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { EmptyState } from '../../../components/EmptyState/emptyState';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import AddBatchDialog from './AddBatchDialog';
 import EditBatchDialog from './EditBatchDialog';
 import DeleteBatchDialog from './DeleteBatchDialog';
@@ -42,7 +42,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
     const [isLoading, setIsLoading] = useState(false);
     const [deleteBatch, setDeleteBatch] = useState<{ id: string; batch_name: string } | null>(null);
 
-    const refreshBatches = async () => {
+    const refreshBatches = useCallback(async () => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/supplies/batches/?supplyId=${supplyId}`);
@@ -60,7 +60,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [supplyId]);
 
 
     // Fetch supply batches and supply name when dialog opens
@@ -68,7 +68,7 @@ export default function SupplyBatchDialog({ open, onClose, supplyId }: SupplyBat
         if (open) {
             refreshBatches();
         }
-    }, [open, supplyId]);
+    }, [open, supplyId, refreshBatches]);
 
     useEffect(() => {
         if (open) {

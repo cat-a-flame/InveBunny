@@ -32,7 +32,7 @@ export function AddSupplyCategoryDialog({ open, onClose, onAdded }: Props) {
             toast('✅ Category created!');
             router.refresh();
             onClose();
-            onAdded && onAdded();
+            onAdded?.();
         } else {
             toast(`Error: ${result.error}`);
         }

@@ -23,7 +23,7 @@ export const DeleteButton = ({ categoryId, categoryName, onDeleted }: Props) => 
             if (res.ok) {
                 toast('✅ Category successfully deleted');
                 router.refresh();
-                onDeleted && onDeleted();
+                onDeleted?.();
             } else {
                 toast('🚫 Failed to delete category');
             }
