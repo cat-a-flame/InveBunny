@@ -2,7 +2,6 @@
 
 import { Button } from '../../../components/Button/button';
 import { IconButton } from '../../../components/IconButton/iconButton';
-import { CgMathPlus } from 'react-icons/cg';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';

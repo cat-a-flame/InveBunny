@@ -2,7 +2,7 @@ import { Button } from '../../../components/Button/button';
 import { CgMathPlus } from 'react-icons/cg';
 import { EmptyState } from '../../../components/EmptyState/emptyState';
 import { IconButton } from '@/src/components/IconButton/iconButton';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import AddProductBatchPanel from './AddProductBatchPanel';
 import { ProductBatch } from './EditProductBatchPanel';
 import DeleteProductBatchDialog from './DeleteProductBatchDialog';
@@ -23,7 +23,7 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
     const [isLoading, setIsLoading] = useState(false);
     const [deleteBatch, setDeleteBatch] = useState<{ id: string; p_batch_name: string } | null>(null);
 
-    const refreshBatches = async () => {
+    const refreshBatches = useCallback(async () => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/products/batches/?productId=${productId}`);
@@ -39,13 +39,13 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [productId]);
 
     useEffect(() => {
         if (open) {
             refreshBatches();
         }
-    }, [open, productId]);
+    }, [open, productId, refreshBatches]);
 
     useEffect(() => {
         if (open) {
@@ -101,7 +101,7 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
 
                                 <div className="table-actions">
                                     <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                    <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
+                                    <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch?.(batch)} />
                                 </div>
                             </summary>
 
@@ -138,7 +138,7 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
 
                                     <div className="table-actions">
                                         <IconButton icon={<i className="fa-regular fa-trash-can"></i>} title="Delete" onClick={() => setDeleteBatch({ id: batch.id, p_batch_name: batch.p_batch_name })} />
-                                        <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch && onEditBatch(batch)} />
+                                        <IconButton icon={<i className="fa-regular fa-pen-to-square"></i>} title="Edit" onClick={() => onEditBatch?.(batch)} />
                                     </div>
                                 </summary>
 
