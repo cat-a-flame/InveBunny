@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   const supplies = (data || []).map((row: any) => {
     if ('supply_batch' in row) {
-      const { supply_batch, ...rest } = row;
+      const { supply_batch: _unused, ...rest } = row;
       return rest;
     }
     return row;
