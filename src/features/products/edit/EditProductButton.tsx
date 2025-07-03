@@ -14,8 +14,6 @@ type ProductInventory = {
     id: string;
     inventory_id: string;
     product_id: string;
-    product_sku: string;
-    product_quantity: number;
 };
 
 type EditProductButtonProps = {
@@ -24,8 +22,6 @@ type EditProductButtonProps = {
     product_category: string;
     product_variant: string;
     product_status: boolean;
-    product_sku: string;
-    product_quantity: number;
     categories: Array<{ id: string; category_name: string }>;
     variants: Array<{ id: string; variant_name: string }>;
     inventories: Inventory[];
@@ -40,8 +36,6 @@ export function EditProductButton({
     product_category,
     product_variant,
     product_status,
-    product_sku,
-    product_quantity,
     categories,
     variants,
     inventories,
@@ -57,12 +51,8 @@ export function EditProductButton({
         product_category,
         product_variant,
         product_status,
-        product_sku,
-        product_quantity,
         inventories: productInventories.map(pi => ({
             inventory_id: pi.inventory_id,
-            product_sku: pi.product_sku,
-            product_quantity: pi.product_quantity,
         })),
         currentInventoryId,
     };

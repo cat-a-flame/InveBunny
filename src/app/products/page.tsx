@@ -167,8 +167,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
                                                 product_status={product.product_status || false}
-                                                product_sku=""
-                                                product_quantity={0}
                                                 categories={categories || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""

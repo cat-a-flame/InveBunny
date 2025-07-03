@@ -17,8 +17,6 @@ type Inventory = {
 };
 
 type ProductInventoryData = {
-    product_sku: string;
-    product_quantity: number;
     inventory_id: string;
 };
 
@@ -27,8 +25,6 @@ type ProductData = {
     product_name: string;
     product_category: string;
     product_status: boolean;
-    product_sku: string;
-    product_quantity: number;
     inventories: ProductInventoryData[];
     currentInventoryId?: string;
 };
@@ -72,7 +68,7 @@ export function EditProductDialog({
         product_status: product.product_status ?? false,
     });
 
-    const [inventoryEntries, setInventoryEntries] = useState<Array<{ inventoryId: string; sku: string; quantity: number }>>([]);
+    const [inventoryEntries, setInventoryEntries] = useState<Array<{ inventoryId: string }>>([]);
 
     useEffect(() => {
         if (!open) return;
@@ -90,25 +86,19 @@ export function EditProductDialog({
                     const data = await res.json();
                     const entries = (data.inventories || []).map((inv: any) => ({
                         inventoryId: inv.inventory_id,
-                        sku: inv.product_sku || '',
-                        quantity: inv.product_quantity || 0,
                     }));
-                    setInventoryEntries(entries.length > 0 ? entries : [{ inventoryId: '', sku: '', quantity: 0 }]);
+                    setInventoryEntries(entries.length > 0 ? entries : [{ inventoryId: '' }]);
                 } else {
                     const fallback = product.inventories.map(pi => ({
                         inventoryId: pi.inventory_id,
-                        sku: pi.product_sku,
-                        quantity: pi.product_quantity,
                     }));
-                    setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '', sku: '', quantity: 0 }]);
+                    setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '' }]);
                 }
             } catch {
                 const fallback = product.inventories.map(pi => ({
                     inventoryId: pi.inventory_id,
-                    sku: pi.product_sku,
-                    quantity: pi.product_quantity,
                 }));
-                setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '', sku: '', quantity: 0 }]);
+                setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '' }]);
             }
         };
 
@@ -137,7 +127,7 @@ export function EditProductDialog({
     };
 
     const addInventoryRow = () => {
-        setInventoryEntries(prev => [...prev, { inventoryId: '', sku: '', quantity: 0 }]);
+        setInventoryEntries(prev => [...prev, { inventoryId: '' }]);
     };
 
     const removeInventoryRow = (index: number) => {
@@ -159,8 +149,8 @@ export function EditProductDialog({
                     product_status: formData.product_status,
                     inventories: inventoryEntries.map(entry => ({
                         inventory_id: entry.inventoryId,
-                        product_sku: entry.sku,
-                        product_quantity: entry.quantity,
+                        product_sku: '',
+                        product_quantity: 0,
                     }))
                 }),
             });
@@ -248,15 +238,7 @@ export function EditProductDialog({
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label className="input-label">SKU</label>
-                                        <input type="text" value={entry.sku} className="input-sku" onChange={e => handleInventoryChange(index, 'sku', e.target.value)} required />
-                                    </div>
 
-                                    <div>
-                                        <label className="input-label">Quantity</label>
-                                        <input type="number" min="0" value={entry.quantity} className="input-quantity" onChange={e => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
-                                    </div>
 
                                     {inventoryEntries.length > 1 && (
                                         <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
