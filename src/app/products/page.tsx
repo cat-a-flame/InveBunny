@@ -5,13 +5,10 @@ import { FilterBar } from '@/src/features/products/FilterBar';
 import { ViewBatchButton } from '@/src/features/inventory/batches/ViewBatchButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
-import { slugify } from '@/src/utils/slugify';
 
 type SearchParams = {
     query?: string;
     page?: string;
-    inventory?: string;
-    tab?: string;
     statusFilter?: 'active' | 'inactive' | 'all';
     categoryFilter?: string;
     variantFilter?: string;
@@ -32,10 +29,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const variantFilter = resolvedSearchParams.variantFilter || 'all';
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
-    const inventorySlug = resolvedSearchParams.inventory;
-    const tab = resolvedSearchParams.tab || 'active';
 
-    // ========== INVENTORY FETCHING & PROCESSING ==========
+    // ========== INVENTORY FETCHING ==========
     const { data: inventories } = await supabase
         .from('inventories')
         .select('id, inventory_name, is_default')
@@ -55,30 +50,11 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         return 0;
     });
 
-    let selectedInventory = inventorySlug
-        ? inventories.find((inv) => slugify(inv.inventory_name) === inventorySlug)
-        : undefined;
-
-    if (!selectedInventory) {
-        selectedInventory = inventories.find((inv) => inv.is_default) || inventories[0];
-    }
-
-    const inventoryId = selectedInventory?.id;
-
-    if (!inventoryId) {
-        return (
-            <main>
-                <p>No inventory selected.</p>
-            </main>
-        );
-    }
-
     // ========== PRODUCT DATA FETCHING ==========
     // Prepare queries that don't depend on each other's results
     const productInventoriesPromise = supabase
         .from('product_inventories')
-        .select('id, product_id, inventory_id')
-        .eq('inventory_id', inventoryId);
+        .select('id, product_id, inventory_id');
 
     const categoriesPromise = supabase
         .from('categories')
@@ -93,8 +69,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const [{ data: productInventories }, { data: categories }, { data: variants }] =
         await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
 
-    const productIdsInInventory = (productInventories || []).map((pi) => pi.product_id);
-
     // Build main products query
     let productsQuery = supabase
         .from('products')
@@ -107,8 +81,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             categories(id, category_name),
             variants(id, variant_name)
         `)
-        .order('product_name', { ascending: true })
-        .in('id', productIdsInInventory.length > 0 ? productIdsInInventory : [0]);
+        .order('product_name', { ascending: true });
 
     if (query) {
         productsQuery = productsQuery.ilike('product_name', `%${query}%`);
@@ -201,7 +174,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                     <td>{product.product_status ? 'Active' : 'Discontinued'}</td>
                                     <td>
                                         <div className="table-actions">
-                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
+                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId=""/>
                                             <ViewBatchButton productId={product.id} />
 
                                             <EditProductButton
@@ -215,7 +188,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                                 categories={categories || []}
                                                 variants={variants || []}
                                                 inventories={inventories}
-                                                currentInventoryId={inventoryId}
+                                                currentInventoryId=""
                                                 productInventories={productInventories || []}
                                             />
                                         </div>
