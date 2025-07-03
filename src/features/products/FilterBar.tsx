@@ -8,17 +8,13 @@ import { Search } from "@/src/components/SearchBar/searchBar";
 type FilterBarProps = {
     statusFilter: "active" | "inactive" | "all";
     categoryFilter: string;
-    variantFilter: string;
     categories: { id: number; category_name: string }[];
-    variants: { id: number; variant_name: string }[];
 };
 
 export function FilterBar({
     statusFilter: initialStatusFilter,
     categoryFilter: initialCategoryFilter,
-    variantFilter: initialVariantFilter,
     categories,
-    variants,
 }: FilterBarProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -26,15 +22,13 @@ export function FilterBar({
 
     const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
     const [categoryFilter, setCategoryFilter] = useState(initialCategoryFilter);
-    const [variantFilter, setVariantFilter] = useState(initialVariantFilter);
     const [searchQuery, setSearchQuery] = useState(searchParams.get("query") || "");
 
     useEffect(() => {
         setStatusFilter(initialStatusFilter);
         setCategoryFilter(initialCategoryFilter);
-        setVariantFilter(initialVariantFilter);
         setSearchQuery(searchParams.get("query") || "");
-    }, [initialStatusFilter, initialCategoryFilter, initialVariantFilter, searchParams]);
+    }, [initialStatusFilter, initialCategoryFilter, searchParams]);
 
     const updateQueryParam = async (key: string, value: string) => {
         setIsLoading(true);
@@ -56,7 +50,7 @@ export function FilterBar({
         params.delete("page");
 
         try {
-            await router.push(`/inventory?${params.toString()}`);
+            await router.push(`/products?${params.toString()}`);
         } finally {
             setIsLoading(false);
         }
@@ -79,13 +73,13 @@ export function FilterBar({
     };
 
     const hasActiveFilters = () => {
-        const filterKeys = ["query", "statusFilter", "categoryFilter", "variantFilter"];
+        const filterKeys = ["query", "statusFilter", "categoryFilter"];
         return filterKeys.some(key => searchParams.has(key));
     };
 
     return (
         <div className={`filter-bar ${isLoading ? 'filter-bar-loading' : ''}`}>
-            <Search placeholder="Search for product name or SKU" query={searchQuery} onChange={handleSearch} size="md" />
+            <Search placeholder="Search for product name" query={searchQuery} onChange={handleSearch} size="md" />
 
             <div>
                 <label htmlFor="status-filter" className="input-label">Status</label>
@@ -104,18 +98,6 @@ export function FilterBar({
                     {categories.map((c) => (
                         <option key={c.id} value={c.id.toString()}>
                             {c.category_name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label htmlFor="variant-filter" className="input-label">Variant</label>
-                <select id="variant-filter" value={variantFilter} onChange={(e) => { setVariantFilter(e.target.value); updateQueryParam("variantFilter", e.target.value); }} disabled={isLoading}>
-                    <option value="all">All</option>
-                    {variants.map((v) => (
-                        <option key={v.id} value={v.id.toString()}>
-                            {v.variant_name}
                         </option>
                     ))}
                 </select>

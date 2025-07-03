@@ -1,8 +1,8 @@
-import { AddButton } from '@/src/features/inventory/add/AddButton';
-import { DeleteProductButton } from '@/src/features/inventory/delete/DeleteProductButton';
-import { EditProductButton } from '@/src/features/inventory/edit/EditProductButton';
+import { AddButton } from '@/src/features/products/add/AddButton';
+import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
+import { EditProductButton } from '@/src/features/products/edit/EditProductButton';
 import { FilterBar } from '@/src/features/products/FilterBar';
-import { ViewBatchButton } from '@/src/features/inventory/batches/ViewBatchButton';
+import { ViewBatchButton } from '@/src/features/products/batches/ViewBatchButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
 
@@ -11,7 +11,6 @@ type SearchParams = {
     page?: string;
     statusFilter?: 'active' | 'inactive' | 'all';
     categoryFilter?: string;
-    variantFilter?: string;
 };
 
 // ========== CONSTANTS ==========
@@ -26,7 +25,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
 
     const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
-    const variantFilter = resolvedSearchParams.variantFilter || 'all';
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
 
@@ -61,13 +59,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         .select('id, category_name')
         .order('category_name');
 
-    const variantsPromise = supabase
-        .from('variants')
-        .select('id, variant_name')
-        .order('variant_name');
-
-    const [{ data: productInventories }, { data: categories }, { data: variants }] =
-        await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
+    const [{ data: productInventories }, { data: categories }] =
+        await Promise.all([productInventoriesPromise, categoriesPromise]);
 
     // Build main products query
     let productsQuery = supabase
@@ -76,10 +69,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             id,
             product_name,
             product_category,
-            product_variant,
             product_status,
-            categories(id, category_name),
-            variants(id, variant_name)
+            categories(id, category_name)
         `)
         .order('product_name', { ascending: true });
 
@@ -96,10 +87,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
     if (categoryFilter !== 'all') {
         productsQuery = productsQuery.eq('product_category', categoryFilter);
-    }
-
-    if (variantFilter !== 'all') {
-        productsQuery = productsQuery.eq('product_variant', variantFilter);
     }
 
     const { data: products } = await productsQuery;
@@ -134,8 +121,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         <main className="inventory-page">
             {/* Header Section */}
             <div className="pageHeader">
-                <h2 className="heading-title">Inventory</h2>
-                <AddButton categories={categories || []} variants={variants || []} inventories={inventories}/>
+                <h2 className="heading-title">Products</h2>
+                <AddButton categories={categories || []} inventories={inventories}/>
             </div>
 
             {/* Main Content */}
@@ -143,9 +130,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                 <FilterBar
                     statusFilter={statusFilter}
                     categoryFilter={categoryFilter}
-                    variantFilter={variantFilter}
                     categories={categories || []}
-                    variants={variants || []}
                 />
 
                 <table>
@@ -181,12 +166,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                                 id={product.id}
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
-                                                product_variant={product.product_variant || ''}
                                                 product_status={product.product_status || false}
                                                 product_sku=""
                                                 product_quantity={0}
                                                 categories={categories || []}
-                                                variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""
                                                 productInventories={productInventories || []}

@@ -20,8 +20,14 @@ const Sidebar = () => {
                     <ul>
                         <li>
                             <Link className={`${styles.navigationLink} ${pathname === '/inventory' ? styles.active : ''}`} href="/" title="Inventory">
-                                <i className="fa-solid fa-box-open"></i>
+                                <i className="fa-solid fa-warehouse"></i>
                                 {!isCollapsed && <span>Inventory</span>}
+                            </Link>
+                        </li>
+                                                <li>
+                            <Link className={`${styles.navigationLink} ${pathname === '/products' ? styles.active : ''}`} href="/products" title="Products">
+                                <i className="fa-solid fa-box-open"></i>
+                                {!isCollapsed && <span>Products</span>}
                             </Link>
                         </li>
                         <li>
