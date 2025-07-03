@@ -63,13 +63,13 @@ export function FilterBar({
 
     const clearAllFilters = () => {
         const params = new URLSearchParams();
-        if (searchParams.get("inventory")) {
-            params.set("inventory", searchParams.get("inventory")!);
+        if (searchParams.get("products")) {
+            params.set("products", searchParams.get("products")!);
         }
         if (searchParams.get("tab")) {
             params.set("tab", searchParams.get("tab")!);
         }
-        router.push(`/inventory?${params.toString()}`);
+        router.push(`/products?${params.toString()}`);
     };
 
     const hasActiveFilters = () => {

@@ -32,7 +32,7 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
     });
 
     const [inventoryEntries, setInventoryEntries] = useState([
-        { inventoryId: '', quantity: 0, status: true, sku: '' }
+        { inventoryId: '' }
     ]);
 
     const [submitting, setSubmitting] = useState(false);
@@ -70,7 +70,7 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
     const addInventoryRow = () => {
         setInventoryEntries(prev => [
             ...prev,
-            { inventoryId: '', quantity: 0, status: true, sku: '' },
+            { inventoryId: '' },
         ]);
     };
 
@@ -91,7 +91,11 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
                     product_name: formData.productName,
                     product_category: formData.categoryId,
                     product_status: formData.status,
-                    inventories: inventoryEntries
+                    inventories: inventoryEntries.map(entry => ({
+                        inventoryId: entry.inventoryId,
+                        sku: '',
+                        quantity: 0,
+                    }))
                 })
             });
 
@@ -109,7 +113,7 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
                 categoryId: '',
                 status: true
             });
-            setInventoryEntries([{ inventoryId: '', quantity: 0, status: true, sku: '' }]);
+            setInventoryEntries([{ inventoryId: '' }]);
 
         } catch (error) {
             console.error('Error:', error);
@@ -171,15 +175,7 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label className="input-label">SKU</label>
-                                        <input type="text" className="input-sku" value={entry.sku} onChange={(e) => handleInventoryChange(index, 'sku', e.target.value)} required />
-                                    </div>
 
-                                    <div>
-                                        <label className="input-label">Quantity</label>
-                                        <input type="number" min="0" className="input-quantity" value={entry.quantity} onChange={(e) => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
-                                    </div>
 
                                     {index > 0 && (
                                         <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
