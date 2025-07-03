@@ -18,13 +18,6 @@ type SearchParams = {
 };
 
 // ========== CONSTANTS ==========
-const validStockFilters = ['all', 'low', 'out', 'in'] as const;
-type StockFilter = (typeof validStockFilters)[number];
-
-function isStockFilter(value: unknown): value is StockFilter {
-  return typeof value === 'string' && validStockFilters.includes(value as StockFilter);
-}
-
 const PAGE_SIZE = 10;
 
 export default async function Home({ searchParams}: {searchParams: Promise<SearchParams>}) {
@@ -33,9 +26,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
     // ========== PARAM PROCESSING ==========
     const statusFilterRaw = resolvedSearchParams.statusFilter;
-    const stockFilterRaw = resolvedSearchParams.stockFilter;
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
-    const stockFilter = isStockFilter(stockFilterRaw) ? stockFilterRaw : 'all';
 
     const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
     const variantFilter = resolvedSearchParams.variantFilter || 'all';
@@ -86,16 +77,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     // Prepare queries that don't depend on each other's results
     const productInventoriesPromise = supabase
         .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku, inventory_id')
+        .select('id, product_id, inventory_id')
         .eq('inventory_id', inventoryId);
-
-    const inventoryMatchesPromise = query ?
-        supabase
-            .from('product_inventories')
-            .select('product_id')
-            .ilike('product_sku', `%${query}%`)
-            .eq('inventory_id', inventoryId) :
-        Promise.resolve({ data: null });
 
     const categoriesPromise = supabase
         .from('categories')
@@ -107,21 +90,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         .select('id, variant_name')
         .order('variant_name');
 
-    const [{ data: allProductInventories }, { data: inventoryMatches }, { data: categories }, { data: variants }] =
-        await Promise.all([productInventoriesPromise, inventoryMatchesPromise, categoriesPromise, variantsPromise]);
+    const [{ data: productInventories }, { data: categories }, { data: variants }] =
+        await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
 
-    // Filter by stock level if needed
-    let filteredByStock = allProductInventories || [];
-    if (stockFilter !== 'all') {
-        filteredByStock = filteredByStock.filter((pi) => {
-            if (stockFilter === 'low') return pi.product_quantity > 0 && pi.product_quantity <= 5;
-            if (stockFilter === 'out') return pi.product_quantity === 0;
-            if (stockFilter === 'in') return pi.product_quantity > 5;
-            return true;
-        });
-    }
-
-    const productIdsFromStockFilter = filteredByStock.map((pi) => pi.product_id);
+    const productIdsInInventory = (productInventories || []).map((pi) => pi.product_id);
 
     // Build main products query
     let productsQuery = supabase
@@ -136,13 +108,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             variants(id, variant_name)
         `)
         .order('product_name', { ascending: true })
-        .in('id', productIdsFromStockFilter.length > 0 ? productIdsFromStockFilter : [0]);
+        .in('id', productIdsInInventory.length > 0 ? productIdsInInventory : [0]);
 
     if (query) {
-        const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
-        productsQuery = productsQuery.or(
-            `product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`
-        );
+        productsQuery = productsQuery.ilike('product_name', `%${query}%`);
     }
 
     // Apply filters
@@ -186,11 +155,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     // Pagination
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-    const inventoryMap = new Map(
-        (allProductInventories || [])
-            .filter(pi => pagedProducts.some(p => p.id === pi.product_id))
-            .map(pi => [pi.product_id, pi])
-    );
 
     // ========== RENDER ==========
     return (
@@ -214,7 +178,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                 <table>
                     <thead>
                         <tr>
-                            <th>Product name & SKU</th>
+                            <th>Product name</th>
                             <th>Category</th>
                             <th>Inventories</th>
                             <th>Status</th>
@@ -223,7 +187,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                     </thead>
                     <tbody>
                         {pagedProducts.map((product) => {
-                            const inventoryInfo = inventoryMap.get(product.id);
                             return (
                                 <tr key={product.id}>
                                     <td>
@@ -247,12 +210,13 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                                 product_category={product.product_category || ''}
                                                 product_variant={product.product_variant || ''}
                                                 product_status={product.product_status || false}
-                                                product_sku={inventoryInfo?.product_sku || ''}
+                                                product_sku=""
+                                                product_quantity={0}
                                                 categories={categories || []}
                                                 variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId={inventoryId}
-                                                productInventories={filteredByStock}
+                                                productInventories={productInventories || []}
                                             />
                                         </div>
                                     </td>
