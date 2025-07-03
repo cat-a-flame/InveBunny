@@ -1,7 +1,6 @@
 import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
-import { ViewBatchButton } from '@/src/features/products/batches/ViewBatchButton';
-import { InventoryTabs } from '@/src/features/inventory/InventoryTabs';
+import { EditProductButton } from '@/src/features/products/edit/EditProductButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
 import { slugify } from '@/src/utils/slugify';
@@ -11,7 +10,6 @@ type SearchParams = {
     query?: string;
     page?: string;
     inventory?: string;
-    tab?: string;
     statusFilter?: 'active' | 'inactive' | 'all';
     categoryFilter?: string;
     variantFilter?: string;
@@ -43,7 +41,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
     const inventorySlug = resolvedSearchParams.inventory;
-    const tab = resolvedSearchParams.tab || 'active';
 
     // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
@@ -192,9 +189,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                 <h2 className="heading-title">Inventory</h2>
             </div>
 
-            {/* Inventory Tabs */}
-            <InventoryTabs inventories={inventories} selectedInventory={selectedInventory} tab={tab}/>
-
             {/* Main Content */}
             <div className="content inventory-content">
                 <FilterBar
@@ -211,9 +205,9 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                         <tr>
                             <th>Product name & SKU</th>
                             <th>Quantity</th>
-                            <th>Category</th>
-                            <th>Variant</th>
-                            <th></th>
+                            <th>Product category</th>
+                            <th>Product variant</th>
+                            <th>Edit / Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -232,12 +226,22 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
                                     <td>{(product.variants as any)?.variant_name || '-'}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
-                                            <ViewBatchButton productId={product.id} />
-
-                                        </div>
+                                    <td className="table-actions">
+                                        <EditProductButton
+                                            id={product.id}
+                                            product_name={product.product_name || ''}
+                                            product_category={product.product_category || ''}
+                                            product_status={product.product_status || false}
+                                            categories={categories || []}
+                                            inventories={inventories}
+                                            currentInventoryId={inventoryId.toString()}
+                                            productInventories={[]}
+                                        />
+                                        <DeleteProductButton
+                                            productId={product.id}
+                                            productName={product.product_name}
+                                            inventoryId={inventoryId}
+                                        />
                                     </td>
                                 </tr>
                             );
