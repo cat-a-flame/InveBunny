@@ -1,6 +1,4 @@
-import { AddButton } from '@/src/features/products/add/AddButton';
 import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
-import { EditProductButton } from '@/src/features/products/edit/EditProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
 import { ViewBatchButton } from '@/src/features/products/batches/ViewBatchButton';
 import { InventoryTabs } from '@/src/features/inventory/InventoryTabs';
@@ -192,7 +190,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             {/* Header Section */}
             <div className="pageHeader">
                 <h2 className="heading-title">Inventory</h2>
-                <AddButton categories={categories || []} inventories={inventories}/>
             </div>
 
             {/* Inventory Tabs */}
@@ -240,16 +237,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                             <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
                                             <ViewBatchButton productId={product.id} />
 
-                                            <EditProductButton
-                                                id={product.id}
-                                                product_name={product.product_name || ''}
-                                                product_category={product.product_category || ''}
-                                                product_status={product.product_status || false}
-                                                categories={categories || []}
-                                                inventories={inventories}
-                                                currentInventoryId={inventoryId}
-                                                productInventories={filteredByStock}
-                                            />
                                         </div>
                                     </td>
                                 </tr>
