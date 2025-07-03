@@ -84,7 +84,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     // Prepare queries that don't depend on each other's results
     const productInventoriesPromise = supabase
         .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku, inventory_id')
+        .select('id, product_id, product_quantity, product_sku, product_variant, inventory_id, variants(id, variant_name)')
         .eq('inventory_id', inventoryId);
 
     const inventoryMatchesPromise = query ?
@@ -108,10 +108,16 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const [{ data: allProductInventories }, { data: inventoryMatches }, { data: categories }, { data: variants }] =
         await Promise.all([productInventoriesPromise, inventoryMatchesPromise, categoriesPromise, variantsPromise]);
 
-    // Filter by stock level if needed
-    let filteredByStock = allProductInventories || [];
+    let filteredInventories = allProductInventories || [];
+
+    if (variantFilter !== 'all') {
+        filteredInventories = filteredInventories.filter(
+            (pi) => String(pi.product_variant) === variantFilter
+        );
+    }
+
     if (stockFilter !== 'all') {
-        filteredByStock = filteredByStock.filter((pi) => {
+        filteredInventories = filteredInventories.filter((pi) => {
             if (stockFilter === 'low') return pi.product_quantity > 0 && pi.product_quantity <= 5;
             if (stockFilter === 'out') return pi.product_quantity === 0;
             if (stockFilter === 'in') return pi.product_quantity > 5;
@@ -119,7 +125,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         });
     }
 
-    const productIdsFromStockFilter = filteredByStock.map((pi) => pi.product_id);
+    const productIdsFromFilters = filteredInventories.map((pi) => pi.product_id);
 
     // Build main products query
     let productsQuery = supabase
@@ -128,13 +134,11 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             id,
             product_name,
             product_category,
-            product_variant,
             product_status,
-            categories(id, category_name),
-            variants(id, variant_name)
+            categories(id, category_name)
         `)
         .order('product_name', { ascending: true })
-        .in('id', productIdsFromStockFilter.length > 0 ? productIdsFromStockFilter : [0]);
+        .in('id', productIdsFromFilters.length > 0 ? productIdsFromFilters : [0]);
 
     if (query) {
         const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
@@ -154,10 +158,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         productsQuery = productsQuery.eq('product_category', categoryFilter);
     }
 
-    if (variantFilter !== 'all') {
-        productsQuery = productsQuery.eq('product_variant', variantFilter);
-    }
-
     const { data: products } = await productsQuery;
 
     // ========== DATA PROCESSING ==========
@@ -166,7 +166,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
     const filteredProductIds = filteredProducts.map(p => p.id);
-    const filteredInventoryItems = (allProductInventories || []).filter(pi => filteredProductIds.includes(pi.product_id));
+    const filteredInventoryItems = (filteredInventories || []).filter(pi => filteredProductIds.includes(pi.product_id));
 
     // Stock calculations
     const lowStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity > 0 && pi.product_quantity <= 5).length;
@@ -176,7 +176,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const inventoryMap = new Map(
-        (allProductInventories || [])
+        (filteredInventories || [])
             .filter(pi => pagedProducts.some(p => p.id === pi.product_id))
             .map(pi => [pi.product_id, pi])
     );
@@ -225,7 +225,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                         </div>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
-                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
+                                    <td>{(inventoryInfo as any)?.variants?.variant_name || '-'}</td>
                                     <td className="table-actions">
                                         <EditProductButton
                                             id={product.id}
