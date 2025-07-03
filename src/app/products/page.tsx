@@ -167,6 +167,22 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const totalCount = filteredProducts.length;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
+    const productIds = filteredProducts.map(p => p.id);
+    const { data: inventoryAssignments } = await supabase
+        .from('product_inventories')
+        .select('product_id, inventories(id, inventory_name)')
+        .in('product_id', productIds.length > 0 ? productIds : [0]);
+
+    const inventoryNamesMap = new Map<string, string[]>();
+    (inventoryAssignments || []).forEach((row: any) => {
+        const name = row.inventories?.inventory_name as string | undefined;
+        if (!name) return;
+        if (!inventoryNamesMap.has(row.product_id)) {
+            inventoryNamesMap.set(row.product_id, []);
+        }
+        inventoryNamesMap.get(row.product_id)!.push(name);
+    });
+
     // Pagination
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -216,10 +232,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
                                     <td>
                                         <div className="badge">
-                                            {/*List of inventories*/}
+                                            {(inventoryNamesMap.get(product.id) || []).join(', ') || '-'}
                                         </div>
                                     </td>
-                                    <td>{product.product_status}</td>
+                                    <td>{product.product_status ? 'Active' : 'Discontinued'}</td>
                                     <td>
                                         <div className="table-actions">
                                             <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
