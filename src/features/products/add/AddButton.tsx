@@ -11,11 +11,6 @@ type Category = {
     inventory_name?: string;
 };
 
-type Variant = {
-    id: string;
-    variant_name: string;
-};
-
 type Inventory = {
     id: string;
     inventory_name: string;
@@ -23,12 +18,11 @@ type Inventory = {
 
 type Props = {
     categories: Category[];
-    variants?: Variant[];
     inventories?: Inventory[];
 };
 
 
-export function AddButton({ categories, variants, inventories }: Props) {
+export function AddButton({ categories, inventories }: Props) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -41,7 +35,6 @@ export function AddButton({ categories, variants, inventories }: Props) {
                     open={open}
                     onClose={() => setOpen(false)}
                     categories={categories}
-                    variants={variants}
                     inventories={inventories ?? []}
                 />
             )}
