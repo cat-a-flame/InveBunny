@@ -3,7 +3,6 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from "react";
 import Link from 'next/link';
-import { supabaseClient } from '@/src/utils/supabase/client';
 import { slugify } from '@/src/utils/slugify';
 import styles from "./sidebar.module.css";
 
@@ -15,11 +14,18 @@ const Sidebar = () => {
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        supabaseClient
-            .from('inventories')
-            .select('id, inventory_name')
-            .order('inventory_name')
-            .then(({ data }) => setInventories(data || []));
+        const load = async () => {
+            try {
+                const res = await fetch('/api/inventories');
+                if (res.ok) {
+                    const data = await res.json();
+                    setInventories(data.inventories || []);
+                }
+            } catch (err) {
+                console.error('Failed to load inventories', err);
+            }
+        };
+        load();
     }, []);
 
     return (
