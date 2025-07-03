@@ -65,7 +65,6 @@ export async function PUT(request: Request) {
             .update({
                 product_name: body.product_name,
                 product_category: body.product_category || null,
-                product_variant: body.product_variant || null,
                 product_status: body.product_status || false,
             })
             .eq('id', body.id)

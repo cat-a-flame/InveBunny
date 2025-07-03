@@ -1,8 +1,8 @@
-import { AddButton } from '@/src/features/inventory/add/AddButton';
-import { DeleteProductButton } from '@/src/features/inventory/delete/DeleteProductButton';
-import { EditProductButton } from '@/src/features/inventory/edit/EditProductButton';
+import { AddButton } from '@/src/features/products/add/AddButton';
+import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
+import { EditProductButton } from '@/src/features/products/edit/EditProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
-import { ViewBatchButton } from '@/src/features/inventory/batches/ViewBatchButton';
+import { ViewBatchButton } from '@/src/features/products/batches/ViewBatchButton';
 import { InventoryTabs } from '@/src/features/inventory/InventoryTabs';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';

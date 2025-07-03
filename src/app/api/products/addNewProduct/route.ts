@@ -17,7 +17,6 @@ export async function POST(request: Request) {
             product_name,
             product_category,
             product_status,
-            product_variant,
             inventories
         } = body;
 
@@ -40,7 +39,6 @@ export async function POST(request: Request) {
             .insert([{
                 product_name,
                 product_category,
-                product_variant,
                 product_status,
                 owner_id: user.id
             }])
