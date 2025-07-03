@@ -1,6 +1,6 @@
 import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
-import { EditProductButton } from '@/src/features/products/edit/EditProductButton';
+import { EditInventoryItemButton } from '@/src/features/inventory/edit/EditInventoryItemButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
 import { slugify } from '@/src/utils/slugify';
@@ -227,15 +227,13 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
                                     <td>{(inventoryInfo as any)?.variants?.variant_name || '-'}</td>
                                     <td className="table-actions">
-                                        <EditProductButton
-                                            id={product.id}
-                                            product_name={product.product_name || ''}
-                                            product_category={product.product_category || ''}
-                                            product_status={product.product_status || false}
-                                            categories={categories || []}
-                                            inventories={inventories}
-                                            currentInventoryId={inventoryId.toString()}
-                                            productInventories={[]}
+                                        <EditInventoryItemButton
+                                            productId={product.id}
+                                            inventoryId={inventoryId.toString()}
+                                            productName={product.product_name || ''}
+                                            productCategoryName={(product.categories as any)?.category_name || ''}
+                                            productSku={inventoryInfo?.product_sku || ''}
+                                            productQuantity={inventoryInfo?.product_quantity ?? 0}
                                         />
                                         <DeleteProductButton
                                             productId={product.id}
