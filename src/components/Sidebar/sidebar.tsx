@@ -28,6 +28,10 @@ const Sidebar = () => {
         load();
     }, []);
 
+    useEffect(() => {
+        setInventoryOpen(pathname.startsWith('/inventory'));
+    }, [pathname]);
+
     return (
         <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
             <div>
