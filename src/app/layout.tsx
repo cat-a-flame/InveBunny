@@ -5,6 +5,7 @@ import { ToastProvider } from "../components/Toast/toast";
 import "../../styles/globals.css";
 
 import Sidebar from '../components/Sidebar/sidebar';
+import { Suspense } from 'react';
 
 const geistSans = Quicksand({
   variable: "--font-quicksand",
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={geistSans.variable}>
         <ToastProvider>
-          <Sidebar />
+          <Suspense fallback={null}>
+            <Sidebar />
+          </Suspense>
           <main>
             {children}
           </main>
