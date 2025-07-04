@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { IconButton } from "@/src/components/IconButton/iconButton";
 import { Search } from "@/src/components/SearchBar/searchBar";
 
@@ -24,6 +24,8 @@ export function FilterBar({
 }: FilterBarProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const slugFromPath = pathname.startsWith('/inventory/') ? pathname.split('/')[2] : null;
     const [isLoading, setIsLoading] = useState(false);
 
     const [statusFilter, setStatusFilter] = useState(initialStatusFilter);
@@ -43,6 +45,9 @@ export function FilterBar({
     const updateQueryParam = async (key: string, value: string) => {
         setIsLoading(true);
         const params = new URLSearchParams(searchParams.toString());
+        if (!params.has("inventory") && slugFromPath) {
+            params.set("inventory", slugFromPath);
+        }
 
         if (key === "statusFilter") {
             if (value === "all") {
@@ -75,6 +80,8 @@ export function FilterBar({
         const params = new URLSearchParams();
         if (searchParams.get("inventory")) {
             params.set("inventory", searchParams.get("inventory")!);
+        } else if (slugFromPath) {
+            params.set("inventory", slugFromPath);
         }
         if (searchParams.get("tab")) {
             params.set("tab", searchParams.get("tab")!);
