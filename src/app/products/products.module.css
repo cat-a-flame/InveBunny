@@ -1,0 +1,13 @@
+.badge {
+    background-color: #b795c2;
+    border-radius: 0.25rem;
+    color: #fff;
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 0.25em 0.5em;
+
+    &:not(:last-child) {
+        margin-right: 0.5em;
+    }
+}

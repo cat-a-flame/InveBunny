@@ -7,7 +7,6 @@ import { IconButton } from '../../../components/IconButton/iconButton';
 type Inventory = {
     id: string;
     inventory_name: string;
-    is_default?: boolean;
 };
 
 type Variant = {

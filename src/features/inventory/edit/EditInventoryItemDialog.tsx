@@ -74,7 +74,7 @@ export function EditInventoryItemDialog({
             toast('✅ Inventory item updated!');
             router.refresh();
             onClose();
-            onSuccess && onSuccess();
+            if (onSuccess) onSuccess();
         } catch (error: any) {
             toast(`❌ ${error.message || 'Error updating item'}`);
         } finally {

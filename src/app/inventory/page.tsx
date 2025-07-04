@@ -21,12 +21,12 @@ const validStockFilters = ['all', 'low', 'out', 'in'] as const;
 type StockFilter = (typeof validStockFilters)[number];
 
 function isStockFilter(value: unknown): value is StockFilter {
-  return typeof value === 'string' && validStockFilters.includes(value as StockFilter);
+    return typeof value === 'string' && validStockFilters.includes(value as StockFilter);
 }
 
 const PAGE_SIZE = 10;
 
-export default async function Home({ searchParams}: {searchParams: Promise<SearchParams>}) {
+export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const supabase = await createClient();
     const resolvedSearchParams = await searchParams;
 
@@ -55,7 +55,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             </main>
         );
     }
-
     inventories.sort((a, b) => {
         if (a.is_default && !b.is_default) return -1;
         if (!a.is_default && b.is_default) return 1;
@@ -69,7 +68,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     if (!selectedInventory) {
         selectedInventory = inventories.find((inv) => inv.is_default) || inventories[0];
     }
-
     const inventoryId = selectedInventory?.id;
 
     if (!inventoryId) {
@@ -186,7 +184,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         <main className="inventory-page">
             {/* Header Section */}
             <div className="pageHeader">
-                <h2 className="heading-title">Inventory</h2>
+                <div>
+                    <h2 className="heading-title">Inventory</h2>
+                    <h3 className="heading-subtitle">{selectedInventory?.inventory_name}</h3>
+                </div>
             </div>
 
             {/* Main Content */}
@@ -220,7 +221,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                         <span className="item-sku">{inventoryInfo?.product_sku || '-'}</span>
                                     </td>
                                     <td>
-                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock': inventoryInfo?.product_quantity <= 5 ? 'low-stock': ''}`}>
+                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock' : inventoryInfo?.product_quantity <= 5 ? 'low-stock' : ''}`}>
                                             {inventoryInfo?.product_quantity ?? '-'}
                                         </div>
                                     </td>

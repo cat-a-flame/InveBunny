@@ -191,7 +191,7 @@ export function EditProductDialog({
     return (
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <div className={`side-panel side-panel-md ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
                 <div className="side-panel-header">
                     <h3 className="side-panel-title" id="dialog-title">Edit product</h3>
                 </div>
@@ -233,46 +233,35 @@ export function EditProductDialog({
                         </div>
 
                         <div className="input-group">
-                            <label htmlFor="product_status" className="input-label">Status</label>
                             <label>
                                 <input name="product_status" type="checkbox" checked={formData.product_status} onChange={(e) => setFormData((prev) => ({ ...prev, product_status: e.target.checked, }))} />
                                 Product is active
                             </label>
                         </div>
 
-                        <div className="boxed-section">
-                            <h4 className="section-subtitle">Inventories</h4>
+                        <h4 className="section-subtitle">Inventories</h4>
 
-                            {inventoryEntries.map((entry, index) => (
-                                <div key={index} className="double-input-group">
-                                    <div>
-                                        <label className="input-label">Inventory name</label>
-                                        <select value={entry.inventoryId} onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
-                                            <option value="">Select an inventory</option>
-                                            {inventories
-                                                .filter(inv =>
-                                                    inv.id === entry.inventoryId ||
-                                                    !inventoryEntries.some(
-                                                        (e, idx) => idx !== index && e.inventoryId === inv.id
-                                                    )
-                                                )
-                                                .map(inv => (
-                                                    <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
-                                                ))}
-                                        </select>
-                                    </div>
+                        {inventoryEntries.map((entry, index) => (
+                            <div key={index} className="double-input-group">
+                                <select value={entry.inventoryId} className="input-max-width" onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
+                                    <option value="">Select an inventory</option>
+                                    {inventories
+                                        .filter(inv =>
+                                            inv.id === entry.inventoryId ||
+                                            !inventoryEntries.some(
+                                                (e, idx) => idx !== index && e.inventoryId === inv.id
+                                            )
+                                        )
+                                        .map(inv => (
+                                            <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                                        ))}
+                                </select>
 
+                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" disabled={index <= 0 && (true)} />
+                            </div>
+                        ))}
 
-
-                                    {inventoryEntries.length > 1 && (
-                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
-                                    )}
-                                </div>
-                            ))}
-
-                            <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
-                        </div>
-
+                        <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
                     </div>
 
                     <div className="side-panel-footer">

@@ -41,7 +41,7 @@ const Sidebar = () => {
                             <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/inventory') ? styles.active : ''}`} onClick={() => setInventoryOpen((prev) => !prev)}>
                                 <i className="fa-solid fa-warehouse"></i>
                                 {!isCollapsed && <span>Inventory</span>}
-                                {!isCollapsed && <i className={`fa-solid ${inventoryOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>}
+                                {!isCollapsed && <i className={`${styles.chevron} fa-solid ${inventoryOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>}
                             </button>
                             {!isCollapsed && inventoryOpen && (
                                 <ul className={styles.subMenu}>

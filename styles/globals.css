@@ -40,6 +40,11 @@ main {
     font-size: 2rem;
 }
 
+.heading-subtitle {
+    color: #8b71a4;
+    font-size: 1.2rem;
+}
+
 .pageHeader {
     display: flex;
     justify-content: space-between;
@@ -474,12 +479,6 @@ textarea {
 .side-panel-title {
     font-family: titleFont;
     font-size: 1.5rem;
-}
-
-.boxed-section {
-    background-color: #F7F3FF;
-    border-radius: 4px;
-    padding: 1rem;
 }
 
 /* BATCH TABLE */

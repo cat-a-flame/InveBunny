@@ -49,15 +49,16 @@
 }
 
 button.navigationLink {
+    background-color: transparent;
     border: 0 none;
     cursor: pointer;
     font-family: "Quicksand", "Quicksand Fallback";
     font-size: 1rem;
     height: 40px !important;
+}
 
-    & .fa-chevron-down {
-        font-size: .875rem;
-    }
+.chevron {
+    font-size: .875rem;
 }
 
 .navigation {
