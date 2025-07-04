@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     // ========== INVENTORY FETCHING ==========
     const { data: inventories } = await supabase
         .from('inventories')
-        .select('id, inventory_name, is_default')
+        .select('id, inventory_name')
         .order('inventory_name');
 
     if (!inventories || inventories.length === 0) {
@@ -45,11 +45,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         );
     }
 
-    inventories.sort((a, b) => {
-        if (a.is_default && !b.is_default) return -1;
-        if (!a.is_default && b.is_default) return 1;
-        return 0;
-    });
+
 
     // ========== PRODUCT DATA FETCHING ==========
     // Prepare queries that don't depend on each other's results
