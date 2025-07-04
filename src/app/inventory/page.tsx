@@ -84,7 +84,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     // Prepare queries that don't depend on each other's results
     const productInventoriesPromise = supabase
         .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku, product_variant, inventory_id, variants(id, variant_name)')
+        .select('id, product_id, product_quantity, product_sku, inventory_id')
         .eq('inventory_id', inventoryId);
 
     const inventoryMatchesPromise = query ?
@@ -110,12 +110,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
     let filteredInventories = allProductInventories || [];
 
-    if (variantFilter !== 'all') {
-        filteredInventories = filteredInventories.filter(
-            (pi) => String(pi.product_variant) === variantFilter
-        );
-    }
-
     if (stockFilter !== 'all') {
         filteredInventories = filteredInventories.filter((pi) => {
             if (stockFilter === 'low') return pi.product_quantity > 0 && pi.product_quantity <= 5;
@@ -135,7 +129,9 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             product_name,
             product_category,
             product_status,
-            categories(id, category_name)
+            product_variant,
+            categories(id, category_name),
+            variants(id, variant_name)
         `)
         .order('product_name', { ascending: true })
         .in('id', productIdsFromFilters.length > 0 ? productIdsFromFilters : [0]);
@@ -156,6 +152,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
     if (categoryFilter !== 'all') {
         productsQuery = productsQuery.eq('product_category', categoryFilter);
+    }
+
+    if (variantFilter !== 'all') {
+        productsQuery = productsQuery.eq('product_variant', variantFilter);
     }
 
     const { data: products } = await productsQuery;
@@ -225,7 +225,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                         </div>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
-                                    <td>{(inventoryInfo as any)?.variants?.variant_name || '-'}</td>
+                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
                                     <td className="table-actions">
                                         <EditInventoryItemButton
                                             productId={product.id}
