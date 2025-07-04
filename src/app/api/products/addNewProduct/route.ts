@@ -16,6 +16,7 @@ export async function POST(request: Request) {
         const {
             product_name,
             product_category,
+            product_variant,
             product_status,
             inventories
         } = body;
@@ -39,8 +40,9 @@ export async function POST(request: Request) {
             .insert([{
                 product_name,
                 product_category,
+                product_variant,
                 product_status,
-                owner_id: user.id
+                    owner_id: user.id
             }])
             .select()
             .single();

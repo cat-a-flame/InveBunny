@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
-  const { id, product_name, product_category, product_status, inventories } = body;
+  const { id, product_name, product_category, product_variant, product_status, inventories } = body;
 
   if (!product_name?.trim()) {
     return new Response(JSON.stringify({ success: false, error: 'Product name is required' }), { status: 400 });
@@ -36,6 +36,7 @@ export async function PUT(request: Request) {
       .update({
         product_name,
         product_category: product_category || null,
+        product_variant: product_variant || null,
         product_status: product_status || false,
       })
       .eq('id', id)

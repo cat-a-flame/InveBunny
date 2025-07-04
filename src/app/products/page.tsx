@@ -59,8 +59,13 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         .select('id, category_name')
         .order('category_name');
 
-    const [{ data: productInventories }, { data: categories }] =
-        await Promise.all([productInventoriesPromise, categoriesPromise]);
+    const variantsPromise = supabase
+        .from('variants')
+        .select('id, variant_name')
+        .order('variant_name');
+
+    const [{ data: productInventories }, { data: categories }, { data: variants }] =
+        await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
 
     // Build main products query
     let productsQuery = supabase
@@ -69,8 +74,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             id,
             product_name,
             product_category,
+            product_variant,
             product_status,
-            categories(id, category_name)
+            categories(id, category_name),
+            variants(id, variant_name)
         `)
         .order('product_name', { ascending: true });
 
@@ -122,7 +129,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             {/* Header Section */}
             <div className="pageHeader">
                 <h2 className="heading-title">Products</h2>
-                <AddButton categories={categories || []} inventories={inventories}/>
+                <AddButton categories={categories || []} variants={variants || []} inventories={inventories}/>
             </div>
 
             {/* Main Content */}
@@ -138,6 +145,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                         <tr>
                             <th>Product name</th>
                             <th>Category</th>
+                            <th>Variant</th>
                             <th>Inventories</th>
                             <th>Status</th>
                             <th></th>
@@ -151,6 +159,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                         <span className="item-name">{product.product_name}</span>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
+                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
                                     <td>
                                         <div className="badge">
                                             {(inventoryNamesMap.get(product.id) || []).join(', ') || '-'}
@@ -166,8 +175,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                                 id={product.id}
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
+                                                product_variant={product.product_variant || ''}
                                                 product_status={product.product_status || false}
                                                 categories={categories || []}
+                                                variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""
                                                 productInventories={productInventories || []}

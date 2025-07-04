@@ -17,23 +17,30 @@ type Inventory = {
     is_default?: boolean;
 };
 
+type Variant = {
+    id: string;
+    variant_name: string;
+};
+
 type Props = {
     open: boolean;
     onClose: () => void;
     categories: Category[];
+    variants?: Variant[];
     inventories: Inventory[];
 };
 
-export function AddProductDialog({ open, onClose, categories = [], inventories = [] }: Props) {
+export function AddProductDialog({ open, onClose, categories = [], variants = [], inventories = [] }: Props) {
     const [formData, setFormData] = useState({
         productName: '',
         categoryId: '',
+        variantId: '',
         status: true
     });
 
     const [inventoryEntries, setInventoryEntries] = useState([
-        { inventoryId: '' }
-    ]);
+            { inventoryId: '' }
+        ]);
 
     const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
@@ -90,6 +97,7 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
                 body: JSON.stringify({
                     product_name: formData.productName,
                     product_category: formData.categoryId,
+                    product_variant: formData.variantId,
                     product_status: formData.status,
                     inventories: inventoryEntries.map(entry => ({
                         inventoryId: entry.inventoryId,
@@ -111,6 +119,7 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
             setFormData({
                 productName: '',
                 categoryId: '',
+                variantId: '',
                 status: true
             });
             setInventoryEntries([{ inventoryId: '' }]);
@@ -146,6 +155,15 @@ export function AddProductDialog({ open, onClose, categories = [], inventories =
                                     <option value="">Select a category</option>
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>{cat.category_name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="input-equal">
+                                <label htmlFor="variantId" className="input-label">Variant</label>
+                                <select name="variantId" className="input-max-width" value={formData.variantId} onChange={handleChange}>
+                                    <option value="">Select a variant</option>
+                                    {variants.map((variant) => (
+                                        <option key={variant.id} value={variant.id}>{variant.variant_name}</option>
                                     ))}
                                 </select>
                             </div>

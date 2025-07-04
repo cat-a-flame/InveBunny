@@ -16,6 +16,11 @@ type Inventory = {
     inventory_name: string;
 };
 
+type Variant = {
+    id: string;
+    variant_name: string;
+};
+
 type ProductInventoryData = {
     inventory_id: string;
 };
@@ -24,6 +29,7 @@ type ProductData = {
     id: string;
     product_name: string;
     product_category: string;
+    product_variant: string | null;
     product_status: boolean;
     inventories: ProductInventoryData[];
     currentInventoryId?: string;
@@ -34,6 +40,7 @@ type EditProductDialogProps = {
     onClose: () => void;
     product: ProductData;
     categories: Category[];
+    variants?: Variant[];
     inventories: Inventory[];
     onSuccess?: () => void;
 };
@@ -43,6 +50,7 @@ export function EditProductDialog({
     onClose,
     product,
     categories,
+    variants = [],
     inventories,
     onSuccess,
 }: EditProductDialogProps) {
@@ -65,6 +73,7 @@ export function EditProductDialog({
     const [formData, setFormData] = useState({
         product_name: product.product_name || '',
         product_category: product.product_category || '',
+        product_variant: product.product_variant || '',
         product_status: product.product_status ?? false,
     });
 
@@ -76,6 +85,7 @@ export function EditProductDialog({
         setFormData({
             product_name: product.product_name || '',
             product_category: product.product_category || '',
+            product_variant: product.product_variant || '',
             product_status: product.product_status ?? false,
         });
 
@@ -146,6 +156,7 @@ export function EditProductDialog({
                     id: product.id,
                     product_name: formData.product_name,
                     product_category: formData.product_category,
+                    product_variant: formData.product_variant,
                     product_status: formData.product_status,
                     inventories: inventoryEntries.map(entry => ({
                         inventory_id: entry.inventoryId,
@@ -202,6 +213,19 @@ export function EditProductDialog({
                                     {categories.map(cat => (
                                         <option key={cat.id} value={cat.id}>
                                             {cat.category_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="input-equal">
+                                <label htmlFor="product_variant" className="input-label">
+                                    Variant
+                                </label>
+                                <select name="product_variant" className="input-max-width" value={formData.product_variant} onChange={handleChange}>
+                                    <option value="">Select a variant</option>
+                                    {variants.map(variant => (
+                                        <option key={variant.id} value={variant.id}>
+                                            {variant.variant_name}
                                         </option>
                                     ))}
                                 </select>
