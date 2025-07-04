@@ -45,7 +45,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
         .from('inventories')
-        .select('id, inventory_name, is_default')
+        .select('id, inventory_name')
         .order('inventory_name');
 
     if (!inventories || inventories.length === 0) {
@@ -55,18 +55,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
             </main>
         );
     }
-    inventories.sort((a, b) => {
-        if (a.is_default && !b.is_default) return -1;
-        if (!a.is_default && b.is_default) return 1;
-        return 0;
-    });
+
 
     let selectedInventory = inventorySlug
         ? inventories.find((inv) => slugify(inv.inventory_name) === inventorySlug)
         : undefined;
 
     if (!selectedInventory) {
-        selectedInventory = inventories.find((inv) => inv.is_default) || inventories[0];
+        selectedInventory = inventories[0];
     }
     const inventoryId = selectedInventory?.id;
 
