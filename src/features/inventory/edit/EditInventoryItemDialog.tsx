@@ -100,13 +100,15 @@ export function EditInventoryItemDialog({
                             <label className="input-label">Category</label>
                             <input type="text" value={productCategoryName} disabled className="input-max-width" />
                         </div>
-                        <div className="input-group">
-                            <label className="input-label" htmlFor="sku">SKU</label>
-                            <input id="sku" name="sku" type="text" className="input-max-width" value={formData.sku} onChange={handleChange} />
-                        </div>
-                        <div className="input-group">
-                            <label className="input-label" htmlFor="quantity">Quantity</label>
-                            <input id="quantity" name="quantity" type="number" min="0" className="input-max-width" value={formData.quantity} onChange={handleChange} />
+                        <div className="double-input-group">
+                            <div className="input-group input-grow">
+                                <label className="input-label" htmlFor="sku">SKU</label>
+                                <input id="sku" name="sku" type="text" className="input-max-width" value={formData.sku} onChange={handleChange} />
+                            </div>
+                            <div className="input-group input-shrink">
+                                <label className="input-label" htmlFor="quantity">Quantity</label>
+                                <input id="quantity" name="quantity" type="number" min="0" className="input-max-width" value={formData.quantity} onChange={handleChange} />
+                            </div>
                         </div>
                     </div>
                     <div className="side-panel-footer">

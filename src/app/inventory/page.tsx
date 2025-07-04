@@ -205,9 +205,9 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                         <tr>
                             <th>Product name & SKU</th>
                             <th>Quantity</th>
-                            <th>Product category</th>
-                            <th>Product variant</th>
-                            <th>Edit / Delete</th>
+                            <th>Category</th>
+                            <th>Variant</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -227,6 +227,12 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
                                     <td>{(product.variants as any)?.variant_name || '-'}</td>
                                     <td className="table-actions">
+                                        <DeleteProductButton
+                                            productId={product.id}
+                                            productName={product.product_name}
+                                            inventoryId={inventoryId}
+                                        />
+
                                         <EditInventoryItemButton
                                             productId={product.id}
                                             inventoryId={inventoryId.toString()}
@@ -234,11 +240,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                             productCategoryName={(product.categories as any)?.category_name || ''}
                                             productSku={inventoryInfo?.product_sku || ''}
                                             productQuantity={inventoryInfo?.product_quantity ?? 0}
-                                        />
-                                        <DeleteProductButton
-                                            productId={product.id}
-                                            productName={product.product_name}
-                                            inventoryId={inventoryId}
                                         />
                                     </td>
                                 </tr>

@@ -54,7 +54,6 @@ main {
     padding: .5rem 0 0;
 
     &.inventory-content {
-        border-top-left-radius: 0;
         padding-top: 1.5rem;
     }
 }
@@ -288,12 +287,16 @@ textarea {
         cursor: not-allowed;
         pointer-events: none;
     }
+
+    &:disabled {
+        background-color: #f4eefb;
+        color: #97809d;
+    }
 }
 
 .input-max-width {
     width: 100%;
 }
-
 
 .input-label {
     display: block;
