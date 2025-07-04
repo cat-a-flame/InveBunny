@@ -7,15 +7,17 @@ import { IconButton } from '../../../components/IconButton/iconButton';
 type Inventory = {
     id: string;
     inventory_name: string;
-    is_default?: boolean;
+};
+
+type Variant = {
+    id: string;
+    variant_name: string;
 };
 
 type ProductInventory = {
     id: string;
     inventory_id: string;
     product_id: string;
-    product_sku: string;
-    product_quantity: number;
 };
 
 type EditProductButtonProps = {
@@ -24,10 +26,8 @@ type EditProductButtonProps = {
     product_category: string;
     product_variant: string;
     product_status: boolean;
-    product_sku: string;
-    product_quantity: number;
     categories: Array<{ id: string; category_name: string }>;
-    variants: Array<{ id: string; variant_name: string }>;
+    variants?: Variant[];
     inventories: Inventory[];
     productInventories: ProductInventory[];
     currentInventoryId?: string;
@@ -40,8 +40,6 @@ export function EditProductButton({
     product_category,
     product_variant,
     product_status,
-    product_sku,
-    product_quantity,
     categories,
     variants,
     inventories,
@@ -57,12 +55,8 @@ export function EditProductButton({
         product_category,
         product_variant,
         product_status,
-        product_sku,
-        product_quantity,
         inventories: productInventories.map(pi => ({
             inventory_id: pi.inventory_id,
-            product_sku: pi.product_sku,
-            product_quantity: pi.product_quantity,
         })),
         currentInventoryId,
     };

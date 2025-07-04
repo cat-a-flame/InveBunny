@@ -11,15 +11,14 @@ type Category = {
     category_name: string;
 };
 
-type Variant = {
-    id: string;
-    variant_name: string;
-};
-
 type Inventory = {
     id: string;
     inventory_name: string;
-    is_default?: boolean;
+};
+
+type Variant = {
+    id: string;
+    variant_name: string;
 };
 
 type Props = {
@@ -39,8 +38,8 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     });
 
     const [inventoryEntries, setInventoryEntries] = useState([
-        { inventoryId: '', quantity: 0, status: true, sku: '' }
-    ]);
+            { inventoryId: '' }
+        ]);
 
     const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
@@ -77,7 +76,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     const addInventoryRow = () => {
         setInventoryEntries(prev => [
             ...prev,
-            { inventoryId: '', quantity: 0, status: true, sku: '' },
+            { inventoryId: '' },
         ]);
     };
 
@@ -91,7 +90,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
         setSubmitting(true);
 
         try {
-            const response = await fetch('/api/inventory/addNewProduct', {
+            const response = await fetch('/api/products/addNewProduct', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -99,7 +98,11 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     product_category: formData.categoryId,
                     product_variant: formData.variantId,
                     product_status: formData.status,
-                    inventories: inventoryEntries
+                    inventories: inventoryEntries.map(entry => ({
+                        inventoryId: entry.inventoryId,
+                        sku: '',
+                        quantity: 0,
+                    }))
                 })
             });
 
@@ -118,7 +121,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                 variantId: '',
                 status: true
             });
-            setInventoryEntries([{ inventoryId: '', quantity: 0, status: true, sku: '' }]);
+            setInventoryEntries([{ inventoryId: '' }]);
 
         } catch (error) {
             console.error('Error:', error);
@@ -131,7 +134,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     return (
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
-            <div className={`side-panel side-panel-md ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
+            <div className={`side-panel side-panel-sm ${isOpen ? 'open' : ''}`} role="dialog" aria-labelledby="dialog-title">
                 <div className="side-panel-header">
                     <h3 className="side-panel-title" id="dialog-title">Add new product</h3>
                     <IconButton icon={<i className="fa-solid fa-close"></i>} onClick={onClose} title="Close panel" />
@@ -156,7 +159,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                             </div>
                             <div className="input-equal">
                                 <label htmlFor="variantId" className="input-label">Variant</label>
-                                <select name="variantId" className="input-max-width" value={formData.variantId} onChange={handleChange} required>
+                                <select name="variantId" className="input-max-width" value={formData.variantId} onChange={handleChange}>
                                     <option value="">Select a variant</option>
                                     {variants.map((variant) => (
                                         <option key={variant.id} value={variant.id}>{variant.variant_name}</option>
@@ -172,41 +175,23 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                             </label>
                         </div>
 
-                        <div className="boxed-section">
-                            <h3 className="section-subtitle">Inventories</h3>
+                        <h3 className="section-subtitle">Inventories</h3>
 
-                            {inventoryEntries.map((entry, index) => (
-                                <div key={index} className="double-input-group">
-                                    <div>
-                                        <label className="input-label">Inventory name</label>
-                                        <select value={entry.inventoryId} onChange={(e) => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
-                                            <option value="">Select an inventory</option>
-                                            {[...inventories]
-                                                .sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0))
-                                                .map((inv) => (
-                                                    <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
-                                                ))}
-                                        </select>
-                                    </div>
+                        {inventoryEntries.map((entry, index) => (
+                            <div key={index} className="double-input-group">
+                                <select value={entry.inventoryId} className="input-max-width" onChange={(e) => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
+                                    <option value="">Select an inventory</option>
+                                    {[...inventories]
+                                        .map((inv) => (
+                                            <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
+                                        ))}
+                                </select>
 
-                                    <div>
-                                        <label className="input-label">SKU</label>
-                                        <input type="text" className="input-sku" value={entry.sku} onChange={(e) => handleInventoryChange(index, 'sku', e.target.value)} required />
-                                    </div>
+                                    <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" disabled={index <= 0 && (true)} />
+                            </div>
+                        ))}
 
-                                    <div>
-                                        <label className="input-label">Quantity</label>
-                                        <input type="number" min="0" className="input-quantity" value={entry.quantity} onChange={(e) => handleInventoryChange(index, 'quantity', Number(e.target.value))} required />
-                                    </div>
-
-                                    {index > 0 && (
-                                        <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" />
-                                    )}
-                                </div>
-                            ))}
-
-                            <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
-                        </div>
+                        <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
                     </div>
 
                     <div className="side-panel-footer">

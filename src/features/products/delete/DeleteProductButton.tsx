@@ -20,7 +20,7 @@ export const DeleteProductButton = ({ productId, productName, inventoryId }: Pro
     const handleDelete = async () => {
         try {
             const res = await fetch(
-                `/api/inventory/deleteProduct?id=${productId}&inventory_id=${inventoryId}`,
+                `/api/products/deleteProduct?id=${productId}&inventory_id=${inventoryId}`,
                 { method: 'DELETE' }
             );
             if (res.ok) {

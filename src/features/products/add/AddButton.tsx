@@ -11,14 +11,14 @@ type Category = {
     inventory_name?: string;
 };
 
-type Variant = {
-    id: string;
-    variant_name: string;
-};
-
 type Inventory = {
     id: string;
     inventory_name: string;
+};
+
+type Variant = {
+    id: string;
+    variant_name: string;
 };
 
 type Props = {

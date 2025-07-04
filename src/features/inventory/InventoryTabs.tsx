@@ -3,7 +3,6 @@ import { slugify } from '@/src/utils/slugify';
 type Inventory = {
     id: number;
     inventory_name: string;
-    is_default: boolean;
 };
 
 type TabsProps = {
