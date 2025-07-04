@@ -5,18 +5,20 @@ import { FilterBar } from '@/src/features/products/FilterBar';
 import { ViewBatchButton } from '@/src/features/products/batches/ViewBatchButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
+import styles from './products.module.css';
 
 type SearchParams = {
     query?: string;
     page?: string;
     statusFilter?: 'active' | 'inactive' | 'all';
+    variantFilter?: string;
     categoryFilter?: string;
 };
 
 // ========== CONSTANTS ==========
 const PAGE_SIZE = 10;
 
-export default async function Home({ searchParams}: {searchParams: Promise<SearchParams>}) {
+export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const supabase = await createClient();
     const resolvedSearchParams = await searchParams;
 
@@ -25,6 +27,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
 
     const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
+    const variantFilter = resolvedSearchParams.variantFilter || 'all';
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
 
@@ -59,8 +62,13 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         .select('id, category_name')
         .order('category_name');
 
-    const [{ data: productInventories }, { data: categories }] =
-        await Promise.all([productInventoriesPromise, categoriesPromise]);
+    const variantsPromise = supabase
+        .from('variants')
+        .select('id, variant_name')
+        .order('variant_name');
+
+    const [{ data: productInventories }, { data: categories }, { data: variants }] =
+        await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
 
     // Build main products query
     let productsQuery = supabase
@@ -69,8 +77,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             id,
             product_name,
             product_category,
+            product_variant,
             product_status,
-            categories(id, category_name)
+            categories(id, category_name),
+            variants(id, variant_name)
         `)
         .order('product_name', { ascending: true });
 
@@ -87,6 +97,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
 
     if (categoryFilter !== 'all') {
         productsQuery = productsQuery.eq('product_category', categoryFilter);
+    }
+
+    if (variantFilter !== 'all') {
+        productsQuery = productsQuery.eq('product_variant', variantFilter);
     }
 
     const { data: products } = await productsQuery;
@@ -115,14 +129,13 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     // Pagination
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-
     // ========== RENDER ==========
     return (
         <main className="inventory-page">
             {/* Header Section */}
             <div className="pageHeader">
                 <h2 className="heading-title">Products</h2>
-                <AddButton categories={categories || []} inventories={inventories}/>
+                <AddButton categories={categories || []} variants={variants || []} inventories={inventories} />
             </div>
 
             {/* Main Content */}
@@ -131,6 +144,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                     statusFilter={statusFilter}
                     categoryFilter={categoryFilter}
                     categories={categories || []}
+                    variants={variants || []}
+                    variantFilter={''}
                 />
 
                 <table>
@@ -138,8 +153,8 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                         <tr>
                             <th>Product name</th>
                             <th>Category</th>
+                            <th>Variant</th>
                             <th>Inventories</th>
-                            <th>Status</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -151,23 +166,26 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                         <span className="item-name">{product.product_name}</span>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
+                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
                                     <td>
-                                        <div className="badge">
-                                            {(inventoryNamesMap.get(product.id) || []).join(', ') || '-'}
-                                        </div>
+                                        {(inventoryNamesMap.get(product.id) || []).length > 0
+                                            ? (inventoryNamesMap.get(product.id) || []).map((name, index) => (
+                                                <span className={styles.badge} key={index}>{name}</span>
+                                            )) : '-'}
                                     </td>
-                                    <td>{product.product_status ? 'Active' : 'Discontinued'}</td>
                                     <td>
                                         <div className="table-actions">
-                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId=""/>
+                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId="" />
                                             <ViewBatchButton productId={product.id} />
 
                                             <EditProductButton
                                                 id={product.id}
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
+                                                product_variant={product.product_variant || ''}
                                                 product_status={product.product_status || false}
                                                 categories={categories || []}
+                                                variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""
                                                 productInventories={productInventories || []}

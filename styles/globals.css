@@ -40,6 +40,11 @@ main {
     font-size: 2rem;
 }
 
+.heading-subtitle {
+    color: #8b71a4;
+    font-size: 1.2rem;
+}
+
 .pageHeader {
     display: flex;
     justify-content: space-between;
@@ -54,7 +59,6 @@ main {
     padding: .5rem 0 0;
 
     &.inventory-content {
-        border-top-left-radius: 0;
         padding-top: 1.5rem;
     }
 }
@@ -288,12 +292,16 @@ textarea {
         cursor: not-allowed;
         pointer-events: none;
     }
+
+    &:disabled {
+        background-color: #f4eefb;
+        color: #97809d;
+    }
 }
 
 .input-max-width {
     width: 100%;
 }
-
 
 .input-label {
     display: block;
@@ -471,12 +479,6 @@ textarea {
 .side-panel-title {
     font-family: titleFont;
     font-size: 1.5rem;
-}
-
-.boxed-section {
-    background-color: #F7F3FF;
-    border-radius: 4px;
-    padding: 1rem;
 }
 
 /* BATCH TABLE */

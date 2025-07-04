@@ -1,7 +1,6 @@
 import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
-import { ViewBatchButton } from '@/src/features/products/batches/ViewBatchButton';
-import { InventoryTabs } from '@/src/features/inventory/InventoryTabs';
+import { EditInventoryItemButton } from '@/src/features/inventory/edit/EditInventoryItemButton';
 import { Pagination } from '@/src/components/Pagination/pagination';
 import { createClient } from '@/src/utils/supabase/server';
 import { slugify } from '@/src/utils/slugify';
@@ -11,7 +10,6 @@ type SearchParams = {
     query?: string;
     page?: string;
     inventory?: string;
-    tab?: string;
     statusFilter?: 'active' | 'inactive' | 'all';
     categoryFilter?: string;
     variantFilter?: string;
@@ -23,12 +21,12 @@ const validStockFilters = ['all', 'low', 'out', 'in'] as const;
 type StockFilter = (typeof validStockFilters)[number];
 
 function isStockFilter(value: unknown): value is StockFilter {
-  return typeof value === 'string' && validStockFilters.includes(value as StockFilter);
+    return typeof value === 'string' && validStockFilters.includes(value as StockFilter);
 }
 
 const PAGE_SIZE = 10;
 
-export default async function Home({ searchParams}: {searchParams: Promise<SearchParams>}) {
+export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const supabase = await createClient();
     const resolvedSearchParams = await searchParams;
 
@@ -43,7 +41,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
     const inventorySlug = resolvedSearchParams.inventory;
-    const tab = resolvedSearchParams.tab || 'active';
 
     // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
@@ -58,7 +55,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             </main>
         );
     }
-
     inventories.sort((a, b) => {
         if (a.is_default && !b.is_default) return -1;
         if (!a.is_default && b.is_default) return 1;
@@ -72,7 +68,6 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     if (!selectedInventory) {
         selectedInventory = inventories.find((inv) => inv.is_default) || inventories[0];
     }
-
     const inventoryId = selectedInventory?.id;
 
     if (!inventoryId) {
@@ -111,10 +106,10 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const [{ data: allProductInventories }, { data: inventoryMatches }, { data: categories }, { data: variants }] =
         await Promise.all([productInventoriesPromise, inventoryMatchesPromise, categoriesPromise, variantsPromise]);
 
-    // Filter by stock level if needed
-    let filteredByStock = allProductInventories || [];
+    let filteredInventories = allProductInventories || [];
+
     if (stockFilter !== 'all') {
-        filteredByStock = filteredByStock.filter((pi) => {
+        filteredInventories = filteredInventories.filter((pi) => {
             if (stockFilter === 'low') return pi.product_quantity > 0 && pi.product_quantity <= 5;
             if (stockFilter === 'out') return pi.product_quantity === 0;
             if (stockFilter === 'in') return pi.product_quantity > 5;
@@ -122,7 +117,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         });
     }
 
-    const productIdsFromStockFilter = filteredByStock.map((pi) => pi.product_id);
+    const productIdsFromFilters = filteredInventories.map((pi) => pi.product_id);
 
     // Build main products query
     let productsQuery = supabase
@@ -131,13 +126,13 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
             id,
             product_name,
             product_category,
-            product_variant,
             product_status,
+            product_variant,
             categories(id, category_name),
             variants(id, variant_name)
         `)
         .order('product_name', { ascending: true })
-        .in('id', productIdsFromStockFilter.length > 0 ? productIdsFromStockFilter : [0]);
+        .in('id', productIdsFromFilters.length > 0 ? productIdsFromFilters : [0]);
 
     if (query) {
         const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
@@ -169,7 +164,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
     const filteredProductIds = filteredProducts.map(p => p.id);
-    const filteredInventoryItems = (allProductInventories || []).filter(pi => filteredProductIds.includes(pi.product_id));
+    const filteredInventoryItems = (filteredInventories || []).filter(pi => filteredProductIds.includes(pi.product_id));
 
     // Stock calculations
     const lowStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity > 0 && pi.product_quantity <= 5).length;
@@ -179,7 +174,7 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const inventoryMap = new Map(
-        (allProductInventories || [])
+        (filteredInventories || [])
             .filter(pi => pagedProducts.some(p => p.id === pi.product_id))
             .map(pi => [pi.product_id, pi])
     );
@@ -189,11 +184,11 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
         <main className="inventory-page">
             {/* Header Section */}
             <div className="pageHeader">
-                <h2 className="heading-title">Inventory</h2>
+                <div>
+                    <h2 className="heading-title">Inventory</h2>
+                    <h3 className="heading-subtitle">{selectedInventory?.inventory_name}</h3>
+                </div>
             </div>
-
-            {/* Inventory Tabs */}
-            <InventoryTabs inventories={inventories} selectedInventory={selectedInventory} tab={tab}/>
 
             {/* Main Content */}
             <div className="content inventory-content">
@@ -226,18 +221,27 @@ export default async function Home({ searchParams}: {searchParams: Promise<Searc
                                         <span className="item-sku">{inventoryInfo?.product_sku || '-'}</span>
                                     </td>
                                     <td>
-                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock': inventoryInfo?.product_quantity <= 5 ? 'low-stock': ''}`}>
+                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock' : inventoryInfo?.product_quantity <= 5 ? 'low-stock' : ''}`}>
                                             {inventoryInfo?.product_quantity ?? '-'}
                                         </div>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
                                     <td>{(product.variants as any)?.variant_name || '-'}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            <DeleteProductButton productId={product.id} productName={product.product_name} inventoryId={inventoryId}/>
-                                            <ViewBatchButton productId={product.id} />
+                                    <td className="table-actions">
+                                        <DeleteProductButton
+                                            productId={product.id}
+                                            productName={product.product_name}
+                                            inventoryId={inventoryId}
+                                        />
 
-                                        </div>
+                                        <EditInventoryItemButton
+                                            productId={product.id}
+                                            inventoryId={inventoryId.toString()}
+                                            productName={product.product_name || ''}
+                                            productCategoryName={(product.categories as any)?.category_name || ''}
+                                            productSku={inventoryInfo?.product_sku || ''}
+                                            productQuantity={inventoryInfo?.product_quantity ?? 0}
+                                        />
                                     </td>
                                 </tr>
                             );
