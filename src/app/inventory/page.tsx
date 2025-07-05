@@ -1,4 +1,4 @@
-import { DeleteProductButton } from '@/src/features/products/delete/DeleteProductButton';
+import { DeleteProductButton } from '@/src/features/inventory/delete/DeleteProductButton';
 import { FilterBar } from '@/src/features/inventory/FilterBar';
 import { EditInventoryItemButton } from '@/src/features/inventory/edit/EditInventoryItemButton';
 import { Pagination } from '@/src/components/Pagination/pagination';

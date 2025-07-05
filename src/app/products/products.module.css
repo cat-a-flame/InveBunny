@@ -11,3 +11,9 @@
         margin-right: 0.5em;
     }
 }
+
+.summary {
+    & .total {
+        font-size: 0.875rem;
+    }
+}
