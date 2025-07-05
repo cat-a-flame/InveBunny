@@ -31,7 +31,7 @@ const Sidebar = () => {
 
     useEffect(() => {
         setInventoryOpen(pathname.startsWith('/inventory'));
-        const settingsPaths = ['/categories', '/supplies', '/inventories'];
+        const settingsPaths = ['/categories', '/inventories', '/variants'];
         setSettingsOpen(settingsPaths.some(p => pathname.startsWith(p)));
     }, [pathname]);
 
@@ -77,7 +77,7 @@ const Sidebar = () => {
                             </Link>
                         </li>
                         <li>
-                            <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/supplies') || pathname.startsWith('/categories') || pathname.startsWith('/inventories') ? styles.active : ''}`} onClick={() => setSettingsOpen(prev => !prev)}>
+                            <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/categories') || pathname.startsWith('/inventories') || pathname.startsWith('/variants') ? styles.active : ''}`} onClick={() => setSettingsOpen(prev => !prev)}>
                                 <i className="fa-solid fa-gear"></i>
                                 {!isCollapsed && <span>Settings</span>}
                                 {!isCollapsed && <i className={`${styles.chevron} fa-solid ${settingsOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>}
@@ -88,19 +88,13 @@ const Sidebar = () => {
                                         <Link href="/inventories" className={`${styles.subLink} ${pathname === '/inventories' ? styles.active : ''}`}>Inventories</Link>
                                     </li>
                                     <li>
-                                        <Link href="/supplies" className={`${styles.subLink} ${pathname === '/supplies' ? styles.active : ''}`}>Supplies</Link>
+                                        <Link href="/categories" className={`${styles.subLink} ${pathname === '/categories' ? styles.active : ''}`}>Categories</Link>
                                     </li>
                                     <li>
-                                        <Link href="/categories" className={`${styles.subLink} ${pathname === '/categories' ? styles.active : ''}`}>Categories</Link>
+                                        <Link href="/variants" className={`${styles.subLink} ${pathname === '/variants' ? styles.active : ''}`}>Variants</Link>
                                     </li>
                                 </ul>
                             )}
-                        </li>
-                        <li>
-                            <Link className={`${styles.navigationLink} ${pathname === '/variants' ? styles.active : ''}`} href="/variants" title="Variants">
-                                <i className="fa-solid fa-sitemap"></i>
-                                {!isCollapsed && <span>Variants</span>}
-                            </Link>
                         </li>
                     </ul>
                 </nav>
