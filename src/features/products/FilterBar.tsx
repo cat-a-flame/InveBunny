@@ -49,7 +49,10 @@ export function FilterBar({
         setIsLoading(true);
         const params = new URLSearchParams(searchParams.toString());
         const stringValue = Array.isArray(value) ? value.join(',') : value;
-        if (stringValue === "" || stringValue === "all") {
+        if (key === "statusFilter") {
+            // keep status filter explicit so clearing it doesn't default to "active"
+            params.set(key, stringValue);
+        } else if (stringValue === "" || stringValue === "all") {
             params.delete(key);
         } else {
             params.set(key, stringValue);

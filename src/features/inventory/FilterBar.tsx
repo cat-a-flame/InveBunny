@@ -61,7 +61,11 @@ export function FilterBar({
         }
 
         const stringValue = Array.isArray(value) ? value.join(',') : value;
-        if (stringValue === "" || stringValue === "all") {
+        if (key === "statusFilter") {
+            // always keep explicit status filter so clearing it doesn't
+            // revert to the default "active" filter
+            params.set(key, stringValue);
+        } else if (stringValue === "" || stringValue === "all") {
             params.delete(key);
         } else {
             params.set(key, stringValue);
