@@ -33,7 +33,7 @@ const Sidebar = () => {
     useEffect(() => {
         const loadProfile = async () => {
             try {
-                const res = await fetch('/api/profile');
+                const res = await fetch('/api/profile', { credentials: 'same-origin' });
                 if (res.ok) {
                     const data = await res.json();
                     setUsername(data.username || '');

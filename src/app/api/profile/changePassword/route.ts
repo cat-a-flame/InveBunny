@@ -12,12 +12,34 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { password } = await request.json();
-  if (!password || password.trim() === '') {
-    return NextResponse.json({ success: false, error: 'Password is required' }, { status: 400 });
+  const { currentPassword, newPassword } = await request.json();
+  if (!newPassword || newPassword.trim() === '') {
+    return NextResponse.json(
+      { success: false, error: 'New password is required' },
+      { status: 400 },
+    );
   }
 
-  const { error } = await supabase.auth.updateUser({ password });
+  // verify current password before allowing update
+  if (!currentPassword) {
+    return NextResponse.json(
+      { success: false, error: 'Current password is required' },
+      { status: 400 },
+    );
+  }
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email!,
+    password: currentPassword,
+  });
+  if (verifyError) {
+    return NextResponse.json(
+      { success: false, error: 'Current password is incorrect' },
+      { status: 400 },
+    );
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
