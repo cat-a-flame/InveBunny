@@ -91,6 +91,7 @@ export function FilterBar({
         if (searchParams.get("tab")) {
             params.set("tab", searchParams.get("tab")!);
         }
+        params.set("statusFilter", "all");
         router.push(`/inventory?${params.toString()}`);
     };
 

@@ -119,7 +119,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
     const productIdsFromFilters = filteredInventories.map((pi) => pi.product_id);
 
-    // Build main products query
+    // Build base products query (without status filter)
     let productsQuery = supabase
         .from('products')
         .select(`
@@ -141,13 +141,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         );
     }
 
-    // Apply filters
-    if (statusFilter === 'active') {
-        productsQuery = productsQuery.eq('product_status', true);
-    } else if (statusFilter === 'inactive') {
-        productsQuery = productsQuery.eq('product_status', false);
-    }
-
+    // Apply filters except status
     if (categoryFilter.length > 0) {
         productsQuery = productsQuery.in('product_category', categoryFilter);
     }
@@ -156,10 +150,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.in('product_variant', variantFilter);
     }
 
-    const { data: products } = await productsQuery;
+    const { data: productsBase } = await productsQuery;
+
+    const allFilteredProducts = productsBase || [];
+
+    // Status counts before applying status filter
+    const statusCounts = {
+        active: allFilteredProducts.filter(p => p.product_status).length,
+        inactive: allFilteredProducts.filter(p => !p.product_status).length,
+    };
+
+    // Apply status filter in-memory
+    const filteredProducts =
+        statusFilter === 'active'
+            ? allFilteredProducts.filter(p => p.product_status)
+            : statusFilter === 'inactive'
+                ? allFilteredProducts.filter(p => !p.product_status)
+                : allFilteredProducts;
 
     // ========== DATA PROCESSING ==========
-    const filteredProducts = products || [];
     const totalCount = filteredProducts.length;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -180,11 +189,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
             variantCounts[p.product_variant] = (variantCounts[p.product_variant] || 0) + 1;
         }
     });
-
-    const statusCounts = {
-        active: filteredProducts.filter(p => p.product_status).length,
-        inactive: filteredProducts.filter(p => !p.product_status).length,
-    };
 
     const stockCounts = {
         all: filteredInventoryItems.length,

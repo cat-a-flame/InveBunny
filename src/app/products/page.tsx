@@ -70,7 +70,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const [{ data: productInventories }, { data: categories }, { data: variants }] =
         await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
 
-    // Build main products query
+    // Build base products query (without status filter)
     let productsQuery = supabase
         .from('products')
         .select(`
@@ -88,13 +88,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.ilike('product_name', `%${query}%`);
     }
 
-    // Apply filters
-    if (statusFilter === 'active') {
-        productsQuery = productsQuery.eq('product_status', true);
-    } else if (statusFilter === 'inactive') {
-        productsQuery = productsQuery.eq('product_status', false);
-    }
-
+    // Apply filters except status
     if (categoryFilter.length > 0) {
         productsQuery = productsQuery.in('product_category', categoryFilter);
     }
@@ -103,10 +97,23 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.in('product_variant', variantFilter);
     }
 
-    const { data: products } = await productsQuery;
+    const { data: productsBase } = await productsQuery;
+
+    const allFilteredProducts = productsBase || [];
+
+    const statusCounts = {
+        active: allFilteredProducts.filter(p => p.product_status).length,
+        inactive: allFilteredProducts.filter(p => !p.product_status).length,
+    };
+
+    const filteredProducts =
+        statusFilter === 'active'
+            ? allFilteredProducts.filter(p => p.product_status)
+            : statusFilter === 'inactive'
+                ? allFilteredProducts.filter(p => !p.product_status)
+                : allFilteredProducts;
 
     // ========== DATA PROCESSING ==========
-    const filteredProducts = products || [];
     const totalCount = filteredProducts.length;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -137,10 +144,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         }
     });
 
-    const statusCounts = {
-        active: filteredProducts.filter(p => p.product_status).length,
-        inactive: filteredProducts.filter(p => !p.product_status).length,
-    };
 
     // Pagination
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
