@@ -26,8 +26,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const statusFilterRaw = resolvedSearchParams.statusFilter;
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
 
-    const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
-    const variantFilter = resolvedSearchParams.variantFilter || 'all';
+    const categoryFilter = resolvedSearchParams.categoryFilter
+        ? resolvedSearchParams.categoryFilter.split(',').filter(Boolean)
+        : [];
+    const variantFilter = resolvedSearchParams.variantFilter
+        ? resolvedSearchParams.variantFilter.split(',').filter(Boolean)
+        : [];
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
 
@@ -66,7 +70,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const [{ data: productInventories }, { data: categories }, { data: variants }] =
         await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
 
-    // Build main products query
+    // Build base products query (without status filter)
     let productsQuery = supabase
         .from('products')
         .select(`
@@ -84,25 +88,32 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.ilike('product_name', `%${query}%`);
     }
 
-    // Apply filters
-    if (statusFilter === 'active') {
-        productsQuery = productsQuery.eq('product_status', true);
-    } else if (statusFilter === 'inactive') {
-        productsQuery = productsQuery.eq('product_status', false);
+    // Apply filters except status
+    if (categoryFilter.length > 0) {
+        productsQuery = productsQuery.in('product_category', categoryFilter);
     }
 
-    if (categoryFilter !== 'all') {
-        productsQuery = productsQuery.eq('product_category', categoryFilter);
+    if (variantFilter.length > 0) {
+        productsQuery = productsQuery.in('product_variant', variantFilter);
     }
 
-    if (variantFilter !== 'all') {
-        productsQuery = productsQuery.eq('product_variant', variantFilter);
-    }
+    const { data: productsBase } = await productsQuery;
 
-    const { data: products } = await productsQuery;
+    const allFilteredProducts = productsBase || [];
+
+    const statusCounts = {
+        active: allFilteredProducts.filter(p => p.product_status).length,
+        inactive: allFilteredProducts.filter(p => !p.product_status).length,
+    };
+
+    const filteredProducts =
+        statusFilter === 'active'
+            ? allFilteredProducts.filter(p => p.product_status)
+            : statusFilter === 'inactive'
+                ? allFilteredProducts.filter(p => !p.product_status)
+                : allFilteredProducts;
 
     // ========== DATA PROCESSING ==========
-    const filteredProducts = products || [];
     const totalCount = filteredProducts.length;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -121,6 +132,18 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         }
         inventoryNamesMap.get(row.product_id)!.push(name);
     });
+
+    const categoryCounts: Record<string, number> = {};
+    const variantCounts: Record<string, number> = {};
+    filteredProducts.forEach(p => {
+        if (p.product_category) {
+            categoryCounts[p.product_category] = (categoryCounts[p.product_category] || 0) + 1;
+        }
+        if (p.product_variant) {
+            variantCounts[p.product_variant] = (variantCounts[p.product_variant] || 0) + 1;
+        }
+    });
+
 
     // Pagination
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -141,7 +164,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                     categoryFilter={categoryFilter}
                     categories={categories || []}
                     variants={variants || []}
-                    variantFilter={''}
+                    variantFilter={variantFilter}
+                    categoryCounts={categoryCounts}
+                    variantCounts={variantCounts}
+                    totalCount={totalCount}
+                    statusCounts={statusCounts}
                 />
 
                 <table>

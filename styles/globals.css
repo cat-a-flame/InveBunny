@@ -64,10 +64,19 @@ main {
 }
 
 .filter-bar {
-    align-items: last baseline;
+    margin-bottom: 1.5rem;
+
+    &.single-search {
+        padding: 1rem 1.25rem 0;
+    }
+}
+
+.filter-bar-options {
+    align-items: center;
     display: flex;
     gap: 1rem;
-    padding: 0 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0 1.25rem;
 
     & .search-input {
         width: 450px;
@@ -77,9 +86,57 @@ main {
         flex-grow: 1;
         width: 160px;
     }
+
+    & div[class*="-container"] {
+        width: 100%;
+    }
+}
+
+.filter-option {
+    width: 100%;
+}
+
+.filter-chips {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    padding: 0 1.25rem;
+}
+
+.filter-chip-label {
+    font-weight: 700;
+}
+
+.filter-chip {
+    align-items: center;
+    border: 1px solid #e8e1f5;
+    border-radius: 4px;
+    display: inline-flex;
+    font-size: .875rem;
+    padding: .2rem 0.5rem .2rem 0.75rem;
+}
+
+.filter-chip button {
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    margin-left: 0.25rem;
+
+    &:hover {
+        border-radius: 2px;
+        background-color: #e8e1f5;
+    }
+
+    &:focus,
+    &:active {
+        background-color: #ddd5ea;
+    }
 }
 
 .supplies-filter-bar {
+    align-self: center;
+    display: flex;
     justify-content: space-between;
 }
 
@@ -299,7 +356,8 @@ textarea {
     }
 }
 
-.react-select__control {
+.react-select__control,
+.filter-option__control {
     width: 100%;
     border: 1px solid #E2D9F6;
     border-radius: .5rem !important;
@@ -307,6 +365,10 @@ textarea {
     font-family: "Quicksand", serif;
     font-weight: 600;
     color: #725A79;
+
+    & div[class*="-placeholder"] {
+        color: #725a79;
+    }
 }
 
 .react-select__single-value {
@@ -317,14 +379,18 @@ textarea {
     font-weight: 700 !important;
 }
 
-.react-select__control--is-focused {
+.react-select__control--is-focused,
+.filter-option__control--is-focused {
     box-shadow: 0 0px 8px #c8b7ee75 !important;
     border-color: #C9B7F0 !important;
 }
 
 .react-select__option:hover,
 .react-select__option--is-selected,
-.react-select__option--is-focused {
+.react-select__option--is-focused,
+.filter-option__option:hover,
+.filter-option__option--is-selected,
+.filter-option__option--is-focused {
     background-color: #e8e1f5 !important;
     color: #725A79 !important;
 }

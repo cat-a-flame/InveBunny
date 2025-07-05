@@ -41,7 +41,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
 
 
             <div className="content">
-                <div className="filter-bar supplies-filter-bar">
+                <div className="filter-bar supplies-filter-bar single-search">
                     <Search placeholder="Search for supply name" query={query} />
 
                     <SettingsButton />

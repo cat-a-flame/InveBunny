@@ -32,7 +32,7 @@ export default async function InventoriesPage({ searchParams }: { searchParams: 
             </div>
 
             <div className="content">
-                <div className="filter-bar">
+                <div className="filter-bar single-search">
                     <Search placeholder="Search for inventory name" query={query} />
                 </div>
 
