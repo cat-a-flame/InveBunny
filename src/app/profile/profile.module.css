@@ -1,0 +1,12 @@
+.wrapper {
+    padding: 1.5rem;
+    max-width: 400px;
+}
+
+.form {
+    margin-bottom: 1.5rem;
+}
+
+.formAction {
+    margin-top: 0.5rem;
+}

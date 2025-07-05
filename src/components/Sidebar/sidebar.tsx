@@ -11,6 +11,7 @@ const Sidebar = () => {
     const [inventoryOpen, setInventoryOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [inventories, setInventories] = useState<{ id: number; inventory_name: string }[]>([]);
+    const [username, setUsername] = useState('');
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -27,6 +28,21 @@ const Sidebar = () => {
             }
         };
         load();
+    }, []);
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                const res = await fetch('/api/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    setUsername(data.username || '');
+                }
+            } catch (err) {
+                console.error('Failed to load profile', err);
+            }
+        };
+        loadProfile();
     }, []);
 
     useEffect(() => {
@@ -107,7 +123,7 @@ const Sidebar = () => {
 
             <Link className={`${styles.profileLink} ${pathname === '/profile' ? styles.active : ''}`} href="/profile">
                 <span><Image src="/images/avatar.jpg" alt="Profile picture" className={styles["profile-image"]} width={120} height={120} /></span>
-                <span className={styles["profile-name"]}>Stefanie</span>
+                <span className={styles["profile-name"]}>{username || 'Profile'}</span>
             </Link>
         </aside>
     );
