@@ -147,10 +147,30 @@ export function FilterBar({
     };
 
     const chips = [
-        ...(statusFilter !== 'all' ? [{ type: 'status', value: statusFilter, label: statusFilter }] : []),
-        ...(stockFilter !== 'all' ? [{ type: 'stock', value: stockFilter, label: stockFilter }] : []),
-        ...selectedCategoryOptions.map(o => ({ type: 'category', value: o.value, label: o.label.split(' (')[0] })),
-        ...selectedVariantOptions.map(o => ({ type: 'variant', value: o.value, label: o.label.split(' (')[0] })),
+        ...(statusFilter !== 'all'
+            ? [{
+                type: 'status',
+                value: statusFilter,
+                label: `Status: ${statusOptions.find(o => o.value === statusFilter)?.label.split(' (')[0]}`,
+            }]
+            : []),
+        ...(stockFilter !== 'all'
+            ? [{
+                type: 'stock',
+                value: stockFilter,
+                label: `Stock: ${stockOptions.find(o => o.value === stockFilter)?.label.split(' (')[0]}`,
+            }]
+            : []),
+        ...selectedCategoryOptions.map(o => ({
+            type: 'category',
+            value: o.value,
+            label: `Category: ${o.label.split(' (')[0]}`,
+        })),
+        ...selectedVariantOptions.map(o => ({
+            type: 'variant',
+            value: o.value,
+            label: `Variant: ${o.label.split(' (')[0]}`,
+        })),
     ];
 
     return (
@@ -181,6 +201,7 @@ export function FilterBar({
                     }}
                     placeholder={`All (${totalCount})`}
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
@@ -199,6 +220,7 @@ export function FilterBar({
                     placeholder="All"
                     isMulti
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
@@ -217,6 +239,7 @@ export function FilterBar({
                     placeholder="All"
                     isMulti
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
@@ -234,6 +257,7 @@ export function FilterBar({
                     }}
                     placeholder={`All (${stockCounts['all'] ?? totalCount})`}
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>

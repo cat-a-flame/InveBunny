@@ -114,9 +114,23 @@ export function FilterBar({
     };
 
     const chips = [
-        ...(statusFilter !== 'all' ? [{ type: 'status', value: statusFilter, label: statusFilter }] : []),
-        ...selectedCategoryOptions.map(o => ({ type: 'category', value: o.value, label: o.label.split(' (')[0] })),
-        ...selectedVariantOptions.map(o => ({ type: 'variant', value: o.value, label: o.label.split(' (')[0] })),
+        ...(statusFilter !== 'all'
+            ? [{
+                type: 'status',
+                value: statusFilter,
+                label: `Status: ${statusOptions.find(o => o.value === statusFilter)?.label.split(' (')[0]}`,
+            }]
+            : []),
+        ...selectedCategoryOptions.map(o => ({
+            type: 'category',
+            value: o.value,
+            label: `Category: ${o.label.split(' (')[0]}`,
+        })),
+        ...selectedVariantOptions.map(o => ({
+            type: 'variant',
+            value: o.value,
+            label: `Variant: ${o.label.split(' (')[0]}`,
+        })),
     ];
 
     const hasActiveFilters = () => {
@@ -156,6 +170,7 @@ export function FilterBar({
                     }}
                     placeholder={`All (${totalCount})`}
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
@@ -174,6 +189,7 @@ export function FilterBar({
                     placeholder="All"
                     isMulti
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
@@ -192,6 +208,7 @@ export function FilterBar({
                     placeholder="All"
                     isMulti
                     isClearable
+                    controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
