@@ -299,6 +299,40 @@ textarea {
     }
 }
 
+.react-select__control {
+    width: 100%;
+    border: 1px solid #E2D9F6;
+    border-radius: .5rem !important;
+    min-height: 44px !important;
+    font-family: "Quicksand", serif;
+    font-weight: 600;
+    color: #725A79;
+}
+
+.react-select__single-value {
+    color: #725A79 !important;
+}
+
+.react-select__group-heading {
+    font-weight: 700 !important;
+}
+
+.react-select__control--is-focused {
+    box-shadow: 0 0px 8px #c8b7ee75 !important;
+    border-color: #C9B7F0 !important;
+}
+
+.react-select__option:hover,
+.react-select__option--is-selected,
+.react-select__option--is-focused {
+    background-color: #e8e1f5 !important;
+    color: #725A79 !important;
+}
+
+.react-select__menu {
+    z-index: 5;
+}
+
 .input-max-width {
     width: 100%;
 }
