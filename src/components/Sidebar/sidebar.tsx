@@ -6,11 +6,13 @@ import styles from "./sidebar.module.css";
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from 'next/navigation';
 import { slugify } from '@/src/utils/slugify';
+import { useProfile } from '../ProfileContext/profile';
 
 const Sidebar = () => {
     const [inventoryOpen, setInventoryOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [inventories, setInventories] = useState<{ id: number; inventory_name: string }[]>([]);
+    const { username } = useProfile();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -28,6 +30,8 @@ const Sidebar = () => {
         };
         load();
     }, []);
+
+
 
     useEffect(() => {
         const settingsPaths = ['/categories', '/inventories', '/variants'];
@@ -107,7 +111,7 @@ const Sidebar = () => {
 
             <Link className={`${styles.profileLink} ${pathname === '/profile' ? styles.active : ''}`} href="/profile">
                 <span><Image src="/images/avatar.jpg" alt="Profile picture" className={styles["profile-image"]} width={120} height={120} /></span>
-                <span className={styles["profile-name"]}>Stefanie</span>
+                <span className={styles["profile-name"]}>{username || 'Profile'}</span>
             </Link>
         </aside>
     );
