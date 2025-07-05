@@ -59,44 +59,12 @@ export async function DELETE(request: Request) {
 
             if (countError) throw countError;
 
-            if (count === 0) {
-                // Remove all product batches tied to this product
-                const { data: batches } = await supabase
-                    .from('product_batch')
-                    .select('id')
-                    .eq('product_id', productId)
-                    .eq('owner_id', user.id);
-                const batchIds = batches?.map(b => b.id) || [];
-                if (batchIds.length > 0) {
-                    await supabase
-                        .from('product_batch_to_supply_batch')
-                        .delete()
-                        .eq('owner_id', user.id)
-                        .in('product_batch_id', batchIds);
-                }
-                await supabase
-                    .from('product_batch')
-                    .delete()
-                    .eq('product_id', productId)
-                    .eq('owner_id', user.id);
+            const message =
+                count === 0
+                    ? `Removed product ${productId} from inventory ${inventoryId}. Product has no inventory assignments now.`
+                    : `Removed product ${productId} from inventory ${inventoryId} (product remains in ${count} other inventories)`;
 
-                const { error: productError } = await supabase
-                    .from('products')
-                    .delete()
-                    .eq('id', productId);
-
-                if (productError) throw productError;
-
-                return NextResponse.json({
-                    success: true,
-                    message: `Product ${productId} was removed from inventory ${inventoryId} and deleted completely as it had no other inventory associations`
-                });
-            }
-
-            return NextResponse.json({
-                success: true,
-                message: `Removed product ${productId} from inventory ${inventoryId} only (product remains in ${count} other inventories)`
-            });
+            return NextResponse.json({ success: true, message });
         }
 
         const { error: piError } = await supabase
