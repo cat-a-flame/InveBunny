@@ -7,6 +7,7 @@ import "../../styles/globals.css";
 
 import Sidebar from '../components/Sidebar/sidebar';
 import { Suspense } from 'react';
+import { createClient } from '../utils/supabase/server';
 
 const geistSans = Quicksand({
   variable: "--font-quicksand",
@@ -18,15 +19,20 @@ export const metadata: Metadata = {
   description: "Super cute inventory management",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body className={geistSans.variable}>
         <ProfileProvider>
           <ToastProvider>
-            <Suspense fallback={null}>
-              <Sidebar />
-            </Suspense>
+            {user && (
+              <Suspense fallback={null}>
+                <Sidebar />
+              </Suspense>
+            )}
             <main>
               {children}
             </main>
