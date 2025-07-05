@@ -6,12 +6,13 @@ import styles from "./sidebar.module.css";
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from 'next/navigation';
 import { slugify } from '@/src/utils/slugify';
+import { useProfile } from '../ProfileContext/profile';
 
 const Sidebar = () => {
     const [inventoryOpen, setInventoryOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [inventories, setInventories] = useState<{ id: number; inventory_name: string }[]>([]);
-    const [username, setUsername] = useState('');
+    const { username, setUsername } = useProfile();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -30,20 +31,7 @@ const Sidebar = () => {
         load();
     }, []);
 
-    useEffect(() => {
-        const loadProfile = async () => {
-            try {
-                const res = await fetch('/api/profile', { credentials: 'same-origin' });
-                if (res.ok) {
-                    const data = await res.json();
-                    setUsername(data.username || '');
-                }
-            } catch (err) {
-                console.error('Failed to load profile', err);
-            }
-        };
-        loadProfile();
-    }, []);
+
 
     useEffect(() => {
         const settingsPaths = ['/categories', '/inventories', '/variants'];

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/src/components/Button/button';
 import { useToast } from '@/src/components/Toast/toast';
+import { useProfile } from '@/src/components/ProfileContext/profile';
 import styles from './profile.module.css';
 
 type Props = {
@@ -17,7 +17,7 @@ export default function ProfileForm({ email, initialUsername }: Props) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const toast = useToast();
-  const router = useRouter();
+  const { setUsername: setGlobalUsername } = useProfile();
 
   const updateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +29,7 @@ export default function ProfileForm({ email, initialUsername }: Props) {
     const result = await res.json();
     if (result.success) {
       toast('✅ Username updated!');
-      router.refresh();
+      setGlobalUsername(username);
     } else {
       toast(`Error: ${result.error}`);
     }
