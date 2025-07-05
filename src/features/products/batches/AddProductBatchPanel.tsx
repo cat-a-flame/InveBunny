@@ -278,7 +278,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                         isClearable
                         isLoading={loadingSupplies}
                         noOptionsMessage={() =>
-                            loadingSupplies ? 'Loading…' : 'No supplies available'
+                            loadingSupplies ? 'Loading…' : 'Loading...'
                         }
                     />
                 </div>
