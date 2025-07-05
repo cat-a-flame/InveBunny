@@ -33,7 +33,7 @@ export default async function CategoriesPage({ searchParams }: { searchParams: a
             </div>
 
             <div className="content">
-                <div className="filter-bar">
+                <div className="filter-bar single-search">
                     <Search placeholder="Search for category name" query={query} />
                 </div>
 

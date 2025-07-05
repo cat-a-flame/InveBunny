@@ -33,7 +33,7 @@ export default async function VariantsPage({ searchParams }: { searchParams: any
             </div>
 
             <div className="content">
-                <div className="filter-bar">
+                <div className="filter-bar single-search">
                     <Search placeholder="Search for variant name" query={query} />
                 </div>
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { IconButton } from "@/src/components/IconButton/iconButton";
+import { Button } from "@/src/components/Button/button";
 import { Search } from "@/src/components/SearchBar/searchBar";
 
 type FilterBarProps = {
@@ -156,118 +156,110 @@ export function FilterBar({
             ? [{
                 type: 'status',
                 value: statusFilter,
-                label: `Status: ${statusOptions.find(o => o.value === statusFilter)?.label.split(' (')[0]}`,
+                label: (<><span className="filter-chip-label">Status:&nbsp;</span> {statusOptions.find(o => o.value === statusFilter)?.label.split(' (')[0]}</>),
             }]
             : []),
         ...(stockFilter !== 'all'
             ? [{
                 type: 'stock',
                 value: stockFilter,
-                label: `Stock: ${stockOptions.find(o => o.value === stockFilter)?.label.split(' (')[0]}`,
+                label: (<><span className="filter-chip-label">Stock:&nbsp;</span> {stockOptions.find(o => o.value === stockFilter)?.label.split(' (')[0]}</>),
             }]
             : []),
         ...selectedCategoryOptions.map(o => ({
             type: 'category',
             value: o.value,
-            label: `Category: ${o.label.split(' (')[0]}`,
+            label: (<><span className="filter-chip-label">Category:&nbsp;</span> {o.label.split(' (')[0]}</>),
         })),
         ...selectedVariantOptions.map(o => ({
             type: 'variant',
             value: o.value,
-            label: `Variant: ${o.label.split(' (')[0]}`,
+            label: (<><span className="filter-chip-label">Variant:&nbsp;</span> {o.label.split(' (')[0]}</>),
         })),
     ];
 
     return (
-        <div className={`filter-bar ${isLoading ? 'filter-bar-loading' : ''}`}>
-            <Search placeholder="Search for product name or SKU" query={searchQuery} onChange={handleSearch} size="md" />
+        <div className="filter-bar">
+            <div className={`filter-bar-options ${isLoading ? 'filter-bar-loading' : ''}`}>
+                <Search placeholder="Search for product name or SKU" query={searchQuery} onChange={handleSearch} size="md" />
 
-            {chips.length > 0 && (
-                <div className="filter-chips">
-                    {chips.map(chip => (
-                        <span key={chip.type + chip.value} className="filter-chip">
-                            {chip.label}
-                            <button type="button" onClick={() => removeChip(chip.type, chip.value)}>&times;</button>
-                        </span>
-                    ))}
-                </div>
-            )}
+                    <Select
+                        classNamePrefix="react-select"
+                        options={statusOptions}
+                        value={statusOptions.find(o => o.value === statusFilter) || null}
+                        onChange={(opt) => {
+                            const value = (opt ? (opt as any).value : 'all') as "active" | "inactive" | "all";
+                            setStatusFilter(value);
+                            updateQueryParam('statusFilter', value);
+                        }}
+                        placeholder="Status"
+                        isClearable={false}
+                        controlShouldRenderValue={false}
+                        isDisabled={isLoading}
+                    />
 
-            <div>
-                <label className="input-label">Status</label>
-                <Select
-                    classNamePrefix="react-select"
-                    options={statusOptions}
-                    value={statusOptions.find(o => o.value === statusFilter) || null}
-                    onChange={(opt) => {
-                        const value = (opt ? (opt as any).value : 'all') as "active" | "inactive" | "all";
-                        setStatusFilter(value);
-                        updateQueryParam('statusFilter', value);
-                    }}
-                    placeholder={`All (${totalCount})`}
-                    isClearable
-                    controlShouldRenderValue={false}
-                    isDisabled={isLoading}
-                />
+                    <Select
+                        classNamePrefix="react-select"
+                        options={categoryOptions}
+                        value={selectedCategoryOptions}
+                        onChange={(opts) => {
+                            const values = (opts || []).map((o: any) => o.value);
+                            setCategoryFilter(values);
+                            updateQueryParam('categoryFilter', values);
+                        }}
+                        placeholder="Category"
+                        isMulti
+                        isClearable={false}
+                        controlShouldRenderValue={false}
+                        isDisabled={isLoading}
+                    />
+
+                    <Select
+                        classNamePrefix="react-select"
+                        options={variantOptions}
+                        value={selectedVariantOptions}
+                        onChange={(opts) => {
+                            const values = (opts || []).map((o: any) => o.value);
+                            setVariantFilter(values);
+                            updateQueryParam('variantFilter', values);
+                        }}
+                        placeholder="Variant"
+                        isMulti
+                        isClearable={false}
+                        controlShouldRenderValue={false}
+                        isDisabled={isLoading}
+                    />
+
+                    <Select
+                        classNamePrefix="react-select"
+                        options={stockOptions}
+                        value={stockOptions.find(o => o.value === stockFilter) || null}
+                        onChange={(opt) => {
+                            const value = (opt ? (opt as any).value : 'all') as "all" | "low" | "out" | "in";
+                            setStockFilter(value);
+                            updateQueryParam('stockFilter', value);
+                        }}
+                        placeholder="Stock status"
+                        isClearable={false}
+                        controlShouldRenderValue={false}
+                        isDisabled={isLoading}
+                    />
             </div>
 
-            <div>
-                <label className="input-label">Category</label>
-                <Select
-                    classNamePrefix="react-select"
-                    options={categoryOptions}
-                    value={selectedCategoryOptions}
-                    onChange={(opts) => {
-                        const values = (opts || []).map((o: any) => o.value);
-                        setCategoryFilter(values);
-                        updateQueryParam('categoryFilter', values);
-                    }}
-                    placeholder="All"
-                    isMulti
-                    isClearable
-                    controlShouldRenderValue={false}
-                    isDisabled={isLoading}
-                />
+            <div className="filter-chips">
+                {chips.length > 0 && (
+                    <>
+                        {chips.map(chip => (
+                            <span key={chip.type + chip.value} className="filter-chip">
+                                {chip.label}
+                                <button type="button" onClick={() => removeChip(chip.type, chip.value)}>&times;</button>
+                            </span>
+                        ))}
+                    
+                        <Button onClick={clearAllFilters} variant="ghost" size="sm" disabled={!hasActiveFilters()}>Clear all</Button>
+                    </>
+                )}
             </div>
-
-            <div>
-                <label className="input-label">Variant</label>
-                <Select
-                    classNamePrefix="react-select"
-                    options={variantOptions}
-                    value={selectedVariantOptions}
-                    onChange={(opts) => {
-                        const values = (opts || []).map((o: any) => o.value);
-                        setVariantFilter(values);
-                        updateQueryParam('variantFilter', values);
-                    }}
-                    placeholder="All"
-                    isMulti
-                    isClearable
-                    controlShouldRenderValue={false}
-                    isDisabled={isLoading}
-                />
-            </div>
-
-            <div>
-                <label className="input-label">Stock</label>
-                <Select
-                    classNamePrefix="react-select"
-                    options={stockOptions}
-                    value={stockOptions.find(o => o.value === stockFilter) || null}
-                    onChange={(opt) => {
-                        const value = (opt ? (opt as any).value : 'all') as "all" | "low" | "out" | "in";
-                        setStockFilter(value);
-                        updateQueryParam('stockFilter', value);
-                    }}
-                    placeholder={`All (${stockCounts['all'] ?? totalCount})`}
-                    isClearable
-                    controlShouldRenderValue={false}
-                    isDisabled={isLoading}
-                />
-            </div>
-
-            <IconButton onClick={clearAllFilters} icon={<i className="fa-solid fa-filter-circle-xmark"></i>} title="Clear filters" disabled={!hasActiveFilters()} />
         </div>
     );
 }

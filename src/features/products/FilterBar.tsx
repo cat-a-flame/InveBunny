@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { useRouter, useSearchParams } from "next/navigation";
-import { IconButton } from "@/src/components/IconButton/iconButton";
+import { Button } from "@/src/components/Button/button";
 import { Search } from "@/src/components/SearchBar/searchBar";
 
 type FilterBarProps = {
@@ -122,18 +122,18 @@ export function FilterBar({
             ? [{
                 type: 'status',
                 value: statusFilter,
-                label: `Status: ${statusOptions.find(o => o.value === statusFilter)?.label.split(' (')[0]}`,
+                label: (<><span className="filter-chip-label">Status:&nbsp;</span> {statusOptions.find(o => o.value === statusFilter)?.label.split(' (')[0]}</>),
             }]
             : []),
         ...selectedCategoryOptions.map(o => ({
             type: 'category',
             value: o.value,
-            label: `Category: ${o.label.split(' (')[0]}`,
+            label: (<><span className="filter-chip-label">Category:&nbsp;</span> {o.label.split(' (')[0]}</>),
         })),
         ...selectedVariantOptions.map(o => ({
             type: 'variant',
             value: o.value,
-            label: `Variant: ${o.label.split(' (')[0]}`,
+            label: (<><span className="filter-chip-label">Variant:&nbsp;</span> {o.label.split(' (')[0]}</>),
         })),
     ];
 
@@ -147,24 +147,12 @@ export function FilterBar({
     };
 
     return (
-        <div className={`filter-bar ${isLoading ? 'filter-bar-loading' : ''}`}>
-            <Search placeholder="Search for product name" query={searchQuery} onChange={handleSearch} size="md" />
+        <div className="filter-bar">
+            <div className={`filter-bar-options ${isLoading ? 'filter-bar-loading' : ''}`}>
+                <Search placeholder="Search for product name" query={searchQuery} onChange={handleSearch} size="md" />
 
-            {chips.length > 0 && (
-                <div className="filter-chips">
-                    {chips.map(chip => (
-                        <span key={chip.type + chip.value} className="filter-chip">
-                            {chip.label}
-                            <button type="button" onClick={() => removeChip(chip.type, chip.value)}>&times;</button>
-                        </span>
-                    ))}
-                </div>
-            )}
-
-            <div>
-                <label className="input-label">Status</label>
                 <Select
-                    classNamePrefix="react-select"
+                    classNamePrefix="filter-option"
                     options={statusOptions}
                     value={statusOptions.find(o => o.value === statusFilter) || null}
                     onChange={(opt) => {
@@ -172,17 +160,14 @@ export function FilterBar({
                         setStatusFilter(value);
                         updateQueryParam('statusFilter', value);
                     }}
-                    placeholder={`All (${totalCount})`}
-                    isClearable
+                    placeholder="Status"
+                    isClearable={false}
                     controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
-            </div>
 
-            <div>
-                <label className="input-label">Category</label>
                 <Select
-                    classNamePrefix="react-select"
+                    classNamePrefix="filter-option"
                     options={categoryOptions}
                     value={selectedCategoryOptions}
                     onChange={(opts) => {
@@ -190,18 +175,15 @@ export function FilterBar({
                         setCategoryFilter(values);
                         updateQueryParam('categoryFilter', values);
                     }}
-                    placeholder="All"
+                    placeholder="Category"
                     isMulti
-                    isClearable
+                    isClearable={false}
                     controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
-            </div>
 
-            <div>
-                <label className="input-label">Variant</label>
                 <Select
-                    classNamePrefix="react-select"
+                    classNamePrefix="filter-option"
                     options={variantOptions}
                     value={selectedVariantOptions}
                     onChange={(opts) => {
@@ -209,15 +191,28 @@ export function FilterBar({
                         setVariantFilter(values);
                         updateQueryParam('variantFilter', values);
                     }}
-                    placeholder="All"
+                    placeholder="Variant"
                     isMulti
-                    isClearable
+                    isClearable={false}
                     controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
             </div>
 
-            <IconButton onClick={clearAllFilters} icon={<i className="fa-solid fa-filter-circle-xmark"></i>} title="Clear filters" disabled={!hasActiveFilters()} />
+            <div className="filter-chips">
+                {chips.length > 0 && (
+                    <>
+                        {chips.map(chip => (
+                            <span key={chip.type + chip.value} className="filter-chip">
+                                {chip.label}
+                                <button type="button" onClick={() => removeChip(chip.type, chip.value)}>&times;</button>
+                            </span>
+                        ))}
+                        
+                        <Button onClick={clearAllFilters} variant="ghost" size="sm" disabled={!hasActiveFilters()}>Clear filters</Button>
+                    </>
+                )}
+            </div>
         </div>
     );
 }
