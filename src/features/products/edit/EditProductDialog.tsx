@@ -77,7 +77,11 @@ export function EditProductDialog({
         product_status: product.product_status ?? false,
     });
 
-    const [inventoryEntries, setInventoryEntries] = useState<Array<{ inventoryId: string }>>([]);
+    const [inventoryEntries, setInventoryEntries] = useState<Array<{
+        inventoryId: string;
+        sku?: string;
+        quantity?: number;
+    }>>([]);
 
     useEffect(() => {
         if (!open) return;
@@ -96,19 +100,37 @@ export function EditProductDialog({
                     const data = await res.json();
                     const entries = (data.inventories || []).map((inv: any) => ({
                         inventoryId: inv.inventory_id,
+                        sku: inv.product_sku || '',
+                        quantity: inv.product_quantity ?? 0,
                     }));
-                    setInventoryEntries(entries.length > 0 ? entries : [{ inventoryId: '' }]);
+                    setInventoryEntries(
+                        entries.length > 0
+                            ? entries
+                            : [{ inventoryId: '', sku: '', quantity: 0 }]
+                    );
                 } else {
                     const fallback = product.inventories.map(pi => ({
                         inventoryId: pi.inventory_id,
+                        sku: '',
+                        quantity: 0,
                     }));
-                    setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '' }]);
+                    setInventoryEntries(
+                        fallback.length > 0
+                            ? fallback
+                            : [{ inventoryId: '', sku: '', quantity: 0 }]
+                    );
                 }
             } catch {
                 const fallback = product.inventories.map(pi => ({
                     inventoryId: pi.inventory_id,
+                    sku: '',
+                    quantity: 0,
                 }));
-                setInventoryEntries(fallback.length > 0 ? fallback : [{ inventoryId: '' }]);
+                setInventoryEntries(
+                    fallback.length > 0
+                        ? fallback
+                        : [{ inventoryId: '', sku: '', quantity: 0 }]
+                );
             }
         };
 
@@ -137,7 +159,10 @@ export function EditProductDialog({
     };
 
     const addInventoryRow = () => {
-        setInventoryEntries(prev => [...prev, { inventoryId: '' }]);
+        setInventoryEntries(prev => [
+            ...prev,
+            { inventoryId: '', sku: '', quantity: 0 },
+        ]);
     };
 
     const removeInventoryRow = (index: number) => {
@@ -160,8 +185,8 @@ export function EditProductDialog({
                     product_status: formData.product_status,
                     inventories: inventoryEntries.map(entry => ({
                         inventory_id: entry.inventoryId,
-                        product_sku: '',
-                        product_quantity: 0,
+                        product_sku: entry.sku || '',
+                        product_quantity: entry.quantity ?? 0,
                     }))
                 }),
             });
