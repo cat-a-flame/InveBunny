@@ -36,8 +36,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
     const stockFilter = isStockFilter(stockFilterRaw) ? stockFilterRaw : 'all';
 
-    const categoryFilter = resolvedSearchParams.categoryFilter || 'all';
-    const variantFilter = resolvedSearchParams.variantFilter || 'all';
+    const categoryFilter = resolvedSearchParams.categoryFilter
+        ? resolvedSearchParams.categoryFilter.split(',').filter(Boolean)
+        : [];
+    const variantFilter = resolvedSearchParams.variantFilter
+        ? resolvedSearchParams.variantFilter.split(',').filter(Boolean)
+        : [];
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
     const inventorySlug = resolvedSearchParams.inventory;
@@ -144,12 +148,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.eq('product_status', false);
     }
 
-    if (categoryFilter !== 'all') {
-        productsQuery = productsQuery.eq('product_category', categoryFilter);
+    if (categoryFilter.length > 0) {
+        productsQuery = productsQuery.in('product_category', categoryFilter);
     }
 
-    if (variantFilter !== 'all') {
-        productsQuery = productsQuery.eq('product_variant', variantFilter);
+    if (variantFilter.length > 0) {
+        productsQuery = productsQuery.in('product_variant', variantFilter);
     }
 
     const { data: products } = await productsQuery;
@@ -165,6 +169,29 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     // Stock calculations
     const lowStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity > 0 && pi.product_quantity <= 5).length;
     const outOfStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity === 0).length;
+
+    const categoryCounts: Record<string, number> = {};
+    const variantCounts: Record<string, number> = {};
+    filteredProducts.forEach(p => {
+        if (p.product_category) {
+            categoryCounts[p.product_category] = (categoryCounts[p.product_category] || 0) + 1;
+        }
+        if (p.product_variant) {
+            variantCounts[p.product_variant] = (variantCounts[p.product_variant] || 0) + 1;
+        }
+    });
+
+    const statusCounts = {
+        active: filteredProducts.filter(p => p.product_status).length,
+        inactive: filteredProducts.filter(p => !p.product_status).length,
+    };
+
+    const stockCounts = {
+        all: filteredInventoryItems.length,
+        low: lowStockCount,
+        out: outOfStockCount,
+        in: filteredInventoryItems.filter(pi => pi.product_quantity > 5).length,
+    };
 
     // Pagination
     const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -195,6 +222,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                     stockFilter={stockFilter}
                     categories={categories || []}
                     variants={variants || []}
+                    categoryCounts={categoryCounts}
+                    variantCounts={variantCounts}
+                    totalCount={totalCount}
+                    statusCounts={statusCounts}
+                    stockCounts={stockCounts}
                 />
 
                 <table>

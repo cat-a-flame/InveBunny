@@ -79,6 +79,31 @@ main {
     }
 }
 
+.filter-chips {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    padding: 0 1.25rem 1rem;
+}
+
+.filter-chip {
+    align-items: center;
+    background-color: #e8e1f5;
+    border-radius: 16px;
+    color: #725A79;
+    display: inline-flex;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+}
+
+.filter-chip button {
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    margin-left: 0.25rem;
+}
+
 .supplies-filter-bar {
     justify-content: space-between;
 }
