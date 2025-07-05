@@ -26,7 +26,6 @@ export function FilterBar({
     variants,
     categoryCounts,
     variantCounts,
-    totalCount,
     statusCounts,
 }: FilterBarProps) {
     const router = useRouter();

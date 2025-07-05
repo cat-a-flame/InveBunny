@@ -29,7 +29,6 @@ export function FilterBar({
     variants,
     categoryCounts,
     variantCounts,
-    totalCount,
     statusCounts,
     stockCounts,
 }: FilterBarProps) {
