@@ -41,7 +41,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
     });
 
     const [supplies, setSupplies] = useState<SupplyOption[]>([]);
-    const [loadingSupplies, setLoadingSupplies] = useState(false);
+    const [loadingSupplies, setLoadingSupplies] = useState(true);
     const [filteredSupplies, setFilteredSupplies] = useState<SupplyOption[]>([]);
     const [supplyBatches, setSupplyBatches] = useState<Record<string, SupplyBatchOption[]>>({});
     const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>([]);
@@ -79,6 +79,14 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
             }
         };
         fetchSupplies();
+    }, [open]);
+
+    // Reset loading state when panel closes so the loader shows immediately
+    // on the next open before supplies are fetched again
+    useEffect(() => {
+        if (!open) {
+            setLoadingSupplies(true);
+        }
     }, [open]);
 
     // Recompute which supplies have available batches
