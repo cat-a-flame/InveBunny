@@ -41,6 +41,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
     });
 
     const [supplies, setSupplies] = useState<SupplyOption[]>([]);
+    const [loadingSupplies, setLoadingSupplies] = useState(false);
     const [filteredSupplies, setFilteredSupplies] = useState<SupplyOption[]>([]);
     const [supplyBatches, setSupplyBatches] = useState<Record<string, SupplyBatchOption[]>>({});
     const [supplyEntries, setSupplyEntries] = useState<ProductBatchSupply[]>([]);
@@ -64,6 +65,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
     useEffect(() => {
         if (!open) return;
         const fetchSupplies = async () => {
+            setLoadingSupplies(true);
             try {
                 const res = await fetch('/api/supplies?fields=id,supply_name,supply_categories(id,category_name)&withBatches=true');
                 if (res.ok) {
@@ -72,6 +74,8 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                 }
             } catch (err) {
                 console.error(err);
+            } finally {
+                setLoadingSupplies(false);
             }
         };
         fetchSupplies();
@@ -264,6 +268,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                         onChange={opt => setSelectedSupply(opt ? (opt as any).value : '')}
                         placeholder="Select supply"
                         isClearable
+                        isLoading={loadingSupplies}
                     />
                 </div>
                 <div className="input-group">
