@@ -9,6 +9,7 @@ import styles from "./sidebar.module.css";
 const Sidebar = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [inventoryOpen, setInventoryOpen] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(false);
     const [inventories, setInventories] = useState<{ id: number; inventory_name: string }[]>([]);
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -30,6 +31,8 @@ const Sidebar = () => {
 
     useEffect(() => {
         setInventoryOpen(pathname.startsWith('/inventory'));
+        const settingsPaths = ['/categories', '/inventories', '/variants'];
+        setSettingsOpen(settingsPaths.some(p => pathname.startsWith(p)));
     }, [pathname]);
 
     return (
@@ -80,16 +83,24 @@ const Sidebar = () => {
                             </Link>
                         </li>
                         <li>
-                            <Link className={`${styles.navigationLink} ${pathname === '/categories' ? styles.active : ''}`} href="/categories" title="Categories">
-                                <i className="fa-solid fa-boxes-stacked"></i>
-                                {!isCollapsed && <span>Categories</span>}
-                            </Link>
-                        </li>
-                        <li>
-                            <Link className={`${styles.navigationLink} ${pathname === '/variants' ? styles.active : ''}`} href="/variants" title="Variants">
-                                <i className="fa-solid fa-sitemap"></i>
-                                {!isCollapsed && <span>Variants</span>}
-                            </Link>
+                            <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/categories') || pathname.startsWith('/inventories') || pathname.startsWith('/variants') ? styles.active : ''}`} onClick={() => setSettingsOpen(prev => !prev)}>
+                                <i className="fa-solid fa-gear"></i>
+                                {!isCollapsed && <span>Settings</span>}
+                                {!isCollapsed && <i className={`${styles.chevron} fa-solid ${settingsOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>}
+                            </button>
+                            {!isCollapsed && settingsOpen && (
+                                <ul className={styles.subMenu}>
+                                    <li>
+                                        <Link href="/inventories" className={`${styles.subLink} ${pathname === '/inventories' ? styles.active : ''}`}>Inventories</Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/categories" className={`${styles.subLink} ${pathname === '/categories' ? styles.active : ''}`}>Categories</Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/variants" className={`${styles.subLink} ${pathname === '/variants' ? styles.active : ''}`}>Variants</Link>
+                                    </li>
+                                </ul>
+                            )}
                         </li>
                     </ul>
                 </nav>
