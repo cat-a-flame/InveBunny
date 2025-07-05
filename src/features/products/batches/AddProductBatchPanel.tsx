@@ -269,6 +269,9 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                         placeholder="Select supply"
                         isClearable
                         isLoading={loadingSupplies}
+                        noOptionsMessage={() =>
+                            loadingSupplies ? 'Loading…' : 'No supplies available'
+                        }
                     />
                 </div>
                 <div className="input-group">
