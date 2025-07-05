@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Select from 'react-select';
 import { Button } from '@/src/components/Button/button';
 import { IconButton } from '@/src/components/IconButton/iconButton';
 import { useToast } from '@/src/components/Toast/toast';
 
 // Basic types for supply and batch options
-export type SupplyOption = { id: string; supply_name: string };
+export type SupplyOption = {
+    id: string;
+    supply_name: string;
+    supply_categories?: { id: string; category_name: string };
+};
 export type SupplyBatchOption = { id: string; batch_name: string };
 
 export type ProductBatchSupply = {
@@ -60,7 +65,7 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
         if (!open) return;
         const fetchSupplies = async () => {
             try {
-                const res = await fetch('/api/supplies?fields=id,supply_name&withBatches=true');
+                const res = await fetch('/api/supplies?fields=id,supply_name,supply_categories(id,category_name)&withBatches=true');
                 if (res.ok) {
                     const data = await res.json();
                     setSupplies(data.supplies || []);
@@ -203,6 +208,18 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
         setSupplyEntries(prev => prev.filter((_, i) => i !== index));
     };
 
+    const supplyGroups = filteredSupplies.reduce<Record<string, { label: string; options: { value: string; label: string }[] }>>((acc, s) => {
+        const category = s.supply_categories?.category_name || 'Uncategorized';
+        if (!acc[category]) {
+            acc[category] = { label: category, options: [] };
+        }
+        acc[category].options.push({ value: s.id, label: s.supply_name });
+        return acc;
+    }, {});
+
+    const groupedOptions = Object.values(supplyGroups);
+    const selectedSupplyOption = groupedOptions.flatMap(g => g.options).find(o => o.value === selectedSupply) || null;
+
     return (
         <>
             {open && <div className="side-panel-backdrop" onClick={onClose} />}
@@ -240,12 +257,14 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
 
                 <div className="input-group">
                     <label className="input-label">Supply name</label>
-                    <select className="input-max-width" value={selectedSupply} onChange={e => setSelectedSupply(e.target.value)}>
-                        <option value="">Select supply</option>
-                        {filteredSupplies.map(s => (
-                            <option key={s.id} value={s.id}>{s.supply_name}</option>
-                        ))}
-                    </select>
+                    <Select
+                        classNamePrefix="react-select"
+                        options={groupedOptions}
+                        value={selectedSupplyOption}
+                        onChange={opt => setSelectedSupply(opt ? (opt as any).value : '')}
+                        placeholder="Select supply"
+                        isClearable
+                    />
                 </div>
                 <div className="input-group">
                     <label className="input-label">Supply batch</label>
