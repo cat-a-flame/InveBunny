@@ -20,17 +20,17 @@ export const DeleteProductButton = ({ productId, productName, inventoryId }: Pro
     const handleDelete = async () => {
         try {
             const res = await fetch(
-                `/api/products/deleteProduct?id=${productId}&inventory_id=${inventoryId}`,
+                `/api/inventory/deleteProduct?id=${productId}&inventory_id=${inventoryId}`,
                 { method: 'DELETE' }
             );
             if (res.ok) {
-                toast('✅ Product successfully deleted');
+                toast('✅ Product successfully removed');
                 router.refresh();
             } else {
-                toast('🚫 Failed to delete product');
+                toast('🚫 Failed to remove product');
             }
         } catch (error) {
-            console.error('Error deleting product', error);
+            console.error('Error removing product', error);
         }
     };
 

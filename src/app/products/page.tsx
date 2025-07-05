@@ -195,7 +195,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                 </table>
             </div>
 
-            <div className="pagination">
+            <div className="pagination total-count">
+                <div className={styles.summary}>
+                    <div className={styles.total}>
+                        Total <strong>{totalCount}</strong> products
+                    </div>
+                </div>
+
                 <Pagination totalPages={totalPages} currentPage={page} />
             </div>
         </main>
