@@ -12,7 +12,7 @@ const Sidebar = () => {
     const [inventoryOpen, setInventoryOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [inventories, setInventories] = useState<{ id: number; inventory_name: string }[]>([]);
-    const { username, setUsername } = useProfile();
+    const { username } = useProfile();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
