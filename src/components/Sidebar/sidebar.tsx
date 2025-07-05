@@ -1,13 +1,13 @@
 "use client";
 
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from "react";
 import Link from 'next/link';
-import { slugify } from '@/src/utils/slugify';
+import Image from 'next/image';
 import styles from "./sidebar.module.css";
+import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from 'next/navigation';
+import { slugify } from '@/src/utils/slugify';
 
 const Sidebar = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
     const [inventoryOpen, setInventoryOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [inventories, setInventories] = useState<{ id: number; inventory_name: string }[]>([]);
@@ -30,27 +30,26 @@ const Sidebar = () => {
     }, []);
 
     useEffect(() => {
-        setInventoryOpen(pathname.startsWith('/inventory'));
         const settingsPaths = ['/categories', '/inventories', '/variants'];
         setSettingsOpen(settingsPaths.some(p => pathname.startsWith(p)));
     }, [pathname]);
 
     return (
-        <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
+        <aside className={styles.sidebar}>
             <div>
                 <Link href="/" className={styles.logoLink}>
                     <span className={styles.logo}>🐰</span>
-                    {!isCollapsed && <span>InveBunny</span>}
+                    <span>InveBunny</span>
                 </Link>
                 <nav className={styles.navigation}>
                     <ul>
                         <li>
                             <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/inventory') ? styles.active : ''}`} onClick={() => setInventoryOpen((prev) => !prev)}>
                                 <i className="fa-solid fa-warehouse"></i>
-                                {!isCollapsed && <span>Inventory</span>}
-                                {!isCollapsed && <i className={`${styles.chevron} fa-solid ${inventoryOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>}
+                                <span>Inventory</span>
+                                <i className={`${styles.chevron} fa-solid ${inventoryOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>
                             </button>
-                            {!isCollapsed && inventoryOpen && (
+                            {inventoryOpen && (
                                 <ul className={styles.subMenu}>
                                     {inventories.map(inv => {
                                         const slug = slugify(inv.inventory_name);
@@ -67,28 +66,28 @@ const Sidebar = () => {
                                                 <li>
                             <Link className={`${styles.navigationLink} ${pathname === '/products' ? styles.active : ''}`} href="/products" title="Products">
                                 <i className="fa-solid fa-box-open"></i>
-                                {!isCollapsed && <span>Products</span>}
+                                <span>Products</span>
                             </Link>
                         </li>
                         <li>
                             <Link className={`${styles.navigationLink} ${pathname === '/scan' ? styles.active : ''}`} href="/scan" title="Scan items">
                                 <i className="fa-solid fa-barcode"></i>
-                                {!isCollapsed && <span>Scan items</span>}
+                                <span>Scan items</span>
                             </Link>
                         </li>
                         <li>
                             <Link className={`${styles.navigationLink} ${pathname === '/supplies' ? styles.active : ''}`} href="/supplies" title="Supplies">
                                 <i className="fa-solid fa-layer-group"></i>
-                                {!isCollapsed && <span>Supplies</span>}
+                                <span>Supplies</span>
                             </Link>
                         </li>
                         <li>
                             <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/categories') || pathname.startsWith('/inventories') || pathname.startsWith('/variants') ? styles.active : ''}`} onClick={() => setSettingsOpen(prev => !prev)}>
                                 <i className="fa-solid fa-gear"></i>
-                                {!isCollapsed && <span>Settings</span>}
-                                {!isCollapsed && <i className={`${styles.chevron} fa-solid ${settingsOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>}
+                                <span>Settings</span>
+                                <i className={`${styles.chevron} fa-solid ${settingsOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>
                             </button>
-                            {!isCollapsed && settingsOpen && (
+                            {settingsOpen && (
                                 <ul className={styles.subMenu}>
                                     <li>
                                         <Link href="/inventories" className={`${styles.subLink} ${pathname === '/inventories' ? styles.active : ''}`}>Inventories</Link>
@@ -106,9 +105,10 @@ const Sidebar = () => {
                 </nav>
             </div>
 
-            <button className={styles.button} onClick={() => setIsCollapsed((prev) => !prev)} title={`${isCollapsed ? "Expand" : "Collapse"}`}>
-                <i className={`fa-solid ${isCollapsed ? "fa-chevron-right" : "fa-chevron-left"}`}></i>
-            </button>
+            <Link className={`${styles.profileLink} ${pathname === '/profile' ? styles.active : ''}`} href="/profile">
+                <span><Image src="/images/avatar.jpg" alt="Profile picture" className={styles["profile-image"]} width={120} height={120} /></span>
+                <span className={styles["profile-name"]}>Stefanie</span>
+            </Link>
         </aside>
     );
 };

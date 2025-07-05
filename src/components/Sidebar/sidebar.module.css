@@ -114,3 +114,29 @@ button.navigationLink {
         font-weight: 700;
     }
 }
+
+.profileLink {
+    align-items: center;
+    border-radius: 6px;
+    display: flex;
+    gap: .5rem;
+    padding: .5rem 1rem;
+    text-decoration: none;
+
+    &:hover {
+        background-color: #f4e6f8;
+    }
+}
+
+.profile-image {
+    border-radius: 50%;
+    display: block;
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+.profile-name {
+    color: #957D9D;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
