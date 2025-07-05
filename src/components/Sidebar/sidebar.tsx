@@ -77,6 +77,12 @@ const Sidebar = () => {
                             </Link>
                         </li>
                         <li>
+                            <Link className={`${styles.navigationLink} ${pathname === '/supplies' ? styles.active : ''}`} href="/supplies" title="Supplies">
+                                <i className="fa-solid fa-layer-group"></i>
+                                {!isCollapsed && <span>Supplies</span>}
+                            </Link>
+                        </li>
+                        <li>
                             <button type="button" className={`${styles.navigationLink} ${pathname.startsWith('/categories') || pathname.startsWith('/inventories') || pathname.startsWith('/variants') ? styles.active : ''}`} onClick={() => setSettingsOpen(prev => !prev)}>
                                 <i className="fa-solid fa-gear"></i>
                                 {!isCollapsed && <span>Settings</span>}
