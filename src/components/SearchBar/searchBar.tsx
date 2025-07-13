@@ -68,7 +68,7 @@ export function Search({
             {!hasActiveSearch && (
                 <button type="button" onClick={handleManualSearch} className={styles.button}>
                     <span className={styles.label}>Search</span>
-                    <i className="fa-solid fa-magnifying-glass"></i>
+                    <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 </button>
             )}
 

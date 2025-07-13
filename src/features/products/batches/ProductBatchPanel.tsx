@@ -81,7 +81,7 @@ export default function ProductBatchPanel({ open, onClose, productId, onEditBatc
 
                 <div className="side-panel-content">
                     {isLoading?(
-                        <div className = "loading" >
+                        <div className="loading">
                             <div className="loading-title"></div>
                             <div className="loading-batch"></div>
                             <div className="loading-batch"></div>
