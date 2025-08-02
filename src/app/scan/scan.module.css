@@ -49,6 +49,7 @@
 .item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin: 10px 0;
 }
 
@@ -61,6 +62,23 @@
     }
 }
 
+.controls {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+
+.sku {
+    color: #A2A6BB;
+    margin-left: .5rem;
+    font-size: .875rem;
+}
+
+.error {
+    color: #B00020;
+    margin-top: .5rem;
+}
+
 .total-scanned-items {
     border-top: 1px solid #A2A6BB;
     display: flex;
@@ -69,6 +87,10 @@
     margin-top: 1rem;
     padding-top: 1rem;
     text-transform: uppercase;
+}
+
+.copy-button {
+    margin-top: 1rem;
 }
 
 .reset-button {
