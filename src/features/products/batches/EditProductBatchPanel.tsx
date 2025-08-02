@@ -104,7 +104,10 @@ export default function EditProductBatchPanel({ open, onClose, batch, onUpdated 
                         const res = await fetch(`/api/supplies/batches/?supplyId=${s.id}`);
                         if (res.ok) {
                             const data = await res.json();
-                            map[s.id] = data.batches || [];
+                            const activeBatches = (data.batches || []).filter(
+                                (b: SupplyBatchOption) => b.status
+                            );
+                            map[s.id] = activeBatches;
                         }
                     } catch (err) {
                         console.error(err);
@@ -147,7 +150,9 @@ export default function EditProductBatchPanel({ open, onClose, batch, onUpdated 
                     const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
                     if (res.ok) {
                         const data = await res.json();
-                        batches = data.batches || [];
+                        batches = (data.batches || []).filter(
+                            (b: SupplyBatchOption) => b.status
+                        );
                         setSupplyBatches((prev) => ({ ...prev, [selectedSupply]: batches! }));
                     }
                 } catch (err) {

@@ -12,7 +12,7 @@ export type SupplyOption = {
     supply_name: string;
     supply_categories?: { id: string; category_name: string };
 };
-export type SupplyBatchOption = { id: string; batch_name: string };
+export type SupplyBatchOption = { id: string; batch_name: string; status: boolean };
 
 export type ProductBatchSupply = {
     supplyId: string;
@@ -118,7 +118,10 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                         const res = await fetch(`/api/supplies/batches/?supplyId=${s.id}`);
                         if (res.ok) {
                             const data = await res.json();
-                            map[s.id] = data.batches || [];
+                            const activeBatches = (data.batches || []).filter(
+                                (b: SupplyBatchOption) => b.status
+                            );
+                            map[s.id] = activeBatches;
                         }
                     } catch (err) {
                         console.error(err);
@@ -144,7 +147,9 @@ export default function AddProductBatchPanel({ open, onClose, productId, product
                     const res = await fetch(`/api/supplies/batches/?supplyId=${selectedSupply}`);
                     if (res.ok) {
                         const data = await res.json();
-                        batches = data.batches || [];
+                        batches = (data.batches || []).filter(
+                            (b: SupplyBatchOption) => b.status
+                        );
                         setSupplyBatches((prev) => ({ ...prev, [selectedSupply]: batches! }));
                     }
                 } catch (err) {
