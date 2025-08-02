@@ -92,9 +92,7 @@ export default function ScanPage() {
     };
 
     const handleCopy = () => {
-        const text = scannedItems
-            .flatMap((item) => Array(item.quantity).fill(item.sku))
-            .join('\n');
+        const text = Array.from(new Set(scannedItems.map((item) => item.sku))).join('\n');
         navigator.clipboard.writeText(text);
         toast('SKUs copied to clipboard');
     };
