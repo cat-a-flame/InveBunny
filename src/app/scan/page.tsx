@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/src/components/Button/button';
 import { IconButton } from '@/src/components/IconButton/iconButton';
+import { useToast } from '@/src/components/Toast/toast';
 import styles from './scan.module.css';
 
 interface ScannedItem {
@@ -16,6 +17,7 @@ export default function ScanPage() {
     const [input, setInput] = useState('');
     const [error, setError] = useState('');
     const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
+    const toast = useToast();
 
     const handleAdd = async () => {
         const sku = input.trim();
@@ -94,6 +96,32 @@ export default function ScanPage() {
             .flatMap((item) => Array(item.quantity).fill(item.sku))
             .join('\n');
         navigator.clipboard.writeText(text);
+        toast('SKUs copied to clipboard');
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const response = await fetch('/api/inventory/updateStockBySku', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: scannedItems.map((item) => ({
+                        sku: item.sku,
+                        quantity: item.quantity,
+                    })),
+                }),
+            });
+            const result = await response.json();
+            if (result.success) {
+                toast('Inventories updated');
+                reset();
+            } else {
+                toast(result.error || 'Failed to update inventories');
+            }
+        } catch (e) {
+            console.error(e);
+            toast('Failed to update inventories');
+        }
     };
 
     const total = scannedItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -168,6 +196,14 @@ export default function ScanPage() {
                             onClick={handleCopy}
                         >
                             Copy SKUs
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className={styles['submit-button']}
+                            onClick={handleSubmit}
+                            disabled={scannedItems.length === 0}
+                        >
+                            Update stock
                         </Button>
                     </div>
                 )}
