@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/src/components/Button/button';
 import { IconButton } from '@/src/components/IconButton/iconButton';
@@ -17,6 +17,15 @@ export default function ScanPage() {
     const [input, setInput] = useState('');
     const [error, setError] = useState('');
     const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
+    const [isSmiling, setIsSmiling] = useState(false);
+    const smileTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(
+        () => () => {
+            if (smileTimeout.current) clearTimeout(smileTimeout.current);
+        },
+        [],
+    );
     const toast = useToast();
 
     const handleAdd = async () => {
@@ -50,7 +59,9 @@ export default function ScanPage() {
                     },
                 ];
             });
-
+            if (smileTimeout.current) clearTimeout(smileTimeout.current);
+            setIsSmiling(true);
+            smileTimeout.current = setTimeout(() => setIsSmiling(false), 1200);
             setInput('');
             setError('');
         } catch (e) {
@@ -131,6 +142,12 @@ export default function ScanPage() {
             </div>
 
             <div className={styles['scanning-area']}>
+                <div
+                    className={`${styles.face} ${isSmiling ? styles.smile : ''}`}
+                    aria-hidden="true"
+                >
+                    <div className={styles.mouth}></div>
+                </div>
                 <Image
                     src="/images/scan_barcode.png"
                     alt="Scan items"
