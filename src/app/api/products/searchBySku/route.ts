@@ -41,7 +41,9 @@ export async function GET(request: Request) {
     const product = {
         id: data.product_id,
         product_sku: data.product_sku,
-        product_name: data.products?.product_name || '',
+        product_name: Array.isArray(data.products)
+            ? data.products[0]?.product_name || ''
+            : data.products?.product_name || '',
     };
 
     return new Response(
