@@ -14,6 +14,59 @@
     width: 100%;
 }
 
+.face {
+    background: #ffe066;
+    border-radius: 50%;
+    height: 60px;
+    margin: 0 auto 1rem;
+    position: relative;
+    width: 60px;
+}
+
+.face::before,
+.face::after {
+    background: #333;
+    border-radius: 50%;
+    content: '';
+    height: 8px;
+    position: absolute;
+    top: 20px;
+    width: 8px;
+}
+
+.face::before {
+    left: 18px;
+}
+
+.face::after {
+    right: 18px;
+}
+
+.mouth {
+    background: #333;
+    border-radius: 2px;
+    bottom: 20px;
+    height: 4px;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    transition: all 0.3s ease;
+    width: 20px;
+}
+
+.smile {}
+
+.smile .mouth {
+    background: transparent;
+    border: 4px solid #333;
+    border-top: none;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    bottom: 14px;
+    height: 14px;
+    width: 28px;
+}
+
 .scanned-items-list {
     background: #fff;
     box-shadow: 0 0 15px 0px #c1b2c740;
@@ -49,6 +102,7 @@
 .item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin: 10px 0;
 }
 
@@ -61,6 +115,23 @@
     }
 }
 
+.controls {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+
+.sku {
+    color: #A2A6BB;
+    margin-left: .5rem;
+    font-size: .875rem;
+}
+
+.error {
+    color: #B00020;
+    margin-top: .5rem;
+}
+
 .total-scanned-items {
     border-top: 1px solid #A2A6BB;
     display: flex;
@@ -69,6 +140,14 @@
     margin-top: 1rem;
     padding-top: 1rem;
     text-transform: uppercase;
+}
+
+.copy-button {
+    margin-top: 1rem;
+}
+
+.submit-button {
+    margin-top: .5rem;
 }
 
 .reset-button {
