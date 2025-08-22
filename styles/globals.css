@@ -360,6 +360,10 @@ textarea {
         background-color: #f4eefb;
         color: #97809d;
     }
+
+    &.error {
+        border: 1px solid #D93737;
+    }
 }
 
 .react-select__control,

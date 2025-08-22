@@ -11,6 +11,8 @@ interface ScannedItem {
     sku: string;
     name: string;
     quantity: number;
+    batches?: string[];
+    productId?: string;
 }
 
 export default function ScanPage() {
@@ -26,7 +28,30 @@ export default function ScanPage() {
         },
         [],
     );
+
     const toast = useToast();
+
+    const extractFromSearch = (data: any) => {
+        const product = data?.product ?? data ?? {};
+        const productId = product.product_id ?? product.id ?? undefined;
+
+        return { product, productId };
+    };
+
+    // Fetch ALL active batches
+    const fetchActiveBatchesByProductId = async (productId?: string) => {
+        if (!productId) return [];
+        try {
+            const resp = await fetch(`/api/products/batches/?productId=${productId}`);
+            const json = await resp.json();
+            return (json?.batches ?? [])
+                .filter((b: any) => b?.is_active)
+                .map((b: any) => b?.p_batch_name)
+                .filter(Boolean);
+        } catch {
+            return [];
+        }
+    };
 
     const handleAdd = async () => {
         const sku = input.trim();
@@ -36,17 +61,27 @@ export default function ScanPage() {
             const response = await fetch(`/api/products/searchBySku?sku=${encodeURIComponent(sku)}`);
             const data = await response.json();
 
-            if (!data.success || !data.product) {
-                setError('Product not found');
+            if (!data?.success || !data?.product) {
+                setError('Invalid SKU number');
                 return;
             }
+
+            const { product, productId } = extractFromSearch(data);
+
+            // always fetch active batches for consistency
+            const activeBatches = await fetchActiveBatchesByProductId(productId);
 
             setScannedItems((prev) => {
                 const existing = prev.find((item) => item.sku === sku);
                 if (existing) {
                     return prev.map((item) =>
                         item.sku === sku
-                            ? { ...item, quantity: item.quantity + 1 }
+                            ? {
+                                ...item,
+                                quantity: item.quantity + 1,
+                                batches: item.batches?.length ? item.batches : activeBatches,
+                                productId: item.productId ?? productId,
+                            }
                             : item,
                     );
                 }
@@ -54,11 +89,14 @@ export default function ScanPage() {
                     ...prev,
                     {
                         sku,
-                        name: data.product.product_name || 'Unknown product',
+                        name: product.product_name || 'Unknown product',
                         quantity: 1,
+                        batches: activeBatches,
+                        productId: productId,
                     },
                 ];
             });
+
             if (smileTimeout.current) clearTimeout(smileTimeout.current);
             setIsSmiling(true);
             smileTimeout.current = setTimeout(() => setIsSmiling(false), 1200);
@@ -79,9 +117,7 @@ export default function ScanPage() {
 
     const increment = (sku: string) =>
         setScannedItems((prev) =>
-            prev.map((item) =>
-                item.sku === sku ? { ...item, quantity: item.quantity + 1 } : item,
-            ),
+            prev.map((item) => (item.sku === sku ? { ...item, quantity: item.quantity + 1 } : item)),
         );
 
     const decrement = (sku: string) =>
@@ -93,19 +129,20 @@ export default function ScanPage() {
             }),
         );
 
-    const remove = (sku: string) =>
-        setScannedItems((prev) => prev.filter((item) => item.sku !== sku));
-
-    const reset = () => {
-        setScannedItems([]);
-        setInput('');
-        setError('');
-    };
+    const remove = (sku: string) => setScannedItems((prev) => prev.filter((item) => item.sku !== sku));
 
     const handleCopy = () => {
-        const text = Array.from(new Set(scannedItems.map((item) => item.sku))).join('\n');
+        const text = Array.from(
+            new Set(
+                scannedItems.map((item) =>
+                    item.batches?.length
+                        ? `${item.sku} | Batches: ${item.batches.join(', ')}`
+                        : item.sku,
+                ),
+            ),
+        ).join('\n');
         navigator.clipboard.writeText(text);
-        toast('SKUs copied to clipboard');
+        toast('SKUs and batch IDs are copied to clipboard');
     };
 
     const handleSubmit = async () => {
@@ -123,7 +160,6 @@ export default function ScanPage() {
             const result = await response.json();
             if (result.success) {
                 toast('Inventories updated');
-                reset();
             } else {
                 toast(result.error || 'Failed to update inventories');
             }
@@ -142,95 +178,52 @@ export default function ScanPage() {
             </div>
 
             <div className={styles['scanning-area']}>
-                <div
-                    className={`${styles.face} ${isSmiling ? styles.smile : ''}`}
-                    aria-hidden="true"
-                >
+                <div className={`${styles.face} ${isSmiling ? styles.smile : ''}`} aria-hidden="true">
                     <div className={styles.mouth}></div>
                 </div>
-                <Image
-                    src="/images/scan_barcode.png"
-                    alt="Scan items"
-                    className={styles['barcode-image']}
-                    width={200}
-                    height={200}
-                />
 
-                <input
-                    type="text"
-                    className={styles['barcode-input']}
-                    placeholder="Scan or enter SKU"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                />
+                <Image src="/images/scan_barcode.png" alt="Scan items" className={styles['barcode-image']} width={200} height={200} />
+
+
+                <input type="text" className={`${styles['barcode-input']} ${error ? 'error' : ''}`}  placeholder="Scan or enter SKU" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} />
                 {error && <div className={styles.error}>{error}</div>}
 
                 {scannedItems.length > 0 && (
-                    <div className={styles['scanned-items-list']}>
-                        <ul className={styles.list} id="scannedItemsList">
-                            {scannedItems.map((item) => (
-                                <li key={item.sku} className={styles.item}>
-                                    <span>
-                                        {item.name} <span className={styles.sku}>{item.sku}</span>
-                                    </span>
-                                    <div className={styles.controls}>
-                                        <IconButton
-                                            size="sm"
-                                            title="Decrease"
-                                            onClick={() => decrement(item.sku)}
-                                            disabled={item.quantity <= 1}
-                                            icon={<i className="fa-solid fa-minus"></i>}
-                                        />
-                                        <span className={styles.counter}>{item.quantity}</span>
-                                        <IconButton
-                                            size="sm"
-                                            title="Increase"
-                                            onClick={() => increment(item.sku)}
-                                            icon={<i className="fa-solid fa-plus"></i>}
-                                        />
-                                        <IconButton
-                                            size="sm"
-                                            title="Remove"
-                                            onClick={() => remove(item.sku)}
-                                            icon={<i className="fa-regular fa-trash-can"></i>}
-                                        />
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                    <>
+                        <div className={styles['scanned-items-list']}>
+                            <ul className={styles.list} id="scannedItemsList">
+                                {scannedItems.map((item) => (
+                                    <li key={item.sku} className={styles.item}>
+                                        <div>
+                                            <div className={styles.name}>{item.name}</div>
+                                            <div className={styles.sku}>{item.sku}</div>
+                                        </div>
 
-                        <div className={styles['total-scanned-items']}>
-                            <span>Total scanned items:</span>
-                            {total}
+                                        <div className={styles.controls}>
+                                            <IconButton size="sm" title="Decrease" onClick={() => decrement(item.sku)} disabled={item.quantity <= 1} icon={<i className="fa-solid fa-minus"></i>} />
+
+                                            <span className={styles.counter}>{item.quantity}</span>
+
+                                            <IconButton size="sm" title="Increase" onClick={() => increment(item.sku)} icon={<i className="fa-solid fa-plus"></i>} />
+                                            <IconButton size="sm" title="Remove" onClick={() => remove(item.sku)} icon={<i className="fa-regular fa-trash-can"></i>} />
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className={styles['total-scanned-items']}>
+                                <span>Total scanned items:</span>
+                                {total}
+                            </div>
                         </div>
 
-                        <Button
-                            variant="primary"
-                            className={styles['copy-button']}
-                            onClick={handleCopy}
-                        >
-                            Copy SKUs
-                        </Button>
-                        <Button
-                            variant="primary"
-                            className={styles['submit-button']}
-                            onClick={handleSubmit}
-                            disabled={scannedItems.length === 0}
-                        >
-                            Update stock
-                        </Button>
-                    </div>
-                )}
 
-                <Button
-                    variant="secondary"
-                    className={styles['reset-button']}
-                    onClick={reset}
-                    disabled={scannedItems.length === 0}
-                >
-                    Reset list
-                </Button>
+                        <div className={styles.buttons}>
+                            <Button variant="secondary" onClick={handleCopy}>Copy details</Button>
+                            <Button variant="primary" onClick={handleSubmit} disabled={scannedItems.length === 0}>Update stock</Button>
+                        </div>
+                    </>
+                )}
             </div>
         </>
     );
