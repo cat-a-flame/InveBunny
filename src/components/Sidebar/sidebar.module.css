@@ -48,6 +48,18 @@
     }
 }
 
+@media screen and (max-width: 1400px) {
+    .navigationLink{
+        width: auto;
+    }
+    
+    .appName,
+    .navigationLink span,
+    .profile-name {
+        display: none;
+    }
+}
+
 button.navigationLink {
     background-color: transparent;
     border: 0 none;

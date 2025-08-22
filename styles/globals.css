@@ -23,6 +23,12 @@ body {
     padding: 2rem;
 }
 
+@media screen and (max-width: 1400px) {
+    body {
+        padding-left: 8rem;
+    }
+}
+
 b,
 strong {
     font-weight: 800;

@@ -150,7 +150,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
     // ========== RENDER ==========
     return (
-        <main className="inventory-page">
+        <div className="inventory-page">
             {/* Header Section */}
             <div className="pageHeader">
                 <h2 className="heading-title">Products</h2>
@@ -231,6 +231,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
                 <Pagination totalPages={totalPages} currentPage={page} />
             </div>
-        </main>
+        </div>
     );
 }

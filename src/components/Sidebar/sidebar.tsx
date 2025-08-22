@@ -43,7 +43,7 @@ const Sidebar = () => {
             <div>
                 <Link href="/" className={styles.logoLink}>
                     <span className={styles.logo}>🐰</span>
-                    <span>InveBunny</span>
+                    <span className={styles.appName}>InveBunny</span>
                 </Link>
                 <nav className={styles.navigation}>
                     <ul>
