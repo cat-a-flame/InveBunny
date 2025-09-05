@@ -119,6 +119,14 @@
     gap: .25rem;
 }
 
+.warningIcon {
+    color: #E67700;
+}
+
+.errorIcon {
+    color: #D93737;
+}
+
 .name {
     font-weight: 800;
 }

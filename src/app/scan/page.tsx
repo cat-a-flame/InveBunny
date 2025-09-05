@@ -13,6 +13,7 @@ interface ScannedItem {
     quantity: number;
     batches?: string[];
     productId?: string;
+    currentQuantity: number;
 }
 
 export default function ScanPage() {
@@ -82,6 +83,8 @@ export default function ScanPage() {
                                 quantity: item.quantity + 1,
                                 batches: item.batches?.length ? item.batches : activeBatches,
                                 productId: item.productId ?? productId,
+                                currentQuantity:
+                                    item.currentQuantity ?? product.product_quantity ?? 0,
                             }
                             : item,
                     );
@@ -94,6 +97,7 @@ export default function ScanPage() {
                         quantity: 1,
                         batches: activeBatches,
                         productId: productId,
+                        currentQuantity: product.product_quantity ?? 0,
                     },
                 ];
             });
@@ -197,23 +201,57 @@ export default function ScanPage() {
                     <>
                         <div className={styles['scanned-items-list']}>
                             <ul className={styles.list} id="scannedItemsList">
-                                {scannedItems.map((item) => (
-                                    <li key={item.sku} className={styles.item}>
-                                        <div>
-                                            <div className={styles.name}>{item.name}</div>
-                                            <div className={styles.sku}>{item.sku}</div>
-                                        </div>
+                                {scannedItems.map((item) => {
+                                    const outOfStock = item.currentQuantity <= 0;
+                                    const willDeplete =
+                                        item.currentQuantity > 0 &&
+                                        item.currentQuantity - item.quantity <= 0;
+                                    return (
+                                        <li key={item.sku} className={styles.item}>
+                                            <div>
+                                                <div className={styles.name}>{item.name}</div>
+                                                <div className={styles.sku}>{item.sku}</div>
+                                            </div>
 
-                                        <div className={styles.controls}>
-                                            <IconButton size="sm" title="Decrease" onClick={() => decrement(item.sku)} disabled={item.quantity <= 1} icon={<i className="fa-solid fa-minus"></i>} />
+                                            <div className={styles.controls}>
+                                                {outOfStock ? (
+                                                    <i
+                                                        className={`fa-solid fa-circle-exclamation ${styles.errorIcon}`}
+                                                        title="Item is out of stock"
+                                                    ></i>
+                                                ) : willDeplete ? (
+                                                    <i
+                                                        className={`fa-solid fa-triangle-exclamation ${styles.warningIcon}`}
+                                                        title="Quantity will drop to zero"
+                                                    ></i>
+                                                ) : null}
 
-                                            <span className={styles.counter}>{item.quantity}</span>
+                                                <IconButton
+                                                    size="sm"
+                                                    title="Decrease"
+                                                    onClick={() => decrement(item.sku)}
+                                                    disabled={item.quantity <= 1}
+                                                    icon={<i className="fa-solid fa-minus"></i>}
+                                                />
 
-                                            <IconButton size="sm" title="Increase" onClick={() => increment(item.sku)} icon={<i className="fa-solid fa-plus"></i>} />
-                                            <IconButton size="sm" title="Remove" onClick={() => remove(item.sku)} icon={<i className="fa-regular fa-trash-can"></i>} />
-                                        </div>
-                                    </li>
-                                ))}
+                                                <span className={styles.counter}>{item.quantity}</span>
+
+                                                <IconButton
+                                                    size="sm"
+                                                    title="Increase"
+                                                    onClick={() => increment(item.sku)}
+                                                    icon={<i className="fa-solid fa-plus"></i>}
+                                                />
+                                                <IconButton
+                                                    size="sm"
+                                                    title="Remove"
+                                                    onClick={() => remove(item.sku)}
+                                                    icon={<i className="fa-regular fa-trash-can"></i>}
+                                                />
+                                            </div>
+                                        </li>
+                                    );
+                                })}
                             </ul>
 
                             <div className={styles['total-scanned-items']}>
