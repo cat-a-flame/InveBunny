@@ -20,6 +20,7 @@ export default function ScanPage() {
     const [error, setError] = useState('');
     const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
     const [isSmiling, setIsSmiling] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const smileTimeout = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(
@@ -146,6 +147,7 @@ export default function ScanPage() {
     };
 
     const handleSubmit = async () => {
+        setIsUpdating(true);
         try {
             const response = await fetch('/api/inventory/updateStockBySku', {
                 method: 'PUT',
@@ -160,12 +162,15 @@ export default function ScanPage() {
             const result = await response.json();
             if (result.success) {
                 toast('Inventories updated');
+                setScannedItems([]);
             } else {
                 toast(result.error || 'Failed to update inventories');
             }
         } catch (e) {
             console.error(e);
             toast('Failed to update inventories');
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -220,7 +225,13 @@ export default function ScanPage() {
 
                         <div className={styles.buttons}>
                             <Button variant="secondary" onClick={handleCopy}>Copy details</Button>
-                            <Button variant="primary" onClick={handleSubmit} disabled={scannedItems.length === 0}>Update stock</Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleSubmit}
+                                disabled={scannedItems.length === 0 || isUpdating}
+                            >
+                                Update stock
+                            </Button>
                         </div>
                     </>
                 )}
