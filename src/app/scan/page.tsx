@@ -226,28 +226,12 @@ export default function ScanPage() {
                                                     ></i>
                                                 ) : null}
 
-                                                <IconButton
-                                                    size="sm"
-                                                    title="Decrease"
-                                                    onClick={() => decrement(item.sku)}
-                                                    disabled={item.quantity <= 1}
-                                                    icon={<i className="fa-solid fa-minus"></i>}
-                                                />
+                                                <IconButton size="sm" title="Decrease" onClick={() => decrement(item.sku)} disabled={item.quantity <= 1} icon={<i className="fa-solid fa-minus"></i>} />
 
                                                 <span className={styles.counter}>{item.quantity}</span>
 
-                                                <IconButton
-                                                    size="sm"
-                                                    title="Increase"
-                                                    onClick={() => increment(item.sku)}
-                                                    icon={<i className="fa-solid fa-plus"></i>}
-                                                />
-                                                <IconButton
-                                                    size="sm"
-                                                    title="Remove"
-                                                    onClick={() => remove(item.sku)}
-                                                    icon={<i className="fa-regular fa-trash-can"></i>}
-                                                />
+                                                <IconButton size="sm" title="Increase" onClick={() => increment(item.sku)} icon={<i className="fa-solid fa-plus"></i>} />
+                                                <IconButton size="sm" title="Remove" onClick={() => remove(item.sku)} icon={<i className="fa-regular fa-trash-can"></i>} />
                                             </div>
                                         </li>
                                     );
@@ -263,11 +247,7 @@ export default function ScanPage() {
 
                         <div className={styles.buttons}>
                             <Button variant="secondary" onClick={handleCopy}>Copy details</Button>
-                            <Button
-                                variant="primary"
-                                onClick={handleSubmit}
-                                disabled={scannedItems.length === 0 || isUpdating}
-                            >
+                            <Button variant="primary" onClick={handleSubmit} disabled={scannedItems.length === 0 || isUpdating} >
                                 Update stock
                             </Button>
                         </div>
