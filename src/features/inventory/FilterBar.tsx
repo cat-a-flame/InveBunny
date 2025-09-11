@@ -201,13 +201,24 @@ export function FilterBar({
                         classNamePrefix="react-select"
                         options={sortOptions}
                         value={sortOptions.find(o => o.value === `${sortField}-${sortOrder}`) || null}
-                        onChange={(opt) => {
+                        onChange={async (opt) => {
                             const value = (opt ? (opt as any).value : 'name-asc') as string;
                             const [field, order] = value.split('-') as ['name' | 'date', 'asc' | 'desc'];
                             setSortField(field);
                             setSortOrder(order);
-                            updateQueryParam('sortField', field);
-                            updateQueryParam('sortOrder', order);
+                            setIsLoading(true);
+                            const params = new URLSearchParams(searchParams.toString());
+                            if (!params.has('inventory') && slugFromPath) {
+                                params.set('inventory', slugFromPath);
+                            }
+                            params.set('sortField', field);
+                            params.set('sortOrder', order);
+                            params.delete('page');
+                            try {
+                                await router.push(`/inventory?${params.toString()}`);
+                            } finally {
+                                setIsLoading(false);
+                            }
                         }}
                         placeholder="Sort by"
                         isClearable={false}
