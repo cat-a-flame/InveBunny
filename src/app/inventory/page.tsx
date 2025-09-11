@@ -14,6 +14,8 @@ type SearchParams = {
     categoryFilter?: string;
     variantFilter?: string;
     stockFilter?: 'all' | 'low' | 'out' | 'in';
+    sortField?: 'name' | 'date';
+    sortOrder?: 'asc' | 'desc';
 };
 
 // ========== CONSTANTS ==========
@@ -45,6 +47,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
     const query = resolvedSearchParams.query || '';
     const inventorySlug = resolvedSearchParams.inventory;
+    const sortFieldRaw = resolvedSearchParams.sortField;
+    const sortOrderRaw = resolvedSearchParams.sortOrder;
+    const sortField = sortFieldRaw === 'date' ? 'date' : 'name';
+    const sortOrder = sortOrderRaw === 'desc' ? 'desc' : 'asc';
 
     // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
@@ -131,8 +137,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
             categories(id, category_name),
             variants(id, variant_name)
         `)
-        .order('product_name', { ascending: true })
-        .in('id', productIdsFromFilters.length > 0 ? productIdsFromFilters : [0]);
+        .in('id', productIdsFromFilters.length > 0 ? productIdsFromFilters : [0])
+        .order(sortField === 'date' ? 'created_at' : 'product_name', { ascending: sortOrder === 'asc' });
 
     if (query) {
         const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
@@ -224,6 +230,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                     categoryFilter={categoryFilter}
                     variantFilter={variantFilter}
                     stockFilter={stockFilter}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
                     categories={categories || []}
                     variants={variants || []}
                     categoryCounts={categoryCounts}
