@@ -117,9 +117,11 @@ export function FilterBar({
         { value: "in", label: `In stock (${stockCounts['in'] ?? 0})` },
     ];
 
-    const sortFieldOptions = [
-        { value: 'name', label: 'Name' },
-        { value: 'date', label: 'Date added' },
+    const sortOptions = [
+        { value: 'name-asc', label: 'Name (A-Z)' },
+        { value: 'name-desc', label: 'Name (Z-A)' },
+        { value: 'date-asc', label: 'Date added (Oldest first)' },
+        { value: 'date-desc', label: 'Date added (Newest first)' },
     ];
 
     const categoryOptions = categories.map(c => ({
@@ -197,31 +199,21 @@ export function FilterBar({
 
                     <Select
                         classNamePrefix="react-select"
-                        options={sortFieldOptions}
-                        value={sortFieldOptions.find(o => o.value === sortField) || null}
+                        options={sortOptions}
+                        value={sortOptions.find(o => o.value === `${sortField}-${sortOrder}`) || null}
                         onChange={(opt) => {
-                            const value = (opt ? (opt as any).value : 'name') as 'name' | 'date';
-                            setSortField(value);
-                            updateQueryParam('sortField', value);
+                            const value = (opt ? (opt as any).value : 'name-asc') as string;
+                            const [field, order] = value.split('-') as ['name' | 'date', 'asc' | 'desc'];
+                            setSortField(field);
+                            setSortOrder(order);
+                            updateQueryParam('sortField', field);
+                            updateQueryParam('sortOrder', order);
                         }}
                         placeholder="Sort by"
                         isClearable={false}
                         controlShouldRenderValue={false}
                         isDisabled={isLoading}
                     />
-
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                            const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-                            setSortOrder(newOrder);
-                            updateQueryParam('sortOrder', newOrder);
-                        }}
-                        disabled={isLoading}
-                    >
-                        {sortOrder === 'asc' ? 'Asc' : 'Desc'}
-                    </Button>
 
                     <Select
                         classNamePrefix="react-select"
