@@ -80,7 +80,7 @@ export async function POST(request: Request) {
                 product_variant_id: pvData.id,
                 inventory_id: inv.inventoryId,
                 product_sku: inv.sku,
-                quantity: inv.quantity,
+                product_quantity: inv.quantity,
                 owner_id: user.id,
             }));
 

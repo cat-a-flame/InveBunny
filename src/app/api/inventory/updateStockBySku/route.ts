@@ -31,18 +31,18 @@ export async function PUT(request: Request) {
 
       const { data, error } = await supabase
         .from('product_variant_inventories')
-        .select('quantity')
+        .select('product_quantity')
         .eq('product_sku', sku)
         .eq('owner_id', user.id)
         .single();
 
       if (error || !data) continue;
 
-      const newQuantity = Math.max((data.quantity ?? 0) - quantity, 0);
+      const newQuantity = Math.max((data.product_quantity ?? 0) - quantity, 0);
 
       const { error: updateError } = await supabase
         .from('product_variant_inventories')
-        .update({ quantity: newQuantity })
+        .update({ product_quantity: newQuantity })
         .eq('product_sku', sku)
         .eq('owner_id', user.id);
 

@@ -22,7 +22,7 @@ export async function PUT(request: Request) {
         product_variant_id,
         inventory_id,
         product_sku: sku || null,
-        quantity: quantity ?? 0,
+        product_quantity: quantity ?? 0,
         owner_id: user.id,
       }, { onConflict: 'product_variant_id, inventory_id' });
 

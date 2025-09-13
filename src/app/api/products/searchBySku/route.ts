@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
     type InventoryWithProduct = {
         product_sku: string;
-        quantity: number | null;
+        product_quantity: number | null;
         product_variants:
             | {
                 product_id: string;
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
         .from('product_variant_inventories')
-        .select('product_sku, quantity, product_variants ( product_id, products (product_name), variants (variant_name) )')
+        .select('product_sku, product_quantity, product_variants ( product_id, products (product_name), variants (variant_name) )')
         .eq('product_sku', sku)
         .eq('owner_id', user.id)
         .single<InventoryWithProduct>();
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
         id: data.product_variants?.product_id,
         variant_name: variantName,
         sku: data.product_sku,
-        quantity: data.quantity ?? 0,
+        quantity: data.product_quantity ?? 0,
         product_name: productName,
     };
 
