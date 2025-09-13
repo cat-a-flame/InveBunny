@@ -84,7 +84,7 @@ export default function ScanPage() {
                                 batches: item.batches?.length ? item.batches : activeBatches,
                                 productId: item.productId ?? productId,
                                 currentQuantity:
-                                    item.currentQuantity ?? product.product_quantity ?? 0,
+                                    item.currentQuantity ?? product.quantity ?? 0,
                             }
                             : item,
                     );
@@ -97,7 +97,7 @@ export default function ScanPage() {
                         quantity: 1,
                         batches: activeBatches,
                         productId: productId,
-                        currentQuantity: product.product_quantity ?? 0,
+                        currentQuantity: product.quantity ?? 0,
                     },
                 ];
             });

@@ -32,7 +32,7 @@ export async function PUT(request: Request) {
       const { data, error } = await supabase
         .from('product_variant_inventories')
         .select('quantity')
-        .eq('sku', sku)
+        .eq('product_sku', sku)
         .eq('owner_id', user.id)
         .single();
 
@@ -43,7 +43,7 @@ export async function PUT(request: Request) {
       const { error: updateError } = await supabase
         .from('product_variant_inventories')
         .update({ quantity: newQuantity })
-        .eq('sku', sku)
+        .eq('product_sku', sku)
         .eq('owner_id', user.id);
 
       if (updateError) throw updateError;

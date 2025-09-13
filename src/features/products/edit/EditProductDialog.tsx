@@ -100,8 +100,8 @@ export function EditProductDialog({
                     const data = await res.json();
                     const entries = (data.inventories || []).map((inv: any) => ({
                         inventoryId: inv.inventory_id,
-                        sku: inv.product_sku || '',
-                        quantity: inv.product_quantity ?? 0,
+                        sku: inv.sku || '',
+                        quantity: inv.quantity ?? 0,
                     }));
                     setInventoryEntries(
                         entries.length > 0
@@ -186,7 +186,7 @@ export function EditProductDialog({
                     inventories: inventoryEntries.map(entry => ({
                         inventory_id: entry.inventoryId,
                         product_sku: entry.sku || '',
-                        product_quantity: entry.quantity ?? 0,
+                        quantity: entry.quantity ?? 0,
                     }))
                 }),
             });

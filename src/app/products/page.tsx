@@ -35,7 +35,7 @@ export default async function ProductsPage() {
         variants(id, variant_name),
         product_variant_inventories(
           inventory_id,
-          sku,
+          product_sku,
           quantity,
           inventories(id, inventory_name)
         )
@@ -77,7 +77,7 @@ export default async function ProductsPage() {
                         <strong>{(pv.variants as any)?.variant_name || '-'}:</strong>
                         {(pv.product_variant_inventories || []).map((inv: any) => (
                           <div key={inv.inventory_id} className={styles.inventoryInfo}>
-                            {inv.inventories?.inventory_name}: {inv.sku} ({inv.quantity})
+                            {inv.inventories?.inventory_name}: {inv.product_sku} ({inv.quantity})
                           </div>
                         ))}
                       </div>

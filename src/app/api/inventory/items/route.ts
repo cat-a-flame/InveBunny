@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('product_variant_inventories')
-    .select('id, sku, quantity, product_variants!inner(products(product_name), variants(variant_name))')
+    .select('id, product_sku, quantity, product_variants!inner(products(product_name), variants(variant_name))')
     .eq('inventory_id', inventory.id)
     .eq('owner_id', user.id);
   if (error) {
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 
   const items = (data || []).map((row: any) => ({
     id: row.id,
-    sku: row.sku,
+    sku: row.product_sku,
     quantity: row.quantity,
     product_name: row.product_variants?.products?.product_name ?? '',
     variant_name: row.product_variants?.variants?.variant_name ?? '',

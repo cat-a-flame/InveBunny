@@ -79,7 +79,7 @@ export async function POST(request: Request) {
             const inventoryRows = (variant.inventories || []).map(inv => ({
                 product_variant_id: pvData.id,
                 inventory_id: inv.inventoryId,
-                sku: inv.sku,
+                product_sku: inv.sku,
                 quantity: inv.quantity,
                 owner_id: user.id,
             }));

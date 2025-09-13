@@ -21,7 +21,7 @@ export async function PUT(request: Request) {
       .upsert({
         product_variant_id,
         inventory_id,
-        sku: sku || null,
+        product_sku: sku || null,
         quantity: quantity ?? 0,
         owner_id: user.id,
       }, { onConflict: 'product_variant_id, inventory_id' });
