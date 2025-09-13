@@ -101,6 +101,38 @@ export function FilterBar({
     const selectedCategoryOptions = categoryOptions.filter(o => categoryFilter.includes(o.value));
     const selectedVariantOptions = variantOptions.filter(o => variantFilter.includes(o.value));
 
+    const combinedFilterOptions = [
+        { label: 'Status', options: statusOptions.map(o => ({ ...o, type: 'status' })) },
+        { label: 'Category', options: categoryOptions.map(o => ({ ...o, type: 'category' })) },
+        { label: 'Variant', options: variantOptions.map(o => ({ ...o, type: 'variant' })) },
+    ];
+
+    const selectedFilters = [
+        ...(statusFilter !== 'all'
+            ? [{ ...(statusOptions.find(o => o.value === statusFilter)!), type: 'status' }]
+            : []),
+        ...selectedCategoryOptions.map(o => ({ ...o, type: 'category' })),
+        ...selectedVariantOptions.map(o => ({ ...o, type: 'variant' })),
+    ];
+
+    const handleFilterChange = (opts: any) => {
+        const values = Array.isArray(opts) ? opts : [];
+        const status = values.filter((o: any) => o.type === 'status').pop();
+        const categories = values.filter((o: any) => o.type === 'category');
+        const variants = values.filter((o: any) => o.type === 'variant');
+
+        const statusValue = status ? status.value : 'all';
+        const categoryValues = categories.map((o: any) => o.value);
+        const variantValues = variants.map((o: any) => o.value);
+
+        setStatusFilter(statusValue);
+        updateQueryParam('statusFilter', statusValue);
+        setCategoryFilter(categoryValues);
+        updateQueryParam('categoryFilter', categoryValues);
+        setVariantFilter(variantValues);
+        updateQueryParam('variantFilter', variantValues);
+    };
+
     const removeChip = (type: string, value: string) => {
         if (type === 'status') {
             setStatusFilter('all');
@@ -152,47 +184,13 @@ export function FilterBar({
 
                 <Select
                     classNamePrefix="filter-option"
-                    options={statusOptions}
-                    value={statusOptions.find(o => o.value === statusFilter) || null}
-                    onChange={(opt) => {
-                        const value = (opt ? (opt as any).value : 'all') as "active" | "inactive" | "all";
-                        setStatusFilter(value);
-                        updateQueryParam('statusFilter', value);
-                    }}
-                    placeholder="Status"
-                    isClearable={false}
-                    controlShouldRenderValue={false}
-                    isDisabled={isLoading}
-                />
-
-                <Select
-                    classNamePrefix="filter-option"
-                    options={categoryOptions}
-                    value={selectedCategoryOptions}
-                    onChange={(opts) => {
-                        const values = (opts || []).map((o: any) => o.value);
-                        setCategoryFilter(values);
-                        updateQueryParam('categoryFilter', values);
-                    }}
-                    placeholder="Category"
+                    options={combinedFilterOptions}
+                    value={selectedFilters}
+                    onChange={handleFilterChange}
+                    placeholder="Filters"
                     isMulti
-                    isClearable={false}
-                    controlShouldRenderValue={false}
-                    isDisabled={isLoading}
-                />
-
-                <Select
-                    classNamePrefix="filter-option"
-                    options={variantOptions}
-                    value={selectedVariantOptions}
-                    onChange={(opts) => {
-                        const values = (opts || []).map((o: any) => o.value);
-                        setVariantFilter(values);
-                        updateQueryParam('variantFilter', values);
-                    }}
-                    placeholder="Variant"
-                    isMulti
-                    isClearable={false}
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
                     controlShouldRenderValue={false}
                     isDisabled={isLoading}
                 />
