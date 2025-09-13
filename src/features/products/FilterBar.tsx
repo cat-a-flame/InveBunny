@@ -179,7 +179,7 @@ export function FilterBar({
                             setIsFiltersOpen(!isFiltersOpen);
                             setActiveMenu(null);
                         }}
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         disabled={isLoading}
                     >
