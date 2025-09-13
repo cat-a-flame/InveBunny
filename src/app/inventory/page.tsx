@@ -88,7 +88,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     // Prepare queries that don't depend on each other's results
     const productInventoriesPromise = supabase
         .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku, inventory_id')
+        .select('id, product_id, product_quantity, product_sku, product_details, inventory_id')
         .eq('inventory_id', inventoryId);
 
     const inventoryMatchesPromise = query ?
@@ -281,6 +281,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                             productCategoryName={(product.categories as any)?.category_name || ''}
                                             productSku={inventoryInfo?.product_sku || ''}
                                             productQuantity={inventoryInfo?.product_quantity ?? 0}
+                                            productDetails={inventoryInfo?.product_details || ''}
                                         />
                                     </td>
                                 </tr>
