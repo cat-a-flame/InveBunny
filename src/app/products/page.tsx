@@ -53,10 +53,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
     // ========== PRODUCT DATA FETCHING ==========
     // Prepare queries that don't depend on each other's results
-    const productInventoriesPromise = supabase
-        .from('product_inventories')
-        .select('id, product_id, inventory_id');
-
     const categoriesPromise = supabase
         .from('categories')
         .select('id, category_name')
@@ -66,21 +62,31 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         .from('variants')
         .select('id, variant_name')
         .order('variant_name');
+    const [{ data: categories }, { data: variants }] =
+        await Promise.all([categoriesPromise, variantsPromise]);
 
-    const [{ data: productInventories }, { data: categories }, { data: variants }] =
-        await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
-
-    // Build base products query (without status filter)
+    // Build base products query with nested variants and inventories
     let productsQuery = supabase
         .from('products')
         .select(`
             id,
             product_name,
             product_category,
-            product_variant,
             product_status,
+            product_details,
             categories(id, category_name),
-            variants(id, variant_name)
+            product_variants(
+                id,
+                variant_id,
+                variants(id, variant_name),
+                product_variant_inventories(
+                    id,
+                    inventory_id,
+                    product_sku,
+                    product_quantity,
+                    inventories(id, inventory_name)
+                )
+            )
         `)
         .order('product_name', { ascending: true });
 
@@ -93,55 +99,57 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.in('product_category', categoryFilter);
     }
 
-    if (variantFilter.length > 0) {
-        productsQuery = productsQuery.in('product_variant', variantFilter);
-    }
-
     const { data: productsBase } = await productsQuery;
 
-    const allFilteredProducts = productsBase || [];
+    let allFilteredProducts = productsBase || [];
+
+    if (variantFilter.length > 0) {
+        allFilteredProducts = allFilteredProducts.filter((p: any) =>
+            (p.product_variants || []).some((v: any) => variantFilter.includes(v.variant_id))
+        );
+    }
 
     const statusCounts = {
-        active: allFilteredProducts.filter(p => p.product_status).length,
-        inactive: allFilteredProducts.filter(p => !p.product_status).length,
+        active: allFilteredProducts.filter((p: any) => p.product_status).length,
+        inactive: allFilteredProducts.filter((p: any) => !p.product_status).length,
     };
 
     const filteredProducts =
         statusFilter === 'active'
-            ? allFilteredProducts.filter(p => p.product_status)
+            ? allFilteredProducts.filter((p: any) => p.product_status)
             : statusFilter === 'inactive'
-                ? allFilteredProducts.filter(p => !p.product_status)
+                ? allFilteredProducts.filter((p: any) => !p.product_status)
                 : allFilteredProducts;
 
     // ========== DATA PROCESSING ==========
     const totalCount = filteredProducts.length;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-    const productIds = filteredProducts.map(p => p.id);
-    const { data: inventoryAssignments } = await supabase
-        .from('product_inventories')
-        .select('product_id, inventories(id, inventory_name)')
-        .in('product_id', productIds.length > 0 ? productIds : [0]);
-
     const inventoryNamesMap = new Map<string, string[]>();
-    (inventoryAssignments || []).forEach((row: any) => {
-        const name = row.inventories?.inventory_name as string | undefined;
-        if (!name) return;
-        if (!inventoryNamesMap.has(row.product_id)) {
-            inventoryNamesMap.set(row.product_id, []);
-        }
-        inventoryNamesMap.get(row.product_id)!.push(name);
+    const flatInventories: any[] = [];
+    filteredProducts.forEach((p: any) => {
+        const names = new Set<string>();
+        (p.product_variants || []).forEach((pv: any) => {
+            (pv.product_variant_inventories || []).forEach((inv: any) => {
+                const name = inv.inventories?.inventory_name as string | undefined;
+                if (name) names.add(name);
+                flatInventories.push({ id: inv.id, product_id: p.id, inventory_id: inv.inventory_id });
+            });
+        });
+        inventoryNamesMap.set(p.id, Array.from(names));
     });
 
     const categoryCounts: Record<string, number> = {};
     const variantCounts: Record<string, number> = {};
-    filteredProducts.forEach(p => {
+    filteredProducts.forEach((p: any) => {
         if (p.product_category) {
             categoryCounts[p.product_category] = (categoryCounts[p.product_category] || 0) + 1;
         }
-        if (p.product_variant) {
-            variantCounts[p.product_variant] = (variantCounts[p.product_variant] || 0) + 1;
-        }
+        (p.product_variants || []).forEach((v: any) => {
+            if (v.variant_id) {
+                variantCounts[v.variant_id] = (variantCounts[v.variant_id] || 0) + 1;
+            }
+        });
     });
 
 
@@ -176,7 +184,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                         <tr>
                             <th>Product name</th>
                             <th>Category</th>
-                            <th>Variant</th>
+                            <th>Variants</th>
                             <th>Inventories</th>
                             <th></th>
                         </tr>
@@ -189,7 +197,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                         <span className="item-name">{product.product_name}</span>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
-                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
+                                    <td>{(product.product_variants || [])
+                                        .map((pv: any) => (pv.variants as any)?.variant_name)
+                                        .filter(Boolean)
+                                        .join(', ') || '-'}</td>
                                     <td>
                                         {(inventoryNamesMap.get(product.id) || []).length > 0
                                             ? (inventoryNamesMap.get(product.id) || []).map((name, index) => (
@@ -205,13 +216,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                                 id={product.id}
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
-                                                product_variant={product.product_variant || ''}
+                                                product_variant={product.product_variants?.[0]?.variant_id || ''}
                                                 product_status={product.product_status || false}
                                                 categories={categories || []}
                                                 variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""
-                                                productInventories={productInventories || []}
+                                                productInventories={flatInventories.filter((pi: any) => pi.product_id === product.id)}
                                             />
                                         </div>
                                     </td>
