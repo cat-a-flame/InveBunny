@@ -106,6 +106,8 @@ export function FilterBar({
     const selectStatus = (value: string) => {
         setStatusFilter(value as any);
         updateQueryParam('statusFilter', value);
+        setIsFiltersOpen(false);
+        setActiveMenu(null);
     };
 
     const toggleCategory = (value: string) => {
@@ -114,6 +116,8 @@ export function FilterBar({
             : [...categoryFilter, value];
         setCategoryFilter(updated);
         updateQueryParam('categoryFilter', updated);
+        setIsFiltersOpen(false);
+        setActiveMenu(null);
     };
 
     const toggleVariant = (value: string) => {
@@ -122,6 +126,8 @@ export function FilterBar({
             : [...variantFilter, value];
         setVariantFilter(updated);
         updateQueryParam('variantFilter', updated);
+        setIsFiltersOpen(false);
+        setActiveMenu(null);
     };
 
     const removeChip = (type: string, value: string) => {
@@ -233,10 +239,10 @@ export function FilterBar({
             </div>
             <style jsx>{`
                 .filter-dropdown { position: relative; display: inline-block; }
-                .drilldown-menu { position: absolute; z-index: 10; background: #fff; border: 1px solid #ccc; margin-top: 4px; }
+                .drilldown-menu { position: absolute; z-index: 10; background: #fff; border: 1px solid #ccc; margin-top: 4px; width: 200px; overflow: hidden; }
                 .drilldown-inner { display: flex; width: 200%; transition: transform 0.3s ease; }
                 .drilldown-inner.show-sub { transform: translateX(-50%); }
-                .drilldown-main, .drilldown-sub { width: 50%; padding: 8px; }
+                .drilldown-main, .drilldown-sub { width: 50%; padding: 8px; flex-shrink: 0; }
                 .drilldown-item { padding: 4px 8px; cursor: pointer; }
                 .drilldown-item.back { font-weight: bold; }
             `}</style>
