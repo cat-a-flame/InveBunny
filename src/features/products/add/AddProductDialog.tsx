@@ -112,6 +112,17 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
         setSubmitting(true);
 
         try {
+            const validVariants = variantEntries.filter(v => v.variantId);
+            const validInventories = inventoryEntries.filter(i => i.inventoryId);
+
+            if (validVariants.length === 0) {
+                throw new Error('At least one variant is required');
+            }
+
+            if (validInventories.length === 0) {
+                throw new Error('At least one inventory is required');
+            }
+
             const response = await fetch('/api/products/addNewProduct', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -119,10 +130,10 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     product_name: formData.productName,
                     product_category: formData.categoryId,
                     product_status: formData.status,
-                    variants: variantEntries.map(entry => ({
+                    variants: validVariants.map(entry => ({
                         variantId: entry.variantId,
                     })),
-                    inventories: inventoryEntries.map(entry => ({
+                    inventories: validInventories.map(entry => ({
                         inventoryId: entry.inventoryId,
                         sku: '',
                         quantity: 0,
