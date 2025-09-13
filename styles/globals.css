@@ -81,6 +81,7 @@ main {
     align-items: center;
     display: flex;
     gap: 1rem;
+    justify-content: space-between;
     margin-bottom: 1rem;
     padding: 0 1.25rem;
 
@@ -96,6 +97,12 @@ main {
     & div[class*="-container"] {
         width: 100%;
     }
+}
+
+.filter-bar-wrapper {
+    align-items: center;
+    display: flex;
+    gap: .5rem;
 }
 
 .filter-option {
@@ -795,4 +802,70 @@ input:focus-visible+.slider {
         bottom: -15px;
         position: absolute;
     }
+}
+
+/* DRILLDOWN MENU */
+
+.filter-dropdown {
+    display: inline-block;
+    position: relative;
+}
+
+.drilldown-menu {
+    background: #fff;
+    border: 1px solid #E2D9F6;
+    border-radius: .5rem !important;
+    box-shadow: 0 0px 8px #c8b7ee75 !important;
+    margin-top: 4px;
+    overflow: hidden;
+    position: absolute;
+    width: 270px;
+    z-index: 10;
+}
+
+.drilldown-item {
+    cursor: pointer;
+    padding: 12px 16px;
+
+    & > span {
+        font-size: .75rem;
+    }
+
+    &:hover {
+        background-color: #e8e1f5 !important;
+        color: #725A79 !important;
+    }
+}
+
+.drilldown-main-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+
+.drilldown-inner {
+    display: flex;
+    width: 200%;
+    transition: transform 0.3s ease;
+}
+
+.drilldown-inner.show-sub {
+    transform: translateX(-50%);
+}
+
+.drilldown-main, .drilldown-sub {
+    max-height: 300px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    width: 50%;
+}
+
+.drilldown-item.back {
+    font-weight: bold;
+}
+
+.react-select-sort {
+    width: 200px !important;
 }
