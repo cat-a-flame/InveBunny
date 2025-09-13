@@ -51,8 +51,8 @@ export default async function InventorySlugPage({ params }: { params: { inventor
                     <tbody>
                         {items?.map(item => (
                             <tr key={item.id}>
-                                <td>{item.product_variants?.products?.product_name || '-'}</td>
-                                <td>{item.product_variants?.variants?.variant_name || '-'}</td>
+                                <td>{item.product_variants?.[0]?.products?.[0]?.product_name || '-'}</td>
+                                <td>{item.product_variants?.[0]?.variants?.[0]?.variant_name || '-'}</td>
                                 <td>{item.sku}</td>
                                 <td>{item.quantity}</td>
                             </tr>
