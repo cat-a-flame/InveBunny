@@ -1,6 +1,28 @@
 import { AddButton } from '@/src/features/products/add/AddButton';
 import { createClient } from '@/src/utils/supabase/server';
 
+type ProductInventory = {
+    inventory_id: number;
+    inventory_name: string | null;
+    sku: string | null;
+    quantity: number | null;
+    product_details: string | null;
+};
+
+type ProductVariant = {
+    variant_id: number;
+    variant_name: string | null;
+    inventories: ProductInventory[];
+};
+
+type Product = {
+    id: number;
+    product_name: string;
+    product_category: string | null;
+    product_status: boolean;
+    variants: ProductVariant[];
+};
+
 export default async function ProductsPage() {
     const supabase = await createClient();
 
@@ -40,7 +62,7 @@ export default async function ProductsPage() {
         `)
         .order('product_name');
 
-    const products = (data || []).map((p: any) => ({
+    const products: Product[] = (data || []).map((p: any) => ({
         id: p.id,
         product_name: p.product_name,
         product_category: p.product_category,
@@ -80,8 +102,8 @@ export default async function ProductsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {product.variants.flatMap(variant =>
-                                variant.inventories.map(inv => (
+                            {product.variants.flatMap((variant: ProductVariant) =>
+                                variant.inventories.map((inv: ProductInventory) => (
                                     <tr key={`${variant.variant_id}-${inv.inventory_id}`}>
                                         <td>{variant.variant_name}</td>
                                         <td>{inv.inventory_name}</td>
