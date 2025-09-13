@@ -24,18 +24,29 @@ export async function DELETE(request: Request) {
 
     try {
         if (inventoryId) {
-            const { data: inventories, error: inventoryError } = await supabase
-                .from('product_inventories')
-                .select('inventory_id')
+            const { data: variants, error: variantsError } = await supabase
+                .from('product_variants')
+                .select('id')
                 .eq('product_id', productId);
 
-            if (inventoryError) throw inventoryError;
+            if (variantsError) throw variantsError;
+            const variantIds = variants?.map(v => v.id) || [];
 
-            const inTargetInventory = inventories?.some(
-                inv => inv.inventory_id === inventoryId
-            );
+            if (variantIds.length === 0) {
+                return NextResponse.json(
+                    { error: 'Product has no variants' },
+                    { status: 404 }
+                );
+            }
 
-            if (!inTargetInventory) {
+            const { count: existingCount, error: existingError } = await supabase
+                .from('product_variant_inventories')
+                .select('id', { count: 'exact', head: true })
+                .in('product_variant_id', variantIds)
+                .eq('inventory_id', inventoryId);
+
+            if (existingError) throw existingError;
+            if ((existingCount ?? 0) === 0) {
                 return NextResponse.json(
                     { error: 'Product not found in specified inventory' },
                     { status: 404 }
@@ -43,37 +54,51 @@ export async function DELETE(request: Request) {
             }
 
             const { error: removeError } = await supabase
-                .from('product_inventories')
+                .from('product_variant_inventories')
                 .delete()
-                .match({
-                    product_id: productId,
-                    inventory_id: inventoryId
-                });
+                .in('product_variant_id', variantIds)
+                .eq('inventory_id', inventoryId);
 
             if (removeError) throw removeError;
 
             const { count, error: countError } = await supabase
-                .from('product_inventories')
-                .select('*', { count: 'exact' })
-                .eq('product_id', productId);
+                .from('product_variant_inventories')
+                .select('id', { count: 'exact', head: true })
+                .in('product_variant_id', variantIds);
 
             if (countError) throw countError;
 
             const message =
-                count === 0
+                (count ?? 0) === 0
                     ? `Removed product ${productId} from inventory ${inventoryId}. Product has no inventory assignments now.`
                     : `Removed product ${productId} from inventory ${inventoryId} (product remains in ${count} other inventories)`;
 
             return NextResponse.json({ success: true, message });
         }
 
-        const { error: piError } = await supabase
-            .from('product_inventories')
-            .delete()
+        const { data: variants, error: variantsError } = await supabase
+            .from('product_variants')
+            .select('id')
             .eq('product_id', productId)
             .eq('owner_id', user.id);
 
-        if (piError) throw piError;
+        if (variantsError) throw variantsError;
+        const variantIds = variants?.map(v => v.id) || [];
+
+        if (variantIds.length > 0) {
+            const { error: pviError } = await supabase
+                .from('product_variant_inventories')
+                .delete()
+                .in('product_variant_id', variantIds)
+                .eq('owner_id', user.id);
+            if (pviError) throw pviError;
+
+            const { error: pvError } = await supabase
+                .from('product_variants')
+                .delete()
+                .in('id', variantIds);
+            if (pvError) throw pvError;
+        }
 
         const { data: batches } = await supabase
             .from('product_batch')

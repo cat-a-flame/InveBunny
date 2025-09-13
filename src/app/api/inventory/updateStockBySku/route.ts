@@ -30,20 +30,20 @@ export async function PUT(request: Request) {
       if (!sku || typeof quantity !== 'number') continue;
 
       const { data, error } = await supabase
-        .from('product_inventories')
-        .select('product_quantity')
-        .eq('product_sku', sku)
+        .from('product_variant_inventories')
+        .select('quantity')
+        .eq('sku', sku)
         .eq('owner_id', user.id)
         .single();
 
       if (error || !data) continue;
 
-      const newQuantity = Math.max((data.product_quantity ?? 0) - quantity, 0);
+      const newQuantity = Math.max((data.quantity ?? 0) - quantity, 0);
 
       const { error: updateError } = await supabase
-        .from('product_inventories')
-        .update({ product_quantity: newQuantity })
-        .eq('product_sku', sku)
+        .from('product_variant_inventories')
+        .update({ quantity: newQuantity })
+        .eq('sku', sku)
         .eq('owner_id', user.id);
 
       if (updateError) throw updateError;

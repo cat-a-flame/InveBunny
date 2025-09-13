@@ -12,7 +12,7 @@ export async function DELETE(request: Request) {
   const supabase = await createClient();
 
   const { count } = await supabase
-    .from('product_inventories')
+    .from('product_variant_inventories')
     .select('id', { count: 'exact', head: true })
     .eq('inventory_id', id);
 

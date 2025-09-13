@@ -16,7 +16,7 @@ export default async function InventoriesPage({ searchParams }: { searchParams: 
 
     const { data: inventories, count } = await supabase
         .from('inventories')
-        .select('id, inventory_name, product_inventories(count)', { count: 'exact' })
+        .select('id, inventory_name, product_variant_inventories(count)', { count: 'exact' })
         .ilike('inventory_name', `%${query}%`)
         .range((page - 1) * pageSize, page * pageSize - 1)
         .order('inventory_name', { ascending: true });
@@ -46,7 +46,7 @@ export default async function InventoriesPage({ searchParams }: { searchParams: 
                     </thead>
                     <tbody>
                         {inventories && inventories.map(inv => {
-                            const productCount = inv.product_inventories ? inv.product_inventories[0]?.count ?? 0 : 0;
+                            const productCount = inv.product_variant_inventories ? inv.product_variant_inventories[0]?.count ?? 0 : 0;
                             return (
                                 <tr key={inv.id}>
                                     <td><span className="item-name">{inv.inventory_name}</span></td>

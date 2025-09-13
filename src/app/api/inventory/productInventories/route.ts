@@ -16,8 +16,8 @@ export async function GET(request: Request) {
   }
 
   const { data, error } = await supabase
-    .from('product_inventories')
-    .select('inventory_id, product_sku, product_quantity, inventories(id, inventory_name)')
+    .from('product_variants')
+    .select('variants(variant_name), product_variant_inventories(inventory_id, sku, quantity, inventories(id, inventory_name))')
     .eq('product_id', productId)
     .eq('owner_id', user.id);
 
@@ -25,12 +25,15 @@ export async function GET(request: Request) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
-  const inventories = (data || []).map((row: any) => ({
-    inventory_id: row.inventory_id,
-    product_sku: row.product_sku,
-    product_quantity: row.product_quantity,
-    inventory_name: row.inventories?.inventory_name,
+  const variants = (data || []).map((row: any) => ({
+    variant_name: row.variants?.variant_name,
+    inventories: (row.product_variant_inventories || []).map((inv: any) => ({
+      inventory_id: inv.inventory_id,
+      sku: inv.sku,
+      quantity: inv.quantity,
+      inventory_name: inv.inventories?.inventory_name,
+    })),
   }));
 
-  return new Response(JSON.stringify({ success: true, inventories }), { status: 200 });
+  return new Response(JSON.stringify({ success: true, variants }), { status: 200 });
 }

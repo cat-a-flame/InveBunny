@@ -9,23 +9,22 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
-  const { product_id, inventory_id, product_sku, product_quantity, product_details } = body;
+  const { product_variant_id, inventory_id, sku, quantity } = body;
 
-  if (!product_id || !inventory_id) {
+  if (!product_variant_id || !inventory_id) {
     return new Response(JSON.stringify({ success: false, error: 'Missing identifiers' }), { status: 400 });
   }
 
   try {
     const { error } = await supabase
-      .from('product_inventories')
+      .from('product_variant_inventories')
       .upsert({
-        product_id,
+        product_variant_id,
         inventory_id,
-        product_sku: product_sku || null,
-        product_quantity: product_quantity ?? 0,
-        product_details: product_details || null,
+        sku: sku || null,
+        quantity: quantity ?? 0,
         owner_id: user.id,
-      }, { onConflict: 'product_id, inventory_id' });
+      }, { onConflict: 'product_variant_id, inventory_id' });
 
     if (error) throw error;
 
