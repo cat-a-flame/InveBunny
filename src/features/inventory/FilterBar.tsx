@@ -137,44 +137,33 @@ export function FilterBar({
     const selectedCategoryOptions = categoryOptions.filter(o => categoryFilter.includes(o.value));
     const selectedVariantOptions = variantOptions.filter(o => variantFilter.includes(o.value));
 
-    const combinedFilterOptions = [
-        { label: 'Status', options: statusOptions.map(o => ({ ...o, type: 'status' })) },
-        { label: 'Stock status', options: stockOptions.map(o => ({ ...o, type: 'stock' })) },
-        { label: 'Category', options: categoryOptions.map(o => ({ ...o, type: 'category' })) },
-        { label: 'Variant', options: variantOptions.map(o => ({ ...o, type: 'variant' })) },
-    ];
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+    const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
-    const selectedFilters = [
-        ...(statusFilter !== 'all'
-            ? [{ ...(statusOptions.find(o => o.value === statusFilter)!), type: 'status' }]
-            : []),
-        ...(stockFilter !== 'all'
-            ? [{ ...(stockOptions.find(o => o.value === stockFilter)!), type: 'stock' }]
-            : []),
-        ...selectedCategoryOptions.map(o => ({ ...o, type: 'category' })),
-        ...selectedVariantOptions.map(o => ({ ...o, type: 'variant' })),
-    ];
+    const selectStatus = (value: string) => {
+        setStatusFilter(value as any);
+        updateQueryParam('statusFilter', value);
+    };
 
-    const handleFilterChange = (opts: any) => {
-        const values = Array.isArray(opts) ? opts : [];
-        const status = values.filter((o: any) => o.type === 'status').pop();
-        const stock = values.filter((o: any) => o.type === 'stock').pop();
-        const categories = values.filter((o: any) => o.type === 'category');
-        const variants = values.filter((o: any) => o.type === 'variant');
+    const selectStock = (value: string) => {
+        setStockFilter(value as any);
+        updateQueryParam('stockFilter', value);
+    };
 
-        const statusValue = status ? status.value : 'all';
-        const stockValue = stock ? stock.value : 'all';
-        const categoryValues = categories.map((o: any) => o.value);
-        const variantValues = variants.map((o: any) => o.value);
+    const toggleCategory = (value: string) => {
+        const updated = categoryFilter.includes(value)
+            ? categoryFilter.filter(v => v !== value)
+            : [...categoryFilter, value];
+        setCategoryFilter(updated);
+        updateQueryParam('categoryFilter', updated);
+    };
 
-        setStatusFilter(statusValue);
-        updateQueryParam('statusFilter', statusValue);
-        setStockFilter(stockValue);
-        updateQueryParam('stockFilter', stockValue);
-        setCategoryFilter(categoryValues);
-        updateQueryParam('categoryFilter', categoryValues);
-        setVariantFilter(variantValues);
-        updateQueryParam('variantFilter', variantValues);
+    const toggleVariant = (value: string) => {
+        const updated = variantFilter.includes(value)
+            ? variantFilter.filter(v => v !== value)
+            : [...variantFilter, value];
+        setVariantFilter(updated);
+        updateQueryParam('variantFilter', updated);
     };
 
     const hasActiveFilters = () => {
@@ -266,18 +255,54 @@ export function FilterBar({
                         isDisabled={isLoading}
                     />
 
-                    <Select
-                        classNamePrefix="react-select"
-                        options={combinedFilterOptions}
-                        value={selectedFilters}
-                        onChange={handleFilterChange}
-                        placeholder="Filters"
-                        isMulti
-                        closeMenuOnSelect={false}
-                        hideSelectedOptions={false}
-                        controlShouldRenderValue={false}
-                        isDisabled={isLoading}
-                    />
+                    <div className="filter-dropdown">
+                        <Button
+                            onClick={() => {
+                                setIsFiltersOpen(!isFiltersOpen);
+                                setActiveMenu(null);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            disabled={isLoading}
+                        >
+                            Filters
+                        </Button>
+                        {isFiltersOpen && (
+                            <div className="drilldown-menu">
+                                <div className={`drilldown-inner ${activeMenu ? 'show-sub' : ''}`}>
+                                    <div className="drilldown-main">
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('status')}>Status</div>
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('stock')}>Stock status</div>
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('category')}>Category</div>
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('variant')}>Variant</div>
+                                    </div>
+                                    <div className="drilldown-sub">
+                                        <div className="drilldown-item back" onClick={() => setActiveMenu(null)}>Back</div>
+                                        {activeMenu === 'status' && statusOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => selectStatus(o.value)}>
+                                                <input type="radio" checked={statusFilter === o.value} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                        {activeMenu === 'stock' && stockOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => selectStock(o.value)}>
+                                                <input type="radio" checked={stockFilter === o.value} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                        {activeMenu === 'category' && categoryOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => toggleCategory(o.value)}>
+                                                <input type="checkbox" checked={categoryFilter.includes(o.value)} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                        {activeMenu === 'variant' && variantOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => toggleVariant(o.value)}>
+                                                <input type="checkbox" checked={variantFilter.includes(o.value)} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
             </div>
 
             <div className="filter-chips">
@@ -289,11 +314,20 @@ export function FilterBar({
                                 <button type="button" onClick={() => removeChip(chip.type, chip.value)}>&times;</button>
                             </span>
                         ))}
-                    
+
                         <Button onClick={clearAllFilters} variant="ghost" size="sm" disabled={!hasActiveFilters()}>Clear all</Button>
                     </>
                 )}
             </div>
+            <style jsx>{`
+                .filter-dropdown { position: relative; display: inline-block; }
+                .drilldown-menu { position: absolute; z-index: 10; background: #fff; border: 1px solid #ccc; margin-top: 4px; }
+                .drilldown-inner { display: flex; width: 200%; transition: transform 0.3s ease; }
+                .drilldown-inner.show-sub { transform: translateX(-50%); }
+                .drilldown-main, .drilldown-sub { width: 50%; padding: 8px; }
+                .drilldown-item { padding: 4px 8px; cursor: pointer; }
+                .drilldown-item.back { font-weight: bold; }
+            `}</style>
         </div>
     );
 }
