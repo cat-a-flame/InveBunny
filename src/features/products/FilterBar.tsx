@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/src/components/Button/button";
 import { Search } from "@/src/components/SearchBar/searchBar";
+import { IconButton } from "@/src/components/IconButton/iconButton";
 
 type FilterBarProps = {
     statusFilter: "active" | "inactive" | "all";
@@ -177,49 +178,50 @@ export function FilterBar({
     return (
         <div className="filter-bar">
             <div className={`filter-bar-options ${isLoading ? 'filter-bar-loading' : ''}`}>
-                <Search placeholder="Search for product name" query={searchQuery} onChange={handleSearch} size="md" />
+                <div className="filter-bar-wrapper">
+                    <Search placeholder="Search for product name" query={searchQuery} onChange={handleSearch} size="md" />
 
-                <div className="filter-dropdown">
-                    <Button
-                        onClick={() => {
-                            setIsFiltersOpen(!isFiltersOpen);
-                            setActiveMenu(null);
-                        }}
-                        variant="secondary"
-                        size="sm"
-                        disabled={isLoading}
-                    >
-                        Filters
-                    </Button>
-                    {isFiltersOpen && (
-                        <div className="drilldown-menu">
-                            <div className={`drilldown-inner ${activeMenu ? 'show-sub' : ''}`}>
-                                <div className="drilldown-main">
-                                    <div className="drilldown-item" onClick={() => setActiveMenu('status')}>Status</div>
-                                    <div className="drilldown-item" onClick={() => setActiveMenu('category')}>Category</div>
-                                    <div className="drilldown-item" onClick={() => setActiveMenu('variant')}>Variant</div>
-                                </div>
-                                <div className="drilldown-sub">
-                                    <div className="drilldown-item back" onClick={() => setActiveMenu(null)}>Back</div>
-                                    {activeMenu === 'status' && statusOptions.map(o => (
-                                        <div key={o.value} className="drilldown-item" onClick={() => selectStatus(o.value)}>
-                                            <input type="radio" checked={statusFilter === o.value} readOnly /> {o.label}
-                                        </div>
-                                    ))}
-                                    {activeMenu === 'category' && categoryOptions.map(o => (
-                                        <div key={o.value} className="drilldown-item" onClick={() => toggleCategory(o.value)}>
-                                            <input type="checkbox" checked={categoryFilter.includes(o.value)} readOnly /> {o.label}
-                                        </div>
-                                    ))}
-                                    {activeMenu === 'variant' && variantOptions.map(o => (
-                                        <div key={o.value} className="drilldown-item" onClick={() => toggleVariant(o.value)}>
-                                            <input type="checkbox" checked={variantFilter.includes(o.value)} readOnly /> {o.label}
-                                        </div>
-                                    ))}
+                    <div className="filter-dropdown">
+                        <IconButton
+                            onClick={() => {
+                                setIsFiltersOpen(!isFiltersOpen);
+                                setActiveMenu(null);
+                            }}
+                            icon={<i className="fa-solid fa-filter"></i>}
+                            disabled={isLoading}
+                            title="Filters"
+                        >
+                        </IconButton>
+                        {isFiltersOpen && (
+                            <div className="drilldown-menu">
+                                <div className={`drilldown-inner ${activeMenu ? 'show-sub' : ''}`}>
+                                    <div className="drilldown-main">
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('category')}>Category <span className="fa-solid fa-chevron-right"></span></div>
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('variant')}>Variant <span className="fa-solid fa-chevron-right"></span></div>
+                                        <div className="drilldown-item" onClick={() => setActiveMenu('status')}>Status <span className="fa-solid fa-chevron-right"></span></div>
+                                    </div>
+                                    <div className="drilldown-sub">
+                                        <div className="drilldown-item back" onClick={() => setActiveMenu(null)}><span className="fa-solid fa-chevron-left"></span> Back</div>
+                                        {activeMenu === 'status' && statusOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => selectStatus(o.value)}>
+                                                <input type="radio" checked={statusFilter === o.value} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                        {activeMenu === 'category' && categoryOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => toggleCategory(o.value)}>
+                                                <input type="radio" checked={categoryFilter.includes(o.value)} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                        {activeMenu === 'variant' && variantOptions.map(o => (
+                                            <div key={o.value} className="drilldown-item" onClick={() => toggleVariant(o.value)}>
+                                                <input type="radio" checked={variantFilter.includes(o.value)} readOnly /> {o.label}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -237,15 +239,6 @@ export function FilterBar({
                     </>
                 )}
             </div>
-            <style jsx>{`
-                .filter-dropdown { position: relative; display: inline-block; }
-                .drilldown-menu { position: absolute; z-index: 10; background: #fff; border: 1px solid #ccc; margin-top: 4px; width: 200px; overflow: hidden; }
-                .drilldown-inner { display: flex; width: 200%; transition: transform 0.3s ease; }
-                .drilldown-inner.show-sub { transform: translateX(-50%); }
-                .drilldown-main, .drilldown-sub { width: 50%; padding: 8px; flex-shrink: 0; }
-                .drilldown-item { padding: 4px 8px; cursor: pointer; }
-                .drilldown-item.back { font-weight: bold; }
-            `}</style>
         </div>
     );
 }
