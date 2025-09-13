@@ -1,16 +1,36 @@
-import { createClient } from '@/src/utils/supabase/server';
-import { slugify } from '@/src/utils/slugify';
+"use client";
 
-export default async function InventorySlugPage({ params }: { params: { inventory: string } }) {
-    const supabase = await createClient();
+import { useEffect, useState } from 'react';
 
-    const { data: inventories } = await supabase
-        .from('inventories')
-        .select('id, inventory_name');
+interface InventoryItem {
+    id: number;
+    sku: string;
+    quantity: number;
+    product_name: string;
+    variant_name: string;
+}
 
-    const inventory = inventories?.find(inv => slugify(inv.inventory_name) === params.inventory);
+export default function InventorySlugPage({ params }: { params: { inventory: string } }) {
+    const [inventoryName, setInventoryName] = useState('');
+    const [items, setItems] = useState<InventoryItem[]>([]);
 
-    if (!inventory) {
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await fetch(`/api/inventory/items?slug=${params.inventory}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setInventoryName(data.inventory.inventory_name);
+                    setItems(data.items || []);
+                }
+            } catch (err) {
+                console.error('Failed to load inventory', err);
+            }
+        };
+        load();
+    }, [params.inventory]);
+
+    if (!inventoryName) {
         return (
             <main>
                 <p>Inventory not found.</p>
@@ -18,24 +38,11 @@ export default async function InventorySlugPage({ params }: { params: { inventor
         );
     }
 
-    const { data: items } = await supabase
-        .from('product_variant_inventories')
-        .select(`
-            id,
-            sku,
-            quantity,
-            product_variants (
-                products ( product_name ),
-                variants ( variant_name )
-            )
-        `)
-        .eq('inventory_id', inventory.id);
-
     return (
         <main>
             <div className="pageHeader">
                 <h2 className="heading-title">Inventory</h2>
-                <h3 className="heading-subtitle">{inventory.inventory_name}</h3>
+                <h3 className="heading-subtitle">{inventoryName}</h3>
             </div>
 
             <div className="content">
@@ -49,10 +56,10 @@ export default async function InventorySlugPage({ params }: { params: { inventor
                         </tr>
                     </thead>
                     <tbody>
-                        {items?.map(item => (
+                        {items.map(item => (
                             <tr key={item.id}>
-                                <td>{item.product_variants?.[0]?.products?.[0]?.product_name || '-'}</td>
-                                <td>{item.product_variants?.[0]?.variants?.[0]?.variant_name || '-'}</td>
+                                <td>{item.product_name || '-'}</td>
+                                <td>{item.variant_name || '-'}</td>
                                 <td>{item.sku}</td>
                                 <td>{item.quantity}</td>
                             </tr>
