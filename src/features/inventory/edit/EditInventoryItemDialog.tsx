@@ -15,6 +15,7 @@ export type EditInventoryItemDialogProps = {
     productCategoryName: string;
     productSku: string | null;
     productQuantity: number | null;
+    productDetails: string | null;
     onSuccess?: () => void;
 };
 
@@ -27,11 +28,13 @@ export function EditInventoryItemDialog({
     productCategoryName,
     productSku,
     productQuantity,
+    productDetails,
     onSuccess,
 }: EditInventoryItemDialogProps) {
     const [formData, setFormData] = useState({
         sku: productSku || '',
         quantity: productQuantity ?? 0,
+        details: productDetails || '',
     });
     const [submitting, setSubmitting] = useState(false);
     const toast = useToast();
@@ -42,15 +45,15 @@ export function EditInventoryItemDialog({
     useEffect(() => {
         if (open) {
             isMounted.current = true;
-            setFormData({ sku: productSku || '', quantity: productQuantity ?? 0 });
+            setFormData({ sku: productSku || '', quantity: productQuantity ?? 0, details: productDetails || '' });
             setTimeout(() => setIsOpen(true), 50);
         } else {
             setIsOpen(false);
             isMounted.current = false;
         }
-    }, [open, productSku, productQuantity]);
+    }, [open, productSku, productQuantity, productDetails]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: name === 'quantity' ? Number(value) : value }));
     };
@@ -67,6 +70,7 @@ export function EditInventoryItemDialog({
                     inventory_id: inventoryId,
                     product_sku: formData.sku,
                     product_quantity: formData.quantity,
+                    product_details: formData.details,
                 }),
             });
             const result = await res.json();
@@ -109,6 +113,10 @@ export function EditInventoryItemDialog({
                                 <label className="input-label" htmlFor="quantity">Quantity</label>
                                 <input id="quantity" name="quantity" type="number" min="0" className="input-max-width" value={formData.quantity} onChange={handleChange} />
                             </div>
+                        </div>
+                        <div className="input-group">
+                            <label className="input-label" htmlFor="details">Notes</label>
+                            <textarea id="details" name="details" className="input-max-width" value={formData.details} onChange={handleChange}></textarea>
                         </div>
                     </div>
                     <div className="side-panel-footer">

@@ -11,6 +11,7 @@ export type InventoryItemProps = {
     productCategoryName: string;
     productSku: string | null;
     productQuantity: number | null;
+    productDetails: string | null;
     onSuccess?: () => void;
 };
 
@@ -21,6 +22,7 @@ export function EditInventoryItemButton({
     productCategoryName,
     productSku,
     productQuantity,
+    productDetails,
     onSuccess,
 }: InventoryItemProps) {
     const [open, setOpen] = useState(false);
@@ -38,6 +40,7 @@ export function EditInventoryItemButton({
                     productCategoryName={productCategoryName}
                     productSku={productSku}
                     productQuantity={productQuantity}
+                    productDetails={productDetails}
                     onSuccess={onSuccess}
                 />
             )}
