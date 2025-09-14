@@ -24,22 +24,14 @@ export async function GET(request: Request) {
         );
     }
 
-    type InventoryWithProduct = {
-        product_id: string;
-        product_sku: string;
-        product_quantity: number | null;
-        products:
-            | { product_name: string | null }
-            | { product_name: string | null }[]
-            | null;
-    };
-
     const { data, error } = await supabase
-        .from('product_inventories')
-        .select('product_id, product_sku, product_quantity, products (product_name)')
+        .from('product_variant_inventories')
+        .select(
+            'id, product_sku, product_quantity, product_variants (product_id, products (product_name))'
+        )
         .eq('product_sku', sku)
         .eq('owner_id', user.id)
-        .single<InventoryWithProduct>();
+        .single();
 
     if (error || !data) {
         return new Response(
@@ -48,14 +40,19 @@ export async function GET(request: Request) {
         );
     }
 
-    const productName = Array.isArray(data.products)
-        ? data.products[0]?.product_name ?? ''
-        : data.products?.product_name ?? '';
+    const variantData = data.product_variants;
+    const variant = Array.isArray(variantData) ? variantData[0] : variantData;
+
+    const productsData = (variant as any)?.products;
+    const productName = Array.isArray(productsData)
+        ? (productsData as any)[0]?.product_name
+        : (productsData as any)?.product_name;
 
     const product = {
-        id: data.product_id,
+        id: variant?.product_id,
+        product_id: variant?.product_id,
         product_sku: data.product_sku,
-        product_name: productName,
+        product_name: productName ?? '',
         product_quantity: data.product_quantity ?? 0,
     };
 

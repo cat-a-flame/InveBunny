@@ -16,28 +16,19 @@ export async function GET(request: Request) {
   }
 
   const { data, error } = await supabase
-    .from('product_variant_inventories')
-    .select('inventory_id, product_sku, product_quantity, inventories(id, inventory_name), product_variants!inner(product_id)')
-    .eq('product_variants.product_id', productId)
+    .from('product_variants')
+    .select('variant_id, variants(id, variant_name)')
+    .eq('product_id', productId)
     .eq('owner_id', user.id);
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
-  const unique = new Map<string, any>();
-  (data || []).forEach((row: any) => {
-    if (!unique.has(row.inventory_id)) {
-      unique.set(row.inventory_id, {
-        inventory_id: row.inventory_id,
-        product_sku: row.product_sku,
-        product_quantity: row.product_quantity,
-        inventory_name: row.inventories?.inventory_name,
-      });
-    }
-  });
+  const variants = (data || []).map((row: any) => ({
+    variant_id: row.variant_id,
+    variant_name: row.variants?.variant_name,
+  }));
 
-  const inventories = Array.from(unique.values());
-
-  return new Response(JSON.stringify({ success: true, inventories }), { status: 200 });
+  return new Response(JSON.stringify({ success: true, variants }), { status: 200 });
 }

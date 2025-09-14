@@ -18,7 +18,6 @@ type SearchParams = {
     sortOrder?: 'asc' | 'desc';
 };
 
-// ========== CONSTANTS ==========
 const validStockFilters = ['all', 'low', 'out', 'in'] as const;
 type StockFilter = (typeof validStockFilters)[number];
 
@@ -32,7 +31,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const supabase = await createClient();
     const resolvedSearchParams = await searchParams;
 
-    // ========== PARAM PROCESSING ==========
     const statusFilterRaw = resolvedSearchParams.statusFilter;
     const stockFilterRaw = resolvedSearchParams.stockFilter;
     const statusFilter = statusFilterRaw === 'all' ? 'all' : statusFilterRaw === 'inactive' ? 'inactive' : 'active';
@@ -52,7 +50,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const sortField = sortFieldRaw === 'date' ? 'date' : 'name';
     const sortOrder = sortOrderRaw === 'desc' ? 'desc' : 'asc';
 
-    // ========== INVENTORY FETCHING & PROCESSING ==========
     const { data: inventories } = await supabase
         .from('inventories')
         .select('id, inventory_name')
@@ -65,7 +62,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
             </main>
         );
     }
-
 
     let selectedInventory = inventorySlug
         ? inventories.find((inv) => slugify(inv.inventory_name) === inventorySlug)
@@ -84,21 +80,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         );
     }
 
-    // ========== PRODUCT DATA FETCHING ==========
-    // Prepare queries that don't depend on each other's results
-    const productInventoriesPromise = supabase
-        .from('product_inventories')
-        .select('id, product_id, product_quantity, product_sku, product_details, inventory_id')
-        .eq('inventory_id', inventoryId);
-
-    const inventoryMatchesPromise = query ?
-        supabase
-            .from('product_inventories')
-            .select('product_id')
-            .ilike('product_sku', `%${query}%`)
-            .eq('inventory_id', inventoryId) :
-        Promise.resolve({ data: null });
-
     const categoriesPromise = supabase
         .from('categories')
         .select('id, category_name')
@@ -109,113 +90,135 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         .select('id, variant_name')
         .order('variant_name');
 
-    const [{ data: allProductInventories }, { data: inventoryMatches }, { data: categories }, { data: variants }] =
-        await Promise.all([productInventoriesPromise, inventoryMatchesPromise, categoriesPromise, variantsPromise]);
+    const itemsPromise = supabase
+        .from('product_variant_inventories')
+        .select(`
+            id,
+            product_sku,
+            product_quantity,
+            product_details,
+            product_variant_id,
+            product_variants (
+                product_id,
+                variants ( id, variant_name ),
+                products (
+                    id,
+                    product_name,
+                    product_status,
+                    product_category,
+                    created_at,
+                    categories ( id, category_name )
+                )
+            )
+        `)
+        .eq('inventory_id', inventoryId);
 
-    let filteredInventories = allProductInventories || [];
+    const [{ data: allItems }, { data: categories }, { data: variants }] =
+        await Promise.all([itemsPromise, categoriesPromise, variantsPromise]);
+
+    let filteredItems = (allItems || []).map(item => {
+        const pv = Array.isArray(item.product_variants)
+            ? item.product_variants[0]
+            : item.product_variants;
+        const product = Array.isArray(pv?.products) ? pv.products[0] : pv?.products;
+        const variant = Array.isArray(pv?.variants) ? pv.variants[0] : pv?.variants;
+        return {
+            ...item,
+            product_variants: {
+                ...pv,
+                products: product,
+                variants: variant,
+            },
+        };
+    }) as any[];
+
+    if (query) {
+        const q = query.toLowerCase();
+        filteredItems = filteredItems.filter(item => {
+            const productName = item.product_variants?.products?.product_name;
+            return (
+                item.product_sku?.toLowerCase().includes(q) ||
+                productName?.toLowerCase().includes(q)
+            );
+        });
+    }
 
     if (stockFilter !== 'all') {
-        filteredInventories = filteredInventories.filter((pi) => {
-            if (stockFilter === 'low') return pi.product_quantity > 0 && pi.product_quantity <= 5;
-            if (stockFilter === 'out') return pi.product_quantity === 0;
-            if (stockFilter === 'in') return pi.product_quantity > 5;
+        filteredItems = filteredItems.filter(item => {
+            if (stockFilter === 'low') return item.product_quantity > 0 && item.product_quantity <= 5;
+            if (stockFilter === 'out') return item.product_quantity === 0;
+            if (stockFilter === 'in') return item.product_quantity > 5;
             return true;
         });
     }
 
-    const productIdsFromFilters = filteredInventories.map((pi) => pi.product_id);
-
-    // Build base products query (without status filter)
-    let productsQuery = supabase
-        .from('products')
-        .select(`
-            id,
-            product_name,
-            product_category,
-            product_status,
-            product_variant,
-            categories(id, category_name),
-            variants(id, variant_name)
-        `)
-        .in('id', productIdsFromFilters.length > 0 ? productIdsFromFilters : [0])
-        .order(sortField === 'date' ? 'created_at' : 'product_name', { ascending: sortOrder === 'asc' });
-
-    if (query) {
-        const skuMatchedIds = inventoryMatches?.map(i => i.product_id) || [];
-        productsQuery = productsQuery.or(
-            `product_name.ilike.%${query}%${skuMatchedIds.length ? `,id.in.(${skuMatchedIds.join(',')})` : ''}`
+    if (categoryFilter.length > 0) {
+        filteredItems = filteredItems.filter(item =>
+            item.product_variants?.products?.product_category &&
+            categoryFilter.includes(item.product_variants.products.product_category.toString())
         );
     }
 
-    // Apply filters except status
-    if (categoryFilter.length > 0) {
-        productsQuery = productsQuery.in('product_category', categoryFilter);
-    }
-
     if (variantFilter.length > 0) {
-        productsQuery = productsQuery.in('product_variant', variantFilter);
+        filteredItems = filteredItems.filter(item =>
+            item.product_variants?.variants?.id &&
+            variantFilter.includes(item.product_variants.variants.id.toString())
+        );
     }
 
-    const { data: productsBase } = await productsQuery;
+    const preStatusItems = filteredItems;
 
-    const allFilteredProducts = productsBase || [];
-
-    // Status counts before applying status filter
     const statusCounts = {
-        active: allFilteredProducts.filter(p => p.product_status).length,
-        inactive: allFilteredProducts.filter(p => !p.product_status).length,
+        active: preStatusItems.filter(i => i.product_variants?.products?.product_status).length,
+        inactive: preStatusItems.filter(i => !i.product_variants?.products?.product_status).length,
     };
 
-    // Apply status filter in-memory
-    const filteredProducts =
-        statusFilter === 'active'
-            ? allFilteredProducts.filter(p => p.product_status)
-            : statusFilter === 'inactive'
-                ? allFilteredProducts.filter(p => !p.product_status)
-                : allFilteredProducts;
+    filteredItems = statusFilter === 'active'
+        ? preStatusItems.filter(i => i.product_variants?.products?.product_status)
+        : statusFilter === 'inactive'
+            ? preStatusItems.filter(i => !i.product_variants?.products?.product_status)
+            : preStatusItems;
 
-    // ========== DATA PROCESSING ==========
-    const totalCount = filteredProducts.length;
-    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-
-    const filteredProductIds = filteredProducts.map(p => p.id);
-    const filteredInventoryItems = (filteredInventories || []).filter(pi => filteredProductIds.includes(pi.product_id));
-
-    // Stock calculations
-    const lowStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity > 0 && pi.product_quantity <= 5).length;
-    const outOfStockCount = filteredInventoryItems.filter((pi) => pi.product_quantity === 0).length;
+    const lowStockCount = filteredItems.filter(i => i.product_quantity > 0 && i.product_quantity <= 5).length;
+    const outOfStockCount = filteredItems.filter(i => i.product_quantity === 0).length;
 
     const categoryCounts: Record<string, number> = {};
     const variantCounts: Record<string, number> = {};
-    filteredProducts.forEach(p => {
-        if (p.product_category) {
-            categoryCounts[p.product_category] = (categoryCounts[p.product_category] || 0) + 1;
+    preStatusItems.forEach(item => {
+        const cat = item.product_variants?.products?.product_category;
+        if (cat) {
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
         }
-        if (p.product_variant) {
-            variantCounts[p.product_variant] = (variantCounts[p.product_variant] || 0) + 1;
+        const variantId = item.product_variants?.variants?.id;
+        if (variantId) {
+            variantCounts[variantId] = (variantCounts[variantId] || 0) + 1;
         }
     });
 
     const stockCounts = {
-        all: filteredInventoryItems.length,
-        low: lowStockCount,
-        out: outOfStockCount,
-        in: filteredInventoryItems.filter(pi => pi.product_quantity > 5).length,
+        all: preStatusItems.length,
+        low: preStatusItems.filter(i => i.product_quantity > 0 && i.product_quantity <= 5).length,
+        out: preStatusItems.filter(i => i.product_quantity === 0).length,
+        in: preStatusItems.filter(i => i.product_quantity > 5).length,
     };
 
-    // Pagination
-    const pagedProducts = filteredProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    filteredItems.sort((a, b) => {
+        if (sortField === 'date') {
+            const aDate = new Date(a.product_variants?.products?.created_at || '').getTime();
+            const bDate = new Date(b.product_variants?.products?.created_at || '').getTime();
+            return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+        }
+        const aName = a.product_variants?.products?.product_name?.toLowerCase() || '';
+        const bName = b.product_variants?.products?.product_name?.toLowerCase() || '';
+        return sortOrder === 'asc' ? aName.localeCompare(bName) : bName.localeCompare(aName);
+    });
 
-    const inventoryMap = new Map(
-        (filteredInventories || [])
-            .filter(pi => pagedProducts.some(p => p.id === pi.product_id))
-            .map(pi => [pi.product_id, pi])
-    );
+    const totalCount = filteredItems.length;
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+    const pagedItems = filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-    // ========== RENDER ==========
     return (
         <main className="inventory-page">
-            {/* Header Section */}
             <div className="pageHeader">
                 <div>
                     <h2 className="heading-title">Inventory</h2>
@@ -223,7 +226,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                 </div>
             </div>
 
-            {/* Main Content */}
             <div className="content inventory-content">
                 <FilterBar
                     statusFilter={statusFilter}
@@ -252,36 +254,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                         </tr>
                     </thead>
                     <tbody>
-                        {pagedProducts.map((product) => {
-                            const inventoryInfo = inventoryMap.get(product.id);
+                        {pagedItems.map(item => {
+                            const product = item.product_variants?.products;
+                            const variant = item.product_variants?.variants;
                             return (
-                                <tr key={product.id}>
+                                <tr key={item.id}>
                                     <td>
-                                        <span className="item-name">{product.product_name}</span>
-                                        <span className="item-sku">{inventoryInfo?.product_sku || '-'}</span>
+                                        <span className="item-name">{product?.product_name}</span>
+                                        <span className="item-sku">{item.product_sku || '-'}</span>
                                     </td>
                                     <td>
-                                        <div className={`quantity-badge ${inventoryInfo?.product_quantity === 0 ? 'out-of-stock' : inventoryInfo?.product_quantity <= 5 ? 'low-stock' : ''}`}>
-                                            {inventoryInfo?.product_quantity ?? '-'}
+                                        <div className={`quantity-badge ${item.product_quantity === 0 ? 'out-of-stock' : item.product_quantity <= 5 ? 'low-stock' : ''}`}>
+                                            {item.product_quantity ?? '-'}
                                         </div>
                                     </td>
-                                    <td>{(product.categories as any)?.category_name || '-'}</td>
-                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
+                                    <td>{(product?.categories as any)?.category_name || '-'}</td>
+                                    <td>{variant?.variant_name || '-'}</td>
                                     <td className="table-actions">
                                         <DeleteProductButton
-                                            productId={product.id}
-                                            productName={product.product_name}
-                                            inventoryId={inventoryId}
+                                            inventoryItemId={item.id}
+                                            productName={product?.product_name || ''}
                                         />
-
                                         <EditInventoryItemButton
-                                            productId={product.id}
-                                            inventoryId={inventoryId.toString()}
-                                            productName={product.product_name || ''}
-                                            productCategoryName={(product.categories as any)?.category_name || ''}
-                                            productSku={inventoryInfo?.product_sku || ''}
-                                            productQuantity={inventoryInfo?.product_quantity ?? 0}
-                                            productDetails={inventoryInfo?.product_details || ''}
+                                            inventoryItemId={item.id}
+                                            productName={product?.product_name || ''}
+                                            productCategoryName={(product?.categories as any)?.category_name || ''}
+                                            productSku={item.product_sku || ''}
+                                            productQuantity={item.product_quantity ?? 0}
+                                            productDetails={item.product_details || ''}
                                         />
                                     </td>
                                 </tr>
@@ -312,3 +312,4 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         </main>
     );
 }
+

@@ -5,8 +5,7 @@ import { IconButton } from '@/src/components/IconButton/iconButton';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 
 export type InventoryItemProps = {
-    productId: string;
-    inventoryId: string;
+    inventoryItemId: string;
     productName: string;
     productCategoryName: string;
     productSku: string | null;
@@ -16,8 +15,7 @@ export type InventoryItemProps = {
 };
 
 export function EditInventoryItemButton({
-    productId,
-    inventoryId,
+    inventoryItemId,
     productName,
     productCategoryName,
     productSku,
@@ -34,8 +32,7 @@ export function EditInventoryItemButton({
                 <EditInventoryItemDialog
                     open={open}
                     onClose={() => setOpen(false)}
-                    productId={productId}
-                    inventoryId={inventoryId}
+                    inventoryItemId={inventoryItemId}
                     productName={productName}
                     productCategoryName={productCategoryName}
                     productSku={productSku}

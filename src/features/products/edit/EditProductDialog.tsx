@@ -29,7 +29,6 @@ type ProductData = {
     id: string;
     product_name: string;
     product_category: string;
-    product_variant: string | null;
     product_status: boolean;
     inventories: ProductInventoryData[];
     currentInventoryId?: string;
@@ -73,9 +72,12 @@ export function EditProductDialog({
     const [formData, setFormData] = useState({
         product_name: product.product_name || '',
         product_category: product.product_category || '',
-        product_variant: product.product_variant || '',
         product_status: product.product_status ?? false,
     });
+
+    const [variantEntries, setVariantEntries] = useState<Array<{
+        variantId: string;
+    }>>([]);
 
     const [inventoryEntries, setInventoryEntries] = useState<Array<{
         inventoryId: string;
@@ -89,7 +91,6 @@ export function EditProductDialog({
         setFormData({
             product_name: product.product_name || '',
             product_category: product.product_category || '',
-            product_variant: product.product_variant || '',
             product_status: product.product_status ?? false,
         });
 
@@ -134,7 +135,27 @@ export function EditProductDialog({
             }
         };
 
+        const loadVariants = async () => {
+            try {
+                const res = await fetch(`/api/products/productVariants?productId=${product.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const entries = (data.variants || []).map((v: any) => ({
+                        variantId: v.variant_id,
+                    }));
+                    setVariantEntries(
+                        entries.length > 0 ? entries : [{ variantId: '' }]
+                    );
+                } else {
+                    setVariantEntries([{ variantId: '' }]);
+                }
+            } catch {
+                setVariantEntries([{ variantId: '' }]);
+            }
+        };
+
         loadInventories();
+        loadVariants();
     }, [open, product, inventories]);
 
     const handleChange = (
@@ -158,6 +179,14 @@ export function EditProductDialog({
         });
     };
 
+    const handleVariantChange = (index: number, value: string) => {
+        setVariantEntries(prev => {
+            const updated = [...prev];
+            updated[index] = { variantId: value };
+            return updated;
+        });
+    };
+
     const addInventoryRow = () => {
         setInventoryEntries(prev => [
             ...prev,
@@ -165,8 +194,19 @@ export function EditProductDialog({
         ]);
     };
 
+    const addVariantRow = () => {
+        setVariantEntries(prev => [
+            ...prev,
+            { variantId: '' },
+        ]);
+    };
+
     const removeInventoryRow = (index: number) => {
         setInventoryEntries(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const removeVariantRow = (index: number) => {
+        setVariantEntries(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -174,6 +214,21 @@ export function EditProductDialog({
         setSubmitting(true);
 
         try {
+            const selectedVariants = variantEntries
+                .map(entry => entry.variantId)
+                .filter(Boolean);
+            if (selectedVariants.length === 0) {
+                toast('❌ At least one variant is required.');
+                setSubmitting(false);
+                return;
+            }
+
+            const selectedInventories = inventoryEntries.filter(entry => entry.inventoryId);
+            if (selectedInventories.length === 0) {
+                toast('❌ At least one inventory is required.');
+                setSubmitting(false);
+                return;
+            }
             const response = await fetch('/api/inventory/updateProductInventories', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -181,9 +236,9 @@ export function EditProductDialog({
                     id: product.id,
                     product_name: formData.product_name,
                     product_category: formData.product_category,
-                    product_variant: formData.product_variant,
                     product_status: formData.product_status,
-                    inventories: inventoryEntries.map(entry => ({
+                    variants: selectedVariants,
+                    inventories: selectedInventories.map(entry => ({
                         inventory_id: entry.inventoryId,
                         product_sku: entry.sku || '',
                         product_quantity: entry.quantity ?? 0,
@@ -228,25 +283,25 @@ export function EditProductDialog({
                             <input name="product_name" type="text" className="input-max-width" value={formData.product_name} onChange={handleChange} required />
                         </div>
 
-                        <div className="double-input-group">
-                            <div className="input-equal">
-                                <label htmlFor="product_category" className="input-label">
-                                    Category
-                                </label>
-                                <select name="product_category" className="input-max-width" value={formData.product_category} onChange={handleChange} required>
-                                    <option value="">Select a category</option>
-                                    {categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {cat.category_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="input-equal">
-                                <label htmlFor="product_variant" className="input-label">
-                                    Variant
-                                </label>
-                                <select name="product_variant" className="input-max-width" value={formData.product_variant} onChange={handleChange}>
+                        <div className="input-group">
+                            <label htmlFor="product_category" className="input-label">
+                                Category
+                            </label>
+                            <select name="product_category" className="input-max-width" value={formData.product_category} onChange={handleChange} required>
+                                <option value="">Select a category</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.category_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <h4 className="section-subtitle">Variants</h4>
+
+                        {variantEntries.map((entry, index) => (
+                            <div key={index} className="double-input-group">
+                                <select value={entry.variantId} className="input-max-width" onChange={e => handleVariantChange(index, e.target.value)}>
                                     <option value="">Select a variant</option>
                                     {variants.map(variant => (
                                         <option key={variant.id} value={variant.id}>
@@ -254,8 +309,11 @@ export function EditProductDialog({
                                         </option>
                                     ))}
                                 </select>
+                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeVariantRow(index)} title="Remove variant" disabled={index <= 0 && (true)} />
                             </div>
-                        </div>
+                        ))}
+
+                        <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addVariantRow} title="Add new variant" />
 
                         <div className="input-group">
                             <label>

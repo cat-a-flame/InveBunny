@@ -9,14 +9,25 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
-  const { id, product_name, product_category, product_variant, product_status, inventories } = body;
+  const { id, product_name, product_category, product_status, variants, inventories } = body;
 
   if (!product_name?.trim()) {
     return new Response(JSON.stringify({ success: false, error: 'Product name is required' }), { status: 400 });
   }
 
-  if (!Array.isArray(inventories) || inventories.length === 0) {
-    return new Response(JSON.stringify({ success: false, error: 'At least one inventory entry is required' }), { status: 400 });
+  if (!Array.isArray(variants) || variants.length === 0) {
+    return new Response(JSON.stringify({ success: false, error: 'At least one variant entry is required' }), { status: 400 });
+  }
+
+  const validInventories = Array.isArray(inventories)
+    ? inventories.filter((inv: any) => inv.inventory_id)
+    : [];
+
+  if (validInventories.length === 0) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'At least one inventory entry is required' }),
+      { status: 400 }
+    );
   }
 
   try {
@@ -36,7 +47,6 @@ export async function PUT(request: Request) {
       .update({
         product_name,
         product_category: product_category || null,
-        product_variant: product_variant || null,
         product_status: product_status || false,
       })
       .eq('id', id)
@@ -45,47 +55,105 @@ export async function PUT(request: Request) {
 
     if (updateProductError) throw updateProductError;
 
-    const { data: existing, error: existingError } = await supabase
-      .from('product_inventories')
-      .select('inventory_id')
+    const { data: existingVariants, error: existingVariantsError } = await supabase
+      .from('product_variants')
+      .select('id, variant_id')
       .eq('product_id', id)
       .eq('owner_id', user.id);
 
-    if (existingError) throw existingError;
+    if (existingVariantsError) throw existingVariantsError;
 
-    const existingIds = (existing || []).map((r: any) => r.inventory_id);
-    const incomingIds = inventories.map((inv: any) => inv.inventory_id);
+    const existingVariantIds = (existingVariants || []).map((r: any) => r.variant_id);
+    const existingVariantMap = new Map((existingVariants || []).map((r: any) => [r.variant_id, r.id]));
+    const incomingVariantIds = (variants || []) as string[];
 
-    const toDelete = existingIds.filter((id: string) => !incomingIds.includes(id));
+    const variantsToDelete = existingVariantIds.filter((vid: string) => !incomingVariantIds.includes(vid));
 
-    if (toDelete.length > 0) {
-      const { error: deleteError } = await supabase
-        .from('product_inventories')
+    if (variantsToDelete.length > 0) {
+      const idsToDelete = variantsToDelete
+        .map((vid: string) => existingVariantMap.get(vid))
+        .filter(Boolean);
+
+      if (idsToDelete.length > 0) {
+        const { error: deleteVariantInvError } = await supabase
+          .from('product_variant_inventories')
+          .delete()
+          .in('product_variant_id', idsToDelete as string[]);
+        if (deleteVariantInvError) throw deleteVariantInvError;
+      }
+
+      const { error: deleteVariantError } = await supabase
+        .from('product_variants')
         .delete()
         .eq('product_id', id)
         .eq('owner_id', user.id)
-        .in('inventory_id', toDelete);
-      if (deleteError) throw deleteError;
+        .in('variant_id', variantsToDelete);
+      if (deleteVariantError) throw deleteVariantError;
     }
 
-    const upsertRows = inventories.map((inv: any) => ({
-      product_id: id,
-      inventory_id: inv.inventory_id,
-      product_sku: inv.product_sku || null,
-      product_quantity: inv.product_quantity || 0,
-      owner_id: user.id,
-    }));
+    const variantsToInsert = incomingVariantIds.filter((vid: string) => !existingVariantIds.includes(vid));
+    let insertedVariantRows: any[] = [];
+    if (variantsToInsert.length > 0) {
+      const insertRows = variantsToInsert.map(variantId => ({
+        product_id: id,
+        variant_id: variantId,
+        owner_id: user.id,
+        created_at: new Date().toISOString(),
+      }));
+      const { data: inserted, error: insertError } = await supabase
+        .from('product_variants')
+        .insert(insertRows)
+        .select('id, variant_id');
+      if (insertError) throw insertError;
+      insertedVariantRows = inserted || [];
+    }
 
-    const { error: upsertError } = await supabase
-      .from('product_inventories')
-      .upsert(upsertRows, { onConflict: 'product_id, inventory_id' });
+    const allVariantMappings: Array<{ variant_id: string; id: string }> = [
+      ...incomingVariantIds
+        .filter((vid: string) => existingVariantMap.has(vid))
+        .map((vid: string) => ({ variant_id: vid, id: existingVariantMap.get(vid) as string })),
+      ...insertedVariantRows,
+    ];
 
-    if (upsertError) throw upsertError;
+    const productVariantIds = allVariantMappings.map(r => r.id);
+
+    if (productVariantIds.length > 0) {
+      const { error: deleteInvError } = await supabase
+        .from('product_variant_inventories')
+        .delete()
+        .in('product_variant_id', productVariantIds);
+      if (deleteInvError) throw deleteInvError;
+
+      const inventoryRows: any[] = [];
+      productVariantIds.forEach((pvId: string) => {
+        validInventories.forEach((inv: any) => {
+          inventoryRows.push({
+            product_variant_id: pvId,
+            inventory_id: inv.inventory_id,
+            product_sku: inv.product_sku || null,
+            product_quantity: inv.product_quantity || 0,
+            product_details: inv.product_details || null,
+            owner_id: user.id,
+            created_at: new Date().toISOString(),
+          });
+        });
+      });
+
+      if (inventoryRows.length > 0) {
+        const { error: inventoryInsertError } = await supabase
+          .from('product_variant_inventories')
+          .insert(inventoryRows);
+        if (inventoryInsertError) throw inventoryInsertError;
+      }
+    }
 
     return new Response(JSON.stringify({ success: true, product: updatedProduct }), { status: 200 });
   } catch (error: unknown) {
     console.error('Error updating product inventories:', error);
-    const message = error instanceof Error ? error.message : 'Failed to update product';
+    const message =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as any).message
+        : 'Failed to update product';
     return new Response(JSON.stringify({ success: false, error: message }), { status: 500 });
   }
 }
