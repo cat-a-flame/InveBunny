@@ -17,8 +17,7 @@ export async function POST(request: Request) {
             product_name,
             product_category,
             product_status,
-            variants,
-            inventories
+            variants
         } = body;
 
         if (!product_name?.trim()) {
@@ -32,13 +31,6 @@ export async function POST(request: Request) {
             return new Response(JSON.stringify({
                 success: false,
                 error: 'At least one variant entry is required'
-            }), { status: 400 });
-        }
-
-        if (!Array.isArray(inventories) || inventories.length === 0) {
-            return new Response(JSON.stringify({
-                success: false,
-                error: 'At least one inventory entry is required'
             }), { status: 400 });
         }
 
@@ -64,16 +56,16 @@ export async function POST(request: Request) {
 
         const product_id = productData.id;
 
-        const variantRows = variants.map((variantId: string) => ({
+        const variantRows = variants.map((v: any) => ({
             product_id,
-            variant_id: variantId,
+            variant_id: v.variantId,
             owner_id: user.id,
             created_at: new Date().toISOString(),
         }));
         const { data: insertedVariants, error: variantError } = await supabase
             .from('product_variants')
             .insert(variantRows)
-            .select('id');
+            .select('id, variant_id');
 
         if (variantError || !insertedVariants) {
             console.error('Variant insert error:', variantError);
@@ -84,15 +76,17 @@ export async function POST(request: Request) {
         }
 
         const inventoryRows: any[] = [];
-        insertedVariants.forEach((pv: any) => {
-            inventories
-                .filter((inv: { inventoryId: string }) => inv.inventoryId)
-                .forEach((inv: { inventoryId: string; sku: string; quantity: number; details?: string }) => {
+        variants.forEach((v: any) => {
+            const pv = insertedVariants.find((iv: any) => iv.variant_id === v.variantId);
+            if (!pv) return;
+            (v.inventories || [])
+                .filter((inv: any) => inv.inventoryId)
+                .forEach((inv: any) => {
                     inventoryRows.push({
                         product_variant_id: pv.id,
                         inventory_id: inv.inventoryId,
-                        product_sku: inv.sku,
-                        product_quantity: inv.quantity,
+                        product_sku: inv.sku || '',
+                        product_quantity: inv.quantity ?? 0,
                         product_details: inv.details ?? null,
                         owner_id: user.id,
                         created_at: new Date().toISOString(),

@@ -14,12 +14,6 @@ type Variant = {
     variant_name: string;
 };
 
-type ProductInventory = {
-    id: string;
-    inventory_id: string;
-    product_id: string;
-};
-
 type EditProductButtonProps = {
     id: string;
     product_name: string;
@@ -28,7 +22,6 @@ type EditProductButtonProps = {
     categories: Array<{ id: string; category_name: string }>;
     variants?: Variant[];
     inventories: Inventory[];
-    productInventories: ProductInventory[];
     currentInventoryId?: string;
     onSuccess?: () => void;
 };
@@ -41,7 +34,6 @@ export function EditProductButton({
     categories,
     variants,
     inventories,
-    productInventories,
     currentInventoryId,
     onSuccess,
 }: EditProductButtonProps) {
@@ -52,9 +44,6 @@ export function EditProductButton({
         product_name,
         product_category,
         product_status,
-        inventories: productInventories.map(pi => ({
-            inventory_id: pi.inventory_id,
-        })),
         currentInventoryId,
     };
 
