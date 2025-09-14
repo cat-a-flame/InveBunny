@@ -26,7 +26,9 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
         .from('product_variant_inventories')
-        .select('id, product_sku, product_quantity, product_variants (product_id, products (product_name))')
+        .select(
+            'id, product_sku, product_quantity, product_variants (product_id, products (product_name))'
+        )
         .eq('product_sku', sku)
         .eq('owner_id', user.id)
         .single();
@@ -38,12 +40,19 @@ export async function GET(request: Request) {
         );
     }
 
-    const productName = data.product_variants?.products?.product_name ?? '';
+    const variant = Array.isArray(data.product_variants)
+        ? data.product_variants[0]
+        : data.product_variants;
+
+    const productName = Array.isArray(variant?.products)
+        ? variant.products[0]?.product_name
+        : variant?.products?.product_name;
+
     const product = {
-        id: data.product_variants?.product_id,
-        product_id: data.product_variants?.product_id,
+        id: variant?.product_id,
+        product_id: variant?.product_id,
         product_sku: data.product_sku,
-        product_name: productName,
+        product_name: productName ?? '',
         product_quantity: data.product_quantity ?? 0,
     };
 
