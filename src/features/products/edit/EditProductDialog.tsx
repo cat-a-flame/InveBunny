@@ -222,6 +222,13 @@ export function EditProductDialog({
                 setSubmitting(false);
                 return;
             }
+
+            const selectedInventories = inventoryEntries.filter(entry => entry.inventoryId);
+            if (selectedInventories.length === 0) {
+                toast('❌ At least one inventory is required.');
+                setSubmitting(false);
+                return;
+            }
             const response = await fetch('/api/inventory/updateProductInventories', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -231,7 +238,7 @@ export function EditProductDialog({
                     product_category: formData.product_category,
                     product_status: formData.product_status,
                     variants: selectedVariants,
-                    inventories: inventoryEntries.map(entry => ({
+                    inventories: selectedInventories.map(entry => ({
                         inventory_id: entry.inventoryId,
                         product_sku: entry.sku || '',
                         product_quantity: entry.quantity ?? 0,

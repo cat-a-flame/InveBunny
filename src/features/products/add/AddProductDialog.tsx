@@ -120,6 +120,14 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                 setSubmitting(false);
                 return;
             }
+
+            const selectedInventories = inventoryEntries
+                .filter(entry => entry.inventoryId);
+            if (selectedInventories.length === 0) {
+                toast('❌ At least one inventory is required.');
+                setSubmitting(false);
+                return;
+            }
             const response = await fetch('/api/products/addNewProduct', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -128,7 +136,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     product_category: formData.categoryId,
                     product_status: formData.status,
                     variants: selectedVariants,
-                    inventories: inventoryEntries.map(entry => ({
+                    inventories: selectedInventories.map(entry => ({
                         inventoryId: entry.inventoryId,
                         sku: '',
                         quantity: 0,
