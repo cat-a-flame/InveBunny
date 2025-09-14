@@ -88,6 +88,7 @@ export async function PUT(request: Request) {
       product_id: id,
       variant_id: variantId,
       owner_id: user.id,
+      created_at: new Date().toISOString(),
     }));
 
     const { data: upsertedVariants, error: variantUpsertError } = await supabase
@@ -108,15 +109,18 @@ export async function PUT(request: Request) {
 
       const inventoryRows: any[] = [];
       allVariantIds.forEach((pvId: string) => {
-        inventories.forEach((inv: any) => {
-          inventoryRows.push({
-            product_variant_id: pvId,
-            inventory_id: inv.inventory_id,
-            product_sku: inv.product_sku || null,
-            product_quantity: inv.product_quantity || 0,
-            owner_id: user.id,
+        inventories
+          .filter((inv: any) => inv.inventory_id)
+          .forEach((inv: any) => {
+            inventoryRows.push({
+              product_variant_id: pvId,
+              inventory_id: inv.inventory_id,
+              product_sku: inv.product_sku || null,
+              product_quantity: inv.product_quantity || 0,
+              owner_id: user.id,
+              created_at: new Date().toISOString(),
+            });
           });
-        });
       });
 
       const { error: inventoryUpsertError } = await supabase

@@ -67,6 +67,7 @@ export async function POST(request: Request) {
             product_id,
             variant_id: variantId,
             owner_id: user.id,
+            created_at: new Date().toISOString(),
         }));
         const { data: insertedVariants, error: variantError } = await supabase
             .from('product_variants')
@@ -82,15 +83,18 @@ export async function POST(request: Request) {
 
         const inventoryRows: any[] = [];
         insertedVariants?.forEach((pv: any) => {
-            inventories.forEach((inv: { inventoryId: string; sku: string; quantity: number }) => {
-                inventoryRows.push({
-                    product_variant_id: pv.id,
-                    inventory_id: inv.inventoryId,
-                    product_sku: inv.sku,
-                    product_quantity: inv.quantity,
-                    owner_id: user.id,
+            inventories
+                .filter((inv: { inventoryId: string }) => inv.inventoryId)
+                .forEach((inv: { inventoryId: string; sku: string; quantity: number }) => {
+                    inventoryRows.push({
+                        product_variant_id: pv.id,
+                        inventory_id: inv.inventoryId,
+                        product_sku: inv.sku,
+                        product_quantity: inv.quantity,
+                        owner_id: user.id,
+                        created_at: new Date().toISOString(),
+                    });
                 });
-            });
         });
 
         const { error: inventoryError } = await supabase
