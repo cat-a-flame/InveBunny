@@ -5,6 +5,7 @@ import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Select, { components, OptionProps, MultiValue } from 'react-select';
 
 type Category = {
     id: string;
@@ -21,16 +22,25 @@ type Variant = {
     variant_name: string;
 };
 
-type ProductInventoryData = {
-    inventory_id: string;
-};
+const CheckboxOption = (
+    props: OptionProps<{ value: string; label: string }>
+) => (
+    <components.Option {...props}>
+        <input
+            type="checkbox"
+            checked={props.isSelected}
+            onChange={() => null}
+            style={{ marginRight: 8 }}
+        />
+        {props.label}
+    </components.Option>
+);
 
 type ProductData = {
     id: string;
     product_name: string;
     product_category: string;
     product_status: boolean;
-    inventories: ProductInventoryData[];
     currentInventoryId?: string;
 };
 
@@ -59,6 +69,11 @@ export function EditProductDialog({
     const isMounted = useRef(false);
     const [isOpen, setIsOpen] = useState(false);
 
+    const inventoryOptions = inventories.map(inv => ({
+        value: inv.id,
+        label: inv.inventory_name,
+    }));
+
     useEffect(() => {
         if (open) {
             isMounted.current = true;
@@ -77,12 +92,7 @@ export function EditProductDialog({
 
     const [variantEntries, setVariantEntries] = useState<Array<{
         variantId: string;
-    }>>([]);
-
-    const [inventoryEntries, setInventoryEntries] = useState<Array<{
-        inventoryId: string;
-        sku?: string;
-        quantity?: number;
+        inventoryIds: string[];
     }>>([]);
 
     useEffect(() => {
@@ -94,47 +104,6 @@ export function EditProductDialog({
             product_status: product.product_status ?? false,
         });
 
-        const loadInventories = async () => {
-            try {
-                const res = await fetch(`/api/inventory/productInventories?productId=${product.id}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const entries = (data.inventories || []).map((inv: any) => ({
-                        inventoryId: inv.inventory_id,
-                        sku: inv.product_sku || '',
-                        quantity: inv.product_quantity ?? 0,
-                    }));
-                    setInventoryEntries(
-                        entries.length > 0
-                            ? entries
-                            : [{ inventoryId: '', sku: '', quantity: 0 }]
-                    );
-                } else {
-                    const fallback = product.inventories.map(pi => ({
-                        inventoryId: pi.inventory_id,
-                        sku: '',
-                        quantity: 0,
-                    }));
-                    setInventoryEntries(
-                        fallback.length > 0
-                            ? fallback
-                            : [{ inventoryId: '', sku: '', quantity: 0 }]
-                    );
-                }
-            } catch {
-                const fallback = product.inventories.map(pi => ({
-                    inventoryId: pi.inventory_id,
-                    sku: '',
-                    quantity: 0,
-                }));
-                setInventoryEntries(
-                    fallback.length > 0
-                        ? fallback
-                        : [{ inventoryId: '', sku: '', quantity: 0 }]
-                );
-            }
-        };
-
         const loadVariants = async () => {
             try {
                 const res = await fetch(`/api/products/productVariants?productId=${product.id}`);
@@ -142,19 +111,19 @@ export function EditProductDialog({
                     const data = await res.json();
                     const entries = (data.variants || []).map((v: any) => ({
                         variantId: v.variant_id,
+                        inventoryIds: (v.inventories || []).map((inv: any) => inv.inventory_id),
                     }));
                     setVariantEntries(
-                        entries.length > 0 ? entries : [{ variantId: '' }]
+                        entries.length > 0 ? entries : [{ variantId: '', inventoryIds: [] }]
                     );
                 } else {
-                    setVariantEntries([{ variantId: '' }]);
+                    setVariantEntries([{ variantId: '', inventoryIds: [] }]);
                 }
             } catch {
-                setVariantEntries([{ variantId: '' }]);
+                setVariantEntries([{ variantId: '', inventoryIds: [] }]);
             }
         };
 
-        loadInventories();
         loadVariants();
     }, [open, product, inventories]);
 
@@ -171,38 +140,19 @@ export function EditProductDialog({
         }));
     };
 
-    const handleInventoryChange = (index: number, field: string, value: string | number) => {
-        setInventoryEntries(prev => {
+    const handleVariantChange = (index: number, field: 'variantId' | 'inventoryIds', value: any) => {
+        setVariantEntries(prev => {
             const updated = [...prev];
             updated[index] = { ...updated[index], [field]: value };
             return updated;
         });
     };
 
-    const handleVariantChange = (index: number, value: string) => {
-        setVariantEntries(prev => {
-            const updated = [...prev];
-            updated[index] = { variantId: value };
-            return updated;
-        });
-    };
-
-    const addInventoryRow = () => {
-        setInventoryEntries(prev => [
-            ...prev,
-            { inventoryId: '', sku: '', quantity: 0 },
-        ]);
-    };
-
     const addVariantRow = () => {
         setVariantEntries(prev => [
             ...prev,
-            { variantId: '' },
+            { variantId: '', inventoryIds: [] },
         ]);
-    };
-
-    const removeInventoryRow = (index: number) => {
-        setInventoryEntries(prev => prev.filter((_, i) => i !== index));
     };
 
     const removeVariantRow = (index: number) => {
@@ -214,21 +164,23 @@ export function EditProductDialog({
         setSubmitting(true);
 
         try {
-            const selectedVariants = variantEntries
-                .map(entry => entry.variantId)
-                .filter(Boolean);
-            if (selectedVariants.length === 0) {
+            const variantPayload = variantEntries
+                .filter(entry => entry.variantId)
+                .map(entry => ({
+                    variantId: entry.variantId,
+                    inventories: (entry.inventoryIds || []).map(invId => ({
+                        inventoryId: invId,
+                        product_sku: '',
+                        product_quantity: 0,
+                    })),
+                }));
+
+            if (variantPayload.length === 0) {
                 toast('❌ At least one variant is required.');
                 setSubmitting(false);
                 return;
             }
 
-            const selectedInventories = inventoryEntries.filter(entry => entry.inventoryId);
-            if (selectedInventories.length === 0) {
-                toast('❌ At least one inventory is required.');
-                setSubmitting(false);
-                return;
-            }
             const response = await fetch('/api/inventory/updateProductInventories', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -237,12 +189,7 @@ export function EditProductDialog({
                     product_name: formData.product_name,
                     product_category: formData.product_category,
                     product_status: formData.product_status,
-                    variants: selectedVariants,
-                    inventories: selectedInventories.map(entry => ({
-                        inventory_id: entry.inventoryId,
-                        product_sku: entry.sku || '',
-                        product_quantity: entry.quantity ?? 0,
-                    }))
+                    variants: variantPayload,
                 }),
             });
 
@@ -301,7 +248,11 @@ export function EditProductDialog({
 
                         {variantEntries.map((entry, index) => (
                             <div key={index} className="double-input-group">
-                                <select value={entry.variantId} className="input-max-width" onChange={e => handleVariantChange(index, e.target.value)}>
+                                <select
+                                    value={entry.variantId}
+                                    className="input-max-width"
+                                    onChange={e => handleVariantChange(index, 'variantId', e.target.value)}
+                                >
                                     <option value="">Select a variant</option>
                                     {variants.map(variant => (
                                         <option key={variant.id} value={variant.id}>
@@ -309,6 +260,26 @@ export function EditProductDialog({
                                         </option>
                                     ))}
                                 </select>
+
+                                <Select
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    hideSelectedOptions={false}
+                                    classNamePrefix="react-select"
+                                    className="input-max-width"
+                                    options={inventoryOptions}
+                                    components={{ Option: CheckboxOption }}
+                                    value={inventoryOptions.filter(opt => entry.inventoryIds.includes(opt.value))}
+                                    onChange={(selected: MultiValue<{ value: string; label: string }>) =>
+                                        handleVariantChange(
+                                            index,
+                                            'inventoryIds',
+                                            selected.map(s => s.value)
+                                        )
+                                    }
+                                    placeholder="Select inventories"
+                                />
+
                                 <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeVariantRow(index)} title="Remove variant" disabled={index <= 0 && (true)} />
                             </div>
                         ))}
@@ -321,30 +292,6 @@ export function EditProductDialog({
                                 Product is active
                             </label>
                         </div>
-
-                        <h4 className="section-subtitle">Inventories</h4>
-
-                        {inventoryEntries.map((entry, index) => (
-                            <div key={index} className="double-input-group">
-                                <select value={entry.inventoryId} className="input-max-width" onChange={e => handleInventoryChange(index, 'inventoryId', e.target.value)} required>
-                                    <option value="">Select an inventory</option>
-                                    {inventories
-                                        .filter(inv =>
-                                            inv.id === entry.inventoryId ||
-                                            !inventoryEntries.some(
-                                                (e, idx) => idx !== index && e.inventoryId === inv.id
-                                            )
-                                        )
-                                        .map(inv => (
-                                            <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
-                                        ))}
-                                </select>
-
-                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeInventoryRow(index)} title="Remove inventory" disabled={index <= 0 && (true)} />
-                            </div>
-                        ))}
-
-                        <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addInventoryRow} title="Add new inventory" />
                     </div>
 
                     <div className="side-panel-footer">

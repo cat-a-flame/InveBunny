@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
-  const { id, product_name, product_category, product_status, variants, inventories } = body;
+  const { id, product_name, product_category, product_status, variants } = body;
 
   if (!product_name?.trim()) {
     return new Response(JSON.stringify({ success: false, error: 'Product name is required' }), { status: 400 });
@@ -17,17 +17,6 @@ export async function PUT(request: Request) {
 
   if (!Array.isArray(variants) || variants.length === 0) {
     return new Response(JSON.stringify({ success: false, error: 'At least one variant entry is required' }), { status: 400 });
-  }
-
-  const validInventories = Array.isArray(inventories)
-    ? inventories.filter((inv: any) => inv.inventory_id)
-    : [];
-
-  if (validInventories.length === 0) {
-    return new Response(
-      JSON.stringify({ success: false, error: 'At least one inventory entry is required' }),
-      { status: 400 }
-    );
   }
 
   try {
@@ -65,7 +54,7 @@ export async function PUT(request: Request) {
 
     const existingVariantIds = (existingVariants || []).map((r: any) => r.variant_id);
     const existingVariantMap = new Map((existingVariants || []).map((r: any) => [r.variant_id, r.id]));
-    const incomingVariantIds = (variants || []) as string[];
+    const incomingVariantIds = (variants || []).map((v: any) => v.variantId);
 
     const variantsToDelete = existingVariantIds.filter((vid: string) => !incomingVariantIds.includes(vid));
 
@@ -125,18 +114,22 @@ export async function PUT(request: Request) {
       if (deleteInvError) throw deleteInvError;
 
       const inventoryRows: any[] = [];
-      productVariantIds.forEach((pvId: string) => {
-        validInventories.forEach((inv: any) => {
-          inventoryRows.push({
-            product_variant_id: pvId,
-            inventory_id: inv.inventory_id,
-            product_sku: inv.product_sku || null,
-            product_quantity: inv.product_quantity || 0,
-            product_details: inv.product_details || null,
-            owner_id: user.id,
-            created_at: new Date().toISOString(),
+      variants.forEach((v: any) => {
+        const pv = allVariantMappings.find(m => m.variant_id === v.variantId);
+        if (!pv) return;
+        (v.inventories || [])
+          .filter((inv: any) => inv.inventoryId)
+          .forEach((inv: any) => {
+            inventoryRows.push({
+              product_variant_id: pv.id,
+              inventory_id: inv.inventoryId,
+              product_sku: inv.product_sku || inv.sku || null,
+              product_quantity: inv.product_quantity ?? inv.quantity ?? 0,
+              product_details: inv.product_details || inv.details || null,
+              owner_id: user.id,
+              created_at: new Date().toISOString(),
+            });
           });
-        });
       });
 
       if (inventoryRows.length > 0) {

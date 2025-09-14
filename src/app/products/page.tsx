@@ -215,13 +215,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                                 variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""
-                                                productInventories={(product.product_variants || []).flatMap((pv: any) =>
-                                                    (pv.product_variant_inventories || []).map((pvi: any) => ({
-                                                        id: pvi.id,
-                                                        inventory_id: pvi.inventory_id,
-                                                        product_id: product.id,
-                                                    }))
-                                                )}
                                             />
                                         </div>
                                     </td>
