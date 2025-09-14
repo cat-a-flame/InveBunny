@@ -53,10 +53,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
     // ========== PRODUCT DATA FETCHING ==========
     // Prepare queries that don't depend on each other's results
-    const productInventoriesPromise = supabase
-        .from('product_inventories')
-        .select('id, product_id, inventory_id');
-
     const categoriesPromise = supabase
         .from('categories')
         .select('id, category_name')
@@ -67,8 +63,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         .select('id, variant_name')
         .order('variant_name');
 
-    const [{ data: productInventories }, { data: categories }, { data: variants }] =
-        await Promise.all([productInventoriesPromise, categoriesPromise, variantsPromise]);
+    const [{ data: categories }, { data: variants }] =
+        await Promise.all([categoriesPromise, variantsPromise]);
 
     // Build base products query (without status filter)
     let productsQuery = supabase
@@ -77,10 +73,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
             id,
             product_name,
             product_category,
-            product_variant,
             product_status,
             categories(id, category_name),
-            variants(id, variant_name)
+            product_variants(
+                id,
+                variant_id,
+                variants(id, variant_name),
+                product_variant_inventories(id, inventory_id, inventories(id, inventory_name))
+            )
         `)
         .order('product_name', { ascending: true });
 
@@ -93,13 +93,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         productsQuery = productsQuery.in('product_category', categoryFilter);
     }
 
-    if (variantFilter.length > 0) {
-        productsQuery = productsQuery.in('product_variant', variantFilter);
-    }
-
     const { data: productsBase } = await productsQuery;
 
-    const allFilteredProducts = productsBase || [];
+    const baseProducts = productsBase || [];
+    const allFilteredProducts =
+        variantFilter.length > 0
+            ? baseProducts.filter(p =>
+                (p.product_variants || []).some((pv: any) => variantFilter.includes(pv.variant_id))
+            )
+            : baseProducts;
 
     const statusCounts = {
         active: allFilteredProducts.filter(p => p.product_status).length,
@@ -117,31 +119,28 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const totalCount = filteredProducts.length;
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-    const productIds = filteredProducts.map(p => p.id);
-    const { data: inventoryAssignments } = await supabase
-        .from('product_inventories')
-        .select('product_id, inventories(id, inventory_name)')
-        .in('product_id', productIds.length > 0 ? productIds : [0]);
-
     const inventoryNamesMap = new Map<string, string[]>();
-    (inventoryAssignments || []).forEach((row: any) => {
-        const name = row.inventories?.inventory_name as string | undefined;
-        if (!name) return;
-        if (!inventoryNamesMap.has(row.product_id)) {
-            inventoryNamesMap.set(row.product_id, []);
-        }
-        inventoryNamesMap.get(row.product_id)!.push(name);
-    });
-
     const categoryCounts: Record<string, number> = {};
     const variantCounts: Record<string, number> = {};
     filteredProducts.forEach(p => {
         if (p.product_category) {
             categoryCounts[p.product_category] = (categoryCounts[p.product_category] || 0) + 1;
         }
-        if (p.product_variant) {
-            variantCounts[p.product_variant] = (variantCounts[p.product_variant] || 0) + 1;
-        }
+
+        const inventoryNamesSet = new Set<string>();
+        (p.product_variants || []).forEach((pv: any) => {
+            if (pv.variant_id) {
+                variantCounts[pv.variant_id] = (variantCounts[pv.variant_id] || 0) + 1;
+            }
+
+            (pv.product_variant_inventories || []).forEach((pvi: any) => {
+                const name = pvi.inventories?.inventory_name as string | undefined;
+                if (!name) return;
+                inventoryNamesSet.add(name);
+            });
+        });
+
+        inventoryNamesMap.set(p.id, Array.from(inventoryNamesSet));
     });
 
 
@@ -189,7 +188,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                         <span className="item-name">{product.product_name}</span>
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
-                                    <td>{(product.variants as any)?.variant_name || '-'}</td>
+                                    <td>
+                                        {(product.product_variants || []).length > 0
+                                            ? (product.product_variants || []).map((pv: any, index: number) => (
+                                                <span className={styles.badge} key={index}>{pv.variants?.variant_name}</span>
+                                            ))
+                                            : '-'}
+                                    </td>
                                     <td>
                                         {(inventoryNamesMap.get(product.id) || []).length > 0
                                             ? (inventoryNamesMap.get(product.id) || []).map((name, index) => (
@@ -210,7 +215,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                                 variants={variants || []}
                                                 inventories={inventories}
                                                 currentInventoryId=""
-                                                productInventories={productInventories || []}
+                                                productInventories={(product.product_variants || []).flatMap((pv: any) =>
+                                                    (pv.product_variant_inventories || []).map((pvi: any) => ({
+                                                        id: pvi.id,
+                                                        inventory_id: pvi.inventory_id,
+                                                        product_id: product.id,
+                                                    }))
+                                                )}
                                             />
                                         </div>
                                     </td>
