@@ -12,8 +12,60 @@ export async function DELETE(request: Request) {
         );
     }
     const { searchParams } = new URL(request.url);
+    const inventoryItemId = searchParams.get('inventory_item_id');
     const productId = searchParams.get('id');
     const inventoryId = searchParams.get('inventory_id');
+
+    if (inventoryItemId) {
+        try {
+            const { data: item, error: itemError } = await supabase
+                .from('product_variant_inventories')
+                .select('product_variant_id')
+                .eq('id', inventoryItemId)
+                .eq('owner_id', user.id)
+                .single();
+
+            if (itemError || !item) {
+                return NextResponse.json(
+                    { error: 'Inventory item not found' },
+                    { status: 404 }
+                );
+            }
+
+            const { error: removeError } = await supabase
+                .from('product_variant_inventories')
+                .delete()
+                .eq('id', inventoryItemId)
+                .eq('owner_id', user.id);
+
+            if (removeError) throw removeError;
+
+            const { count, error: countError } = await supabase
+                .from('product_variant_inventories')
+                .select('id', { count: 'exact' })
+                .eq('product_variant_id', item.product_variant_id)
+                .eq('owner_id', user.id);
+
+            if (countError) throw countError;
+
+            if (!count) {
+                await supabase
+                    .from('product_variants')
+                    .delete()
+                    .eq('id', item.product_variant_id)
+                    .eq('owner_id', user.id);
+            }
+
+            return NextResponse.json({ success: true, message: `Removed inventory item ${inventoryItemId}` });
+        } catch (error: unknown) {
+            console.error('Delete API error:', error);
+            const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+            return NextResponse.json(
+                { error: 'Operation failed', details: errorMessage },
+                { status: 500 }
+            );
+        }
+    }
 
     if (!productId) {
         return NextResponse.json(

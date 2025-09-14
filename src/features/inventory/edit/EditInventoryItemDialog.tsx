@@ -9,8 +9,7 @@ import { useRouter } from 'next/navigation';
 export type EditInventoryItemDialogProps = {
     open: boolean;
     onClose: () => void;
-    productId: string;
-    inventoryId: string;
+    inventoryItemId: string;
     productName: string;
     productCategoryName: string;
     productSku: string | null;
@@ -22,8 +21,7 @@ export type EditInventoryItemDialogProps = {
 export function EditInventoryItemDialog({
     open,
     onClose,
-    productId,
-    inventoryId,
+    inventoryItemId,
     productName,
     productCategoryName,
     productSku,
@@ -66,8 +64,7 @@ export function EditInventoryItemDialog({
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    product_id: productId,
-                    inventory_id: inventoryId,
+                    id: inventoryItemId,
                     product_sku: formData.sku,
                     product_quantity: formData.quantity,
                     product_details: formData.details,

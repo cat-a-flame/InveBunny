@@ -7,12 +7,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Props = {
-    productId: string;
+    inventoryItemId: string;
     productName: string;
-    inventoryId: string;
 };
 
-export const DeleteProductButton = ({ productId, productName, inventoryId }: Props) => {
+export const DeleteProductButton = ({ inventoryItemId, productName }: Props) => {
     const [open, setOpen] = useState(false);
     const toast = useToast();
     const router = useRouter();
@@ -20,7 +19,7 @@ export const DeleteProductButton = ({ productId, productName, inventoryId }: Pro
     const handleDelete = async () => {
         try {
             const res = await fetch(
-                `/api/inventory/deleteProduct?id=${productId}&inventory_id=${inventoryId}`,
+                `/api/inventory/deleteProduct?inventory_item_id=${inventoryItemId}`,
                 { method: 'DELETE' }
             );
             if (res.ok) {
