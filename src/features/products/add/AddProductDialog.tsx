@@ -33,9 +33,12 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     const [formData, setFormData] = useState({
         productName: '',
         categoryId: '',
-        variantId: '',
         status: true
     });
+
+    const [variantEntries, setVariantEntries] = useState([
+        { variantId: '' }
+    ]);
 
     const [inventoryEntries, setInventoryEntries] = useState([
             { inventoryId: '' }
@@ -73,6 +76,14 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
         });
     };
 
+    const handleVariantChange = (index: number, value: string) => {
+        setVariantEntries(prev => {
+            const updated = [...prev];
+            updated[index] = { variantId: value };
+            return updated;
+        });
+    };
+
     const addInventoryRow = () => {
         setInventoryEntries(prev => [
             ...prev,
@@ -80,8 +91,19 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
         ]);
     };
 
+    const addVariantRow = () => {
+        setVariantEntries(prev => [
+            ...prev,
+            { variantId: '' },
+        ]);
+    };
+
     const removeInventoryRow = (index: number) => {
         setInventoryEntries(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const removeVariantRow = (index: number) => {
+        setVariantEntries(prev => prev.filter((_, i) => i !== index));
     };
 
 
@@ -96,8 +118,10 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                 body: JSON.stringify({
                     product_name: formData.productName,
                     product_category: formData.categoryId,
-                    product_variant: formData.variantId,
                     product_status: formData.status,
+                    variants: variantEntries
+                        .map(entry => entry.variantId)
+                        .filter(Boolean),
                     inventories: inventoryEntries.map(entry => ({
                         inventoryId: entry.inventoryId,
                         sku: '',
@@ -118,9 +142,9 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
             setFormData({
                 productName: '',
                 categoryId: '',
-                variantId: '',
                 status: true
             });
+            setVariantEntries([{ variantId: '' }]);
             setInventoryEntries([{ inventoryId: '' }]);
 
         } catch (error) {
@@ -147,26 +171,32 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                             <input name="productName" type="text" className="input-max-width" value={formData.productName} onChange={handleChange} required />
                         </div>
 
-                        <div className="double-input-group">
-                            <div className="input-equal">
-                                <label htmlFor="categoryId" className="input-label">Category</label>
-                                <select name="categoryId" className="input-max-width" value={formData.categoryId} onChange={handleChange} required>
-                                    <option value="">Select a category</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>{cat.category_name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="input-equal">
-                                <label htmlFor="variantId" className="input-label">Variant</label>
-                                <select name="variantId" className="input-max-width" value={formData.variantId} onChange={handleChange}>
+                        <div className="input-group">
+                            <label htmlFor="categoryId" className="input-label">Category</label>
+                            <select name="categoryId" className="input-max-width" value={formData.categoryId} onChange={handleChange} required>
+                                <option value="">Select a category</option>
+                                {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>{cat.category_name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <h3 className="section-subtitle">Variants</h3>
+
+                        {variantEntries.map((entry, index) => (
+                            <div key={index} className="double-input-group">
+                                <select value={entry.variantId} className="input-max-width" onChange={(e) => handleVariantChange(index, e.target.value)}>
                                     <option value="">Select a variant</option>
                                     {variants.map((variant) => (
                                         <option key={variant.id} value={variant.id}>{variant.variant_name}</option>
                                     ))}
                                 </select>
+
+                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeVariantRow(index)} title="Remove variant" disabled={index <= 0 && (true)} />
                             </div>
-                        </div>
+                        ))}
+
+                        <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addVariantRow} title="Add new variant" />
 
                         <div className="input-group">
                             <label>

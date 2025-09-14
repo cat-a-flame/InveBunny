@@ -16,8 +16,8 @@ export async function POST(request: Request) {
         const {
             product_name,
             product_category,
-            product_variant,
             product_status,
+            variants,
             inventories
         } = body;
 
@@ -40,7 +40,6 @@ export async function POST(request: Request) {
             .insert([{
                 product_name,
                 product_category,
-                product_variant,
                 product_status,
                     owner_id: user.id
             }])
@@ -56,6 +55,24 @@ export async function POST(request: Request) {
         }
 
         const product_id = productData.id;
+
+        if (Array.isArray(variants) && variants.length > 0) {
+            const variantRows = variants.map((variantId: string) => ({
+                product_id,
+                variant_id: variantId,
+                owner_id: user.id,
+            }));
+            const { error: variantError } = await supabase
+                .from('product_variants')
+                .insert(variantRows);
+            if (variantError) {
+                console.error('Variant insert error:', variantError);
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: 'Product created but failed to add variants.'
+                }), { status: 500 });
+            }
+        }
 
         const inventoryRows = inventories.map((inv: { inventoryId: string; sku: string; quantity: number }) => ({
             product_id,

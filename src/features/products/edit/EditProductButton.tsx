@@ -24,7 +24,6 @@ type EditProductButtonProps = {
     id: string;
     product_name: string;
     product_category: string;
-    product_variant: string;
     product_status: boolean;
     categories: Array<{ id: string; category_name: string }>;
     variants?: Variant[];
@@ -38,7 +37,6 @@ export function EditProductButton({
     id,
     product_name,
     product_category,
-    product_variant,
     product_status,
     categories,
     variants,
@@ -53,7 +51,6 @@ export function EditProductButton({
         id,
         product_name,
         product_category,
-        product_variant,
         product_status,
         inventories: productInventories.map(pi => ({
             inventory_id: pi.inventory_id,

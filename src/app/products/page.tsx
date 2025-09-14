@@ -205,7 +205,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                                 id={product.id}
                                                 product_name={product.product_name || ''}
                                                 product_category={product.product_category || ''}
-                                                product_variant={product.product_variant || ''}
                                                 product_status={product.product_status || false}
                                                 categories={categories || []}
                                                 variants={variants || []}

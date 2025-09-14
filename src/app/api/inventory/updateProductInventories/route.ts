@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
-  const { id, product_name, product_category, product_variant, product_status, inventories } = body;
+  const { id, product_name, product_category, product_status, variants, inventories } = body;
 
   if (!product_name?.trim()) {
     return new Response(JSON.stringify({ success: false, error: 'Product name is required' }), { status: 400 });
@@ -36,7 +36,6 @@ export async function PUT(request: Request) {
       .update({
         product_name,
         product_category: product_category || null,
-        product_variant: product_variant || null,
         product_status: product_status || false,
       })
       .eq('id', id)
@@ -81,6 +80,41 @@ export async function PUT(request: Request) {
       .upsert(upsertRows, { onConflict: 'product_id, inventory_id' });
 
     if (upsertError) throw upsertError;
+
+    const { data: existingVariants, error: existingVariantsError } = await supabase
+      .from('product_variants')
+      .select('variant_id')
+      .eq('product_id', id)
+      .eq('owner_id', user.id);
+
+    if (existingVariantsError) throw existingVariantsError;
+
+    const existingVariantIds = (existingVariants || []).map((r: any) => r.variant_id);
+    const incomingVariantIds = (variants || []) as string[];
+
+    const variantsToDelete = existingVariantIds.filter((vid: string) => !incomingVariantIds.includes(vid));
+
+    if (variantsToDelete.length > 0) {
+      const { error: deleteVariantError } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('product_id', id)
+        .eq('owner_id', user.id)
+        .in('variant_id', variantsToDelete);
+      if (deleteVariantError) throw deleteVariantError;
+    }
+
+    const variantUpsertRows = incomingVariantIds.map(variantId => ({
+      product_id: id,
+      variant_id: variantId,
+      owner_id: user.id,
+    }));
+
+    const { error: variantUpsertError } = await supabase
+      .from('product_variants')
+      .upsert(variantUpsertRows, { onConflict: 'product_id, variant_id' });
+
+    if (variantUpsertError) throw variantUpsertError;
 
     return new Response(JSON.stringify({ success: true, product: updatedProduct }), { status: 200 });
   } catch (error: unknown) {
