@@ -91,31 +91,41 @@ export async function PUT(request: Request) {
       if (deleteVariantError) throw deleteVariantError;
     }
 
-    const variantUpsertRows = incomingVariantIds.map(variantId => ({
-      product_id: id,
-      variant_id: variantId,
-      owner_id: user.id,
-      created_at: new Date().toISOString(),
-    }));
+    const variantsToInsert = incomingVariantIds.filter((vid: string) => !existingVariantIds.includes(vid));
+    let insertedVariantRows: any[] = [];
+    if (variantsToInsert.length > 0) {
+      const insertRows = variantsToInsert.map(variantId => ({
+        product_id: id,
+        variant_id: variantId,
+        owner_id: user.id,
+        created_at: new Date().toISOString(),
+      }));
+      const { data: inserted, error: insertError } = await supabase
+        .from('product_variants')
+        .insert(insertRows)
+        .select('id, variant_id');
+      if (insertError) throw insertError;
+      insertedVariantRows = inserted || [];
+    }
 
-    const { data: upsertedVariants, error: variantUpsertError } = await supabase
-      .from('product_variants')
-      .upsert(variantUpsertRows, { onConflict: 'product_id, variant_id' })
-      .select();
+    const allVariantMappings: Array<{ variant_id: string; id: string }> = [
+      ...incomingVariantIds
+        .filter((vid: string) => existingVariantMap.has(vid))
+        .map((vid: string) => ({ variant_id: vid, id: existingVariantMap.get(vid) as string })),
+      ...insertedVariantRows,
+    ];
 
-    if (variantUpsertError) throw variantUpsertError;
+    const productVariantIds = allVariantMappings.map(r => r.id);
 
-    const allVariantIds = (upsertedVariants || []).map((v: any) => v.id);
-
-    if (allVariantIds.length > 0) {
+    if (productVariantIds.length > 0) {
       const { error: deleteInvError } = await supabase
         .from('product_variant_inventories')
         .delete()
-        .in('product_variant_id', allVariantIds);
+        .in('product_variant_id', productVariantIds);
       if (deleteInvError) throw deleteInvError;
 
       const inventoryRows: any[] = [];
-      allVariantIds.forEach((pvId: string) => {
+      productVariantIds.forEach((pvId: string) => {
         validInventories.forEach((inv: any) => {
           inventoryRows.push({
             product_variant_id: pvId,
@@ -130,17 +140,20 @@ export async function PUT(request: Request) {
       });
 
       if (inventoryRows.length > 0) {
-        const { error: inventoryUpsertError } = await supabase
+        const { error: inventoryInsertError } = await supabase
           .from('product_variant_inventories')
           .insert(inventoryRows);
-        if (inventoryUpsertError) throw inventoryUpsertError;
+        if (inventoryInsertError) throw inventoryInsertError;
       }
     }
 
     return new Response(JSON.stringify({ success: true, product: updatedProduct }), { status: 200 });
   } catch (error: unknown) {
     console.error('Error updating product inventories:', error);
-    const message = error instanceof Error ? error.message : 'Failed to update product';
+    const message =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? (error as any).message
+        : 'Failed to update product';
     return new Response(JSON.stringify({ success: false, error: message }), { status: 500 });
   }
 }
