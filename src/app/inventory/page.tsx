@@ -117,7 +117,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
         await Promise.all([itemsPromise, categoriesPromise, variantsPromise]);
 
     let filteredItems = (allItems || []).map(item => {
-        const pv = Array.isArray(item.product_variants) ? item.product_variants[0] : item.product_variants;
+        const pv = Array.isArray(item.product_variants)
+            ? item.product_variants[0]
+            : item.product_variants;
         const product = Array.isArray(pv?.products) ? pv.products[0] : pv?.products;
         const variant = Array.isArray(pv?.variants) ? pv.variants[0] : pv?.variants;
         return {
@@ -127,8 +129,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                 products: product,
                 variants: variant,
             },
-        } as typeof item;
-    });
+        };
+    }) as any[];
 
     if (query) {
         const q = query.toLowerCase();
