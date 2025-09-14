@@ -112,6 +112,14 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
         setSubmitting(true);
 
         try {
+            const selectedVariants = variantEntries
+                .map(entry => entry.variantId)
+                .filter(Boolean);
+            if (selectedVariants.length === 0) {
+                toast('❌ At least one variant is required.');
+                setSubmitting(false);
+                return;
+            }
             const response = await fetch('/api/products/addNewProduct', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -119,9 +127,7 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                     product_name: formData.productName,
                     product_category: formData.categoryId,
                     product_status: formData.status,
-                    variants: variantEntries
-                        .map(entry => entry.variantId)
-                        .filter(Boolean),
+                    variants: selectedVariants,
                     inventories: inventoryEntries.map(entry => ({
                         inventoryId: entry.inventoryId,
                         sku: '',

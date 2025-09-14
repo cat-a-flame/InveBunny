@@ -28,6 +28,13 @@ export async function POST(request: Request) {
             }), { status: 400 });
         }
 
+        if (!Array.isArray(variants) || variants.length === 0) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'At least one variant entry is required'
+            }), { status: 400 });
+        }
+
         if (!Array.isArray(inventories) || inventories.length === 0) {
             return new Response(JSON.stringify({
                 success: false,
@@ -56,36 +63,39 @@ export async function POST(request: Request) {
 
         const product_id = productData.id;
 
-        if (Array.isArray(variants) && variants.length > 0) {
-            const variantRows = variants.map((variantId: string) => ({
-                product_id,
-                variant_id: variantId,
-                owner_id: user.id,
-            }));
-            const { error: variantError } = await supabase
-                .from('product_variants')
-                .insert(variantRows);
-            if (variantError) {
-                console.error('Variant insert error:', variantError);
-                return new Response(JSON.stringify({
-                    success: false,
-                    error: 'Product created but failed to add variants.'
-                }), { status: 500 });
-            }
+        const variantRows = variants.map((variantId: string) => ({
+            product_id,
+            variant_id: variantId,
+            owner_id: user.id,
+        }));
+        const { data: insertedVariants, error: variantError } = await supabase
+            .from('product_variants')
+            .insert(variantRows)
+            .select();
+        if (variantError) {
+            console.error('Variant insert error:', variantError);
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Product created but failed to add variants.'
+            }), { status: 500 });
         }
 
-        const inventoryRows = inventories.map((inv: { inventoryId: string; sku: string; quantity: number }) => ({
-            product_id,
-            inventory_id: inv.inventoryId,
-            product_sku: inv.sku,
-            product_quantity: inv.quantity,
-            owner_id: user.id
-        }));
+        const inventoryRows: any[] = [];
+        insertedVariants?.forEach((pv: any) => {
+            inventories.forEach((inv: { inventoryId: string; sku: string; quantity: number }) => {
+                inventoryRows.push({
+                    product_variant_id: pv.id,
+                    inventory_id: inv.inventoryId,
+                    product_sku: inv.sku,
+                    product_quantity: inv.quantity,
+                    owner_id: user.id,
+                });
+            });
+        });
 
         const { error: inventoryError } = await supabase
-            .from('product_inventories')
+            .from('product_variant_inventories')
             .insert(inventoryRows);
-
 
         if (inventoryError) {
             console.error('Inventory insert error:', inventoryError);
