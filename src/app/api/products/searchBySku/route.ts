@@ -40,13 +40,13 @@ export async function GET(request: Request) {
         );
     }
 
-    const variant = Array.isArray(data.product_variants)
-        ? data.product_variants[0]
-        : data.product_variants;
+    const variantData = data.product_variants;
+    const variant = Array.isArray(variantData) ? variantData[0] : variantData;
 
-    const productName = Array.isArray(variant?.products)
-        ? variant.products[0]?.product_name
-        : variant?.products?.product_name;
+    const productsData = (variant as any)?.products;
+    const productName = Array.isArray(productsData)
+        ? (productsData as any)[0]?.product_name
+        : (productsData as any)?.product_name;
 
     const product = {
         id: variant?.product_id,
