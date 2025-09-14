@@ -234,7 +234,12 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                                         placeholder="Select inventories"
                                     />
 
-                                    <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeVariantRow(index)} title="Remove variant" disabled={index <= 0 && (true)} />
+                                    <IconButton
+                                        icon={<i className="fa-regular fa-trash-can"></i>}
+                                        onClick={() => removeVariantRow(index)}
+                                        title="Delete variant"
+                                        disabled={variantEntries.length <= 1}
+                                    />
                                 </div>
                             </div>
                         ))}
