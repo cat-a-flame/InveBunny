@@ -23,19 +23,34 @@ export async function DELETE(request: Request) {
     }
 
     try {
+        const { data: variantRows, error: variantFetchError } = await supabase
+            .from('product_variants')
+            .select('id')
+            .eq('product_id', productId)
+            .eq('owner_id', user.id);
+
+        if (variantFetchError) throw variantFetchError;
+
+        const variantIds = variantRows?.map(v => v.id) || [];
+
         if (inventoryId) {
-            const { data: inventories, error: inventoryError } = await supabase
-                .from('product_inventories')
-                .select('inventory_id')
-                .eq('product_id', productId);
+            if (variantIds.length === 0) {
+                return NextResponse.json(
+                    { error: 'Product not found in specified inventory' },
+                    { status: 404 }
+                );
+            }
+
+            const { data: existing, error: inventoryError } = await supabase
+                .from('product_variant_inventories')
+                .select('id')
+                .in('product_variant_id', variantIds)
+                .eq('inventory_id', inventoryId)
+                .eq('owner_id', user.id);
 
             if (inventoryError) throw inventoryError;
 
-            const inTargetInventory = inventories?.some(
-                inv => inv.inventory_id === inventoryId
-            );
-
-            if (!inTargetInventory) {
+            if (!existing || existing.length === 0) {
                 return NextResponse.json(
                     { error: 'Product not found in specified inventory' },
                     { status: 404 }
@@ -43,19 +58,19 @@ export async function DELETE(request: Request) {
             }
 
             const { error: removeError } = await supabase
-                .from('product_inventories')
+                .from('product_variant_inventories')
                 .delete()
-                .match({
-                    product_id: productId,
-                    inventory_id: inventoryId
-                });
+                .in('product_variant_id', variantIds)
+                .eq('inventory_id', inventoryId)
+                .eq('owner_id', user.id);
 
             if (removeError) throw removeError;
 
             const { count, error: countError } = await supabase
-                .from('product_inventories')
-                .select('*', { count: 'exact' })
-                .eq('product_id', productId);
+                .from('product_variant_inventories')
+                .select('id', { count: 'exact' })
+                .in('product_variant_id', variantIds)
+                .eq('owner_id', user.id);
 
             if (countError) throw countError;
 
@@ -67,13 +82,23 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ success: true, message });
         }
 
-        const { error: piError } = await supabase
-            .from('product_inventories')
-            .delete()
-            .eq('product_id', productId)
-            .eq('owner_id', user.id);
+        if (variantIds.length > 0) {
+            const { error: pviError } = await supabase
+                .from('product_variant_inventories')
+                .delete()
+                .in('product_variant_id', variantIds)
+                .eq('owner_id', user.id);
 
-        if (piError) throw piError;
+            if (pviError) throw pviError;
+
+            const { error: pvError } = await supabase
+                .from('product_variants')
+                .delete()
+                .eq('owner_id', user.id)
+                .eq('product_id', productId);
+
+            if (pvError) throw pvError;
+        }
 
         const { data: batches } = await supabase
             .from('product_batch')
@@ -108,7 +133,7 @@ export async function DELETE(request: Request) {
     } catch (error: unknown) {
         console.error('Delete API error:', error);
 
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
 
         return NextResponse.json(
             { error: 'Operation failed', details: errorMessage },
