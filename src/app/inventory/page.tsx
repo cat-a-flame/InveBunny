@@ -116,14 +116,29 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     const [{ data: allItems }, { data: categories }, { data: variants }] =
         await Promise.all([itemsPromise, categoriesPromise, variantsPromise]);
 
-    let filteredItems = allItems || [];
+    let filteredItems = (allItems || []).map(item => {
+        const pv = Array.isArray(item.product_variants) ? item.product_variants[0] : item.product_variants;
+        const product = Array.isArray(pv?.products) ? pv.products[0] : pv?.products;
+        const variant = Array.isArray(pv?.variants) ? pv.variants[0] : pv?.variants;
+        return {
+            ...item,
+            product_variants: {
+                ...pv,
+                products: product,
+                variants: variant,
+            },
+        } as typeof item;
+    });
 
     if (query) {
         const q = query.toLowerCase();
-        filteredItems = filteredItems.filter(item =>
-            item.product_sku?.toLowerCase().includes(q) ||
-            item.product_variants?.products?.product_name?.toLowerCase().includes(q)
-        );
+        filteredItems = filteredItems.filter(item => {
+            const productName = item.product_variants?.products?.product_name;
+            return (
+                item.product_sku?.toLowerCase().includes(q) ||
+                productName?.toLowerCase().includes(q)
+            );
+        });
     }
 
     if (stockFilter !== 'all') {
