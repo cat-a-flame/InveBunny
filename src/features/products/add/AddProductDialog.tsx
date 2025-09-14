@@ -5,6 +5,7 @@ import { IconButton } from '../../../components/IconButton/iconButton';
 import { useToast } from '../../../components/Toast/toast';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Select, { components, OptionProps, MultiValue } from 'react-select';
 
 type Category = {
     id: string;
@@ -20,6 +21,20 @@ type Variant = {
     id: string;
     variant_name: string;
 };
+
+const CheckboxOption = (
+    props: OptionProps<{ value: string; label: string }>
+) => (
+    <components.Option {...props}>
+        <input
+            type="checkbox"
+            checked={props.isSelected}
+            onChange={() => null}
+            style={{ marginRight: 8 }}
+        />
+        {props.label}
+    </components.Option>
+);
 
 type Props = {
     open: boolean;
@@ -45,6 +60,11 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
     const router = useRouter();
     const isMounted = useRef(false);
     const [isOpen, setIsOpen] = useState(false);
+
+    const inventoryOptions = inventories.map(inv => ({
+        value: inv.id,
+        label: inv.inventory_name,
+    }));
 
     useEffect(() => {
         if (open) {
@@ -181,22 +201,24 @@ export function AddProductDialog({ open, onClose, categories = [], variants = []
                                     ))}
                                 </select>
 
-                                <select
-                                    multiple
-                                    value={entry.inventoryIds}
+                                <Select
+                                    isMulti
+                                    closeMenuOnSelect={false}
+                                    hideSelectedOptions={false}
+                                    classNamePrefix="react-select"
                                     className="input-max-width"
-                                    onChange={(e) =>
+                                    options={inventoryOptions}
+                                    components={{ Option: CheckboxOption }}
+                                    value={inventoryOptions.filter(opt => entry.inventoryIds.includes(opt.value))}
+                                    onChange={(selected: MultiValue<{ value: string; label: string }>) =>
                                         handleVariantChange(
                                             index,
                                             'inventoryIds',
-                                            Array.from(e.target.selectedOptions, option => option.value)
+                                            selected.map(s => s.value)
                                         )
                                     }
-                                >
-                                    {inventories.map((inv) => (
-                                        <option key={inv.id} value={inv.id}>{inv.inventory_name}</option>
-                                    ))}
-                                </select>
+                                    placeholder="Select inventories"
+                                />
 
                                 <IconButton
                                     icon={<i className="fa-regular fa-trash-can"></i>}
