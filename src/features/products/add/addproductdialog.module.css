@@ -1,0 +1,16 @@
+.variant-entry {
+    background: #d5aae126;
+    padding: 2rem 1rem 1rem;
+    border-radius: 6px;
+    position: relative;
+
+    &:not(:last-child) {
+        margin-bottom: 1rem;
+    }
+
+    & button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+    }
+}

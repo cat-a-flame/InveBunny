@@ -416,6 +416,16 @@ textarea {
     z-index: 5;
 }
 
+.react-select__multi-value {
+    background-color: #e8e1f5 !important;
+}
+
+.react-select__multi-value__remove:hover {
+    background-color: #ddd5ea !important;
+    color: #725A79 !important;
+    cursor: pointer;
+}
+
 .input-max-width {
     width: 100%;
 }
