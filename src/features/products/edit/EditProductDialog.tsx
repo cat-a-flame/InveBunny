@@ -6,6 +6,7 @@ import { useToast } from '../../../components/Toast/toast';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Select, { components, OptionProps, MultiValue } from 'react-select';
+import styles from '../add/addproductdialog.module.css';
 
 type Category = {
     id: string;
@@ -170,8 +171,8 @@ export function EditProductDialog({
                     variantId: entry.variantId,
                     inventories: (entry.inventoryIds || []).map(invId => ({
                         inventoryId: invId,
-                        product_sku: '',
-                        product_quantity: 0,
+                        sku: '',
+                        quantity: 0,
                     })),
                 }));
 
@@ -247,44 +248,57 @@ export function EditProductDialog({
                         <h4 className="section-subtitle">Variants</h4>
 
                         {variantEntries.map((entry, index) => (
-                            <div key={index} className="double-input-group">
-                                <select
-                                    value={entry.variantId}
-                                    className="input-max-width"
-                                    onChange={e => handleVariantChange(index, 'variantId', e.target.value)}
-                                >
-                                    <option value="">Select a variant</option>
-                                    {variants.map(variant => (
-                                        <option key={variant.id} value={variant.id}>
-                                            {variant.variant_name}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div key={index} className={styles['variant-entry']}>
+                                <div className="input-group">
+                                    <label htmlFor="categoryId" className="input-label">Variant</label>
+                                    <select
+                                        value={entry.variantId}
+                                        className="input-max-width"
+                                        onChange={e => handleVariantChange(index, 'variantId', e.target.value)}
+                                    >
+                                        <option value="">Select a variant</option>
+                                        {variants.map(variant => (
+                                            <option key={variant.id} value={variant.id}>
+                                                {variant.variant_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                                <Select
-                                    isMulti
-                                    closeMenuOnSelect={false}
-                                    hideSelectedOptions={false}
-                                    classNamePrefix="react-select"
-                                    className="input-max-width"
-                                    options={inventoryOptions}
-                                    components={{ Option: CheckboxOption }}
-                                    value={inventoryOptions.filter(opt => entry.inventoryIds.includes(opt.value))}
-                                    onChange={(selected: MultiValue<{ value: string; label: string }>) =>
-                                        handleVariantChange(
-                                            index,
-                                            'inventoryIds',
-                                            selected.map(s => s.value)
-                                        )
-                                    }
-                                    placeholder="Select inventories"
-                                />
+                                <div className="input-group">
+                                    <label htmlFor="categoryId" className="input-label">Inventory</label>
+                                    <Select
+                                        isMulti
+                                        closeMenuOnSelect={false}
+                                        hideSelectedOptions={false}
+                                        classNamePrefix="react-select"
+                                        className="input-max-width"
+                                        options={inventoryOptions}
+                                        components={{ Option: CheckboxOption }}
+                                        value={inventoryOptions.filter(opt => entry.inventoryIds.includes(opt.value))}
+                                        onChange={(selected: MultiValue<{ value: string; label: string }>) =>
+                                            handleVariantChange(
+                                                index,
+                                                'inventoryIds',
+                                                selected.map(s => s.value)
+                                            )
+                                        }
+                                        placeholder="Select inventories"
+                                    />
 
-                                <IconButton icon={<i className="fa-regular fa-trash-can"></i>} onClick={() => removeVariantRow(index)} title="Remove variant" disabled={index <= 0 && (true)} />
+                                    <IconButton
+                                        icon={<i className="fa-regular fa-trash-can"></i>}
+                                        onClick={() => removeVariantRow(index)}
+                                        title="Delete variant"
+                                        disabled={variantEntries.length <= 1}
+                                    />
+                                </div>
                             </div>
                         ))}
 
-                        <IconButton type="button" icon={<i className="fa-regular fa-plus"></i>} onClick={addVariantRow} title="Add new variant" />
+                        <div className="input-group">
+                            <Button type="button" variant="ghost" size="sm" onClick={addVariantRow}>+ Add another variant</Button>
+                        </div>
 
                         <div className="input-group">
                             <label>

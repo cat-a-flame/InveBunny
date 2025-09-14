@@ -17,6 +17,9 @@ const geistSans = Quicksand({
 export const metadata: Metadata = {
   title: "InveBunny",
   description: "Super cute inventory management",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

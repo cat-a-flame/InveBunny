@@ -189,17 +189,44 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                                     </td>
                                     <td>{(product.categories as any)?.category_name || '-'}</td>
                                     <td>
-                                        {(product.product_variants || []).length > 0
-                                            ? (product.product_variants || []).map((pv: any, index: number) => (
-                                                <span className={styles.badge} key={index}>{pv.variants?.variant_name}</span>
-                                            ))
-                                            : '-'}
+                                        {(product.product_variants || []).length > 0 ? (
+                                            <>
+                                                {(product.product_variants || [])
+                                                    .slice(0, 2)
+                                                    .map((pv: any, index: number) => (
+                                                        <span className={styles.badge} key={index}>
+                                                            {pv.variants?.variant_name}
+                                                        </span>
+                                                    ))}
+                                                {(product.product_variants || []).length > 2 && (
+                                                    <span className={styles.badge} key="more-variants">
+                                                        +{(product.product_variants || []).length - 2}
+                                                    </span>
+                                                )}
+                                            </>
+                                        ) : (
+                                            '-'
+                                        )}
                                     </td>
                                     <td>
-                                        {(inventoryNamesMap.get(product.id) || []).length > 0
-                                            ? (inventoryNamesMap.get(product.id) || []).map((name, index) => (
-                                                <span className={styles.badge} key={index}>{name}</span>
-                                            )) : '-'}
+                                        {(inventoryNamesMap.get(product.id) || []).length > 0 ? (
+                                            <>
+                                                {(inventoryNamesMap.get(product.id) || [])
+                                                    .slice(0, 2)
+                                                    .map((name, index) => (
+                                                        <span className={styles.badge} key={index}>
+                                                            {name}
+                                                        </span>
+                                                    ))}
+                                                {(inventoryNamesMap.get(product.id) || []).length > 2 && (
+                                                    <span className={styles.badge} key="more-inventories">
+                                                        +{(inventoryNamesMap.get(product.id) || []).length - 2}
+                                                    </span>
+                                                )}
+                                            </>
+                                        ) : (
+                                            '-'
+                                        )}
                                     </td>
                                     <td>
                                         <div className="table-actions">
