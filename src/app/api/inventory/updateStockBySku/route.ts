@@ -2,7 +2,7 @@ import { createClient } from '@/src/utils/supabase/server';
 
 const slackWebhookUrl =
   process.env.SLACK_WEBHOOK_URL ??
-  'https://hooks.slack.com/services/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';
+  'https://hooks.slack.com/services/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';
 
 export async function PUT(request: Request) {
   const supabase = await createClient();
