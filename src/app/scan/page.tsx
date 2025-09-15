@@ -166,6 +166,10 @@ export default function ScanPage() {
             const result = await response.json();
             if (result.success) {
                 toast('Inventories updated');
+                if (Array.isArray(result.outOfStockItems) && result.outOfStockItems.length > 0) {
+                    const skuList = result.outOfStockItems.map((item: { sku: string }) => item.sku).join(', ');
+                    toast(`The following SKUs are now out of stock: ${skuList}`);
+                }
                 setScannedItems([]);
             } else {
                 toast(result.error || 'Failed to update inventories');

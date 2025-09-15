@@ -1,5 +1,9 @@
 import { createClient } from '@/src/utils/supabase/server';
 
+const slackWebhookUrl =
+  process.env.SLACK_WEBHOOK_URL ??
+  'https://hooks.slack.com/services/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';
+
 export async function PUT(request: Request) {
   const supabase = await createClient();
   const {
@@ -25,6 +29,12 @@ export async function PUT(request: Request) {
   }
 
   try {
+    const outOfStockItems: {
+      sku: string;
+      previousQuantity: number;
+      newQuantity: number;
+    }[] = [];
+
     for (const item of items) {
       const { sku, quantity } = item;
       if (!sku || typeof quantity !== 'number') continue;
@@ -38,7 +48,8 @@ export async function PUT(request: Request) {
 
       if (error || !data) continue;
 
-      const newQuantity = Math.max((data.product_quantity ?? 0) - quantity, 0);
+      const previousQuantity = data.product_quantity ?? 0;
+      const newQuantity = Math.max(previousQuantity - quantity, 0);
 
       const { error: updateError } = await supabase
         .from('product_variant_inventories')
@@ -47,9 +58,38 @@ export async function PUT(request: Request) {
         .eq('owner_id', user.id);
 
       if (updateError) throw updateError;
+
+      if (previousQuantity > 0 && newQuantity === 0) {
+        outOfStockItems.push({ sku, previousQuantity, newQuantity });
+      }
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    if (outOfStockItems.length > 0 && slackWebhookUrl) {
+      const messageLines = outOfStockItems
+        .map(
+          (item) =>
+            `• SKU ${item.sku} (was ${item.previousQuantity}, now ${item.newQuantity})`
+        )
+        .join('\n');
+
+      const payload = {
+        text: `:rotating_light: The following items just went out of stock:\n${messageLines}`,
+      };
+
+      try {
+        await fetch(slackWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch (slackError) {
+        console.error('Failed to send Slack notification', slackError);
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, outOfStockItems }), {
+      status: 200,
+    });
   } catch (error: unknown) {
     console.error('Error updating stock by SKU:', error);
     const message =
