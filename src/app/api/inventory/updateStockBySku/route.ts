@@ -1,8 +1,7 @@
 import { createClient } from '@/src/utils/supabase/server';
 
 const slackWebhookUrl =
-  process.env.SLACK_WEBHOOK_URL ??
-  'https://hooks.slack.com/services/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';
+  process.env.Slack ?? process.env.SLACK ?? process.env.SLACK_WEBHOOK_URL;
 
 export async function PUT(request: Request) {
   const supabase = await createClient();
@@ -64,26 +63,33 @@ export async function PUT(request: Request) {
       }
     }
 
-    if (outOfStockItems.length > 0 && slackWebhookUrl) {
-      const messageLines = outOfStockItems
-        .map(
-          (item) =>
-            `• SKU ${item.sku} (was ${item.previousQuantity}, now ${item.newQuantity})`
-        )
-        .join('\n');
+    if (outOfStockItems.length > 0) {
+      if (!slackWebhookUrl) {
+        console.warn(
+          'Slack webhook URL is not configured; skipping notification for SKUs:',
+          outOfStockItems.map((item) => item.sku).join(', ')
+        );
+      } else {
+        const messageLines = outOfStockItems
+          .map(
+            (item) =>
+              `• SKU ${item.sku} (was ${item.previousQuantity}, now ${item.newQuantity})`
+          )
+          .join('\n');
 
-      const payload = {
-        text: `:rotating_light: The following items just went out of stock:\n${messageLines}`,
-      };
+        const payload = {
+          text: `:rotating_light: The following items just went out of stock:\n${messageLines}`,
+        };
 
-      try {
-        await fetch(slackWebhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      } catch (slackError) {
-        console.error('Failed to send Slack notification', slackError);
+        try {
+          await fetch(slackWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+        } catch (slackError) {
+          console.error('Failed to send Slack notification', slackError);
+        }
       }
     }
 
