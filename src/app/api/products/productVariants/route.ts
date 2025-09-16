@@ -17,7 +17,9 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('product_variants')
-    .select('variant_id, variants(id, variant_name), product_variant_inventories(inventory_id, inventories(id, inventory_name))')
+    .select(
+      'variant_id, variants(id, variant_name), product_variant_inventories(inventory_id, product_sku, product_quantity, product_details, inventories(id, inventory_name))'
+    )
     .eq('product_id', productId)
     .eq('owner_id', user.id);
 
@@ -31,6 +33,9 @@ export async function GET(request: Request) {
     inventories: (row.product_variant_inventories || []).map((inv: any) => ({
       inventory_id: inv.inventory_id,
       inventory_name: inv.inventories?.inventory_name,
+      product_sku: inv.product_sku ?? null,
+      product_quantity: inv.product_quantity ?? null,
+      product_details: inv.product_details ?? null,
     })),
   }));
 

@@ -93,7 +93,12 @@ export function EditProductDialog({
 
     const [variantEntries, setVariantEntries] = useState<Array<{
         variantId: string;
-        inventoryIds: string[];
+        inventories: Array<{
+            inventoryId: string;
+            sku: string | null;
+            quantity: number;
+            details: string | null;
+        }>;
     }>>([]);
 
     useEffect(() => {
@@ -112,16 +117,23 @@ export function EditProductDialog({
                     const data = await res.json();
                     const entries = (data.variants || []).map((v: any) => ({
                         variantId: v.variant_id,
-                        inventoryIds: (v.inventories || []).map((inv: any) => inv.inventory_id),
+                        inventories: (v.inventories || []).map((inv: any) => ({
+                            inventoryId: inv.inventory_id,
+                            sku: inv.product_sku ?? null,
+                            quantity: typeof inv.product_quantity === 'number'
+                                ? inv.product_quantity
+                                : 0,
+                            details: inv.product_details ?? null,
+                        })),
                     }));
                     setVariantEntries(
-                        entries.length > 0 ? entries : [{ variantId: '', inventoryIds: [] }]
+                        entries.length > 0 ? entries : [{ variantId: '', inventories: [] }]
                     );
                 } else {
-                    setVariantEntries([{ variantId: '', inventoryIds: [] }]);
+                    setVariantEntries([{ variantId: '', inventories: [] }]);
                 }
             } catch {
-                setVariantEntries([{ variantId: '', inventoryIds: [] }]);
+                setVariantEntries([{ variantId: '', inventories: [] }]);
             }
         };
 
@@ -141,10 +153,38 @@ export function EditProductDialog({
         }));
     };
 
-    const handleVariantChange = (index: number, field: 'variantId' | 'inventoryIds', value: any) => {
+    const handleVariantIdChange = (index: number, variantId: string) => {
         setVariantEntries(prev => {
             const updated = [...prev];
-            updated[index] = { ...updated[index], [field]: value };
+            const current = updated[index] ?? { variantId: '', inventories: [] };
+            updated[index] = { ...current, variantId };
+            return updated;
+        });
+    };
+
+    const handleInventorySelection = (
+        index: number,
+        selected: MultiValue<{ value: string; label: string }>
+    ) => {
+        setVariantEntries(prev => {
+            const updated = [...prev];
+            const current = updated[index];
+            if (!current) return prev;
+
+            const existingMap = new Map(
+                (current.inventories || []).map(inv => [inv.inventoryId, inv])
+            );
+
+            const selectedIds = selected.map(option => option.value);
+
+            const nextInventories = selectedIds.map(id => {
+                const existing = existingMap.get(id);
+                return existing
+                    ? existing
+                    : { inventoryId: id, sku: null, quantity: 0, details: null };
+            });
+
+            updated[index] = { ...current, inventories: nextInventories };
             return updated;
         });
     };
@@ -152,7 +192,7 @@ export function EditProductDialog({
     const addVariantRow = () => {
         setVariantEntries(prev => [
             ...prev,
-            { variantId: '', inventoryIds: [] },
+            { variantId: '', inventories: [] },
         ]);
     };
 
@@ -169,10 +209,11 @@ export function EditProductDialog({
                 .filter(entry => entry.variantId)
                 .map(entry => ({
                     variantId: entry.variantId,
-                    inventories: (entry.inventoryIds || []).map(invId => ({
-                        inventoryId: invId,
-                        sku: '',
-                        quantity: 0,
+                    inventories: (entry.inventories || []).map(inv => ({
+                        inventoryId: inv.inventoryId,
+                        sku: inv.sku ?? null,
+                        quantity: typeof inv.quantity === 'number' ? inv.quantity : 0,
+                        details: inv.details ?? null,
                     })),
                 }));
 
@@ -254,7 +295,7 @@ export function EditProductDialog({
                                     <select
                                         value={entry.variantId}
                                         className="input-max-width"
-                                        onChange={e => handleVariantChange(index, 'variantId', e.target.value)}
+                                        onChange={e => handleVariantIdChange(index, e.target.value)}
                                     >
                                         <option value="">Select a variant</option>
                                         {variants.map(variant => (
@@ -275,13 +316,9 @@ export function EditProductDialog({
                                         className="input-max-width"
                                         options={inventoryOptions}
                                         components={{ Option: CheckboxOption }}
-                                        value={inventoryOptions.filter(opt => entry.inventoryIds.includes(opt.value))}
+                                        value={inventoryOptions.filter(opt => entry.inventories.some(inv => inv.inventoryId === opt.value))}
                                         onChange={(selected: MultiValue<{ value: string; label: string }>) =>
-                                            handleVariantChange(
-                                                index,
-                                                'inventoryIds',
-                                                selected.map(s => s.value)
-                                            )
+                                            handleInventorySelection(index, selected)
                                         }
                                         placeholder="Select inventories"
                                     />
