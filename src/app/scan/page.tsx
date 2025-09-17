@@ -166,6 +166,11 @@ export default function ScanPage() {
             const result = await response.json();
             if (result.success) {
                 toast('Inventories updated');
+                if (result.notificationsSent) {
+                    toast('Out-of-stock notifications sent');
+                } else if (result.notificationError) {
+                    toast(`Inventories updated, but notifications failed: ${result.notificationError}`);
+                }
                 setScannedItems([]);
             } else {
                 toast(result.error || 'Failed to update inventories');
