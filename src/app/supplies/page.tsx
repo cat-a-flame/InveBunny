@@ -6,17 +6,36 @@ import { Search } from '../../components/SearchBar/searchBar';
 import { ViewBatchButton } from '@/src/features/supplies/batches/ViewBatchButton';
 import { createClient } from '@/src/utils/supabase/server';
 import { SettingsButton } from '@/src/features/supplyCategories/SettingsButton';
+import { SupplyCategoryFilter } from '@/src/features/supplies/SupplyCategoryFilter';
 import styles from './supplies.module.css';
 
-export default async function SuppliesPage({ searchParams }: { searchParams: any }) {
+type SearchParams = {
+    page?: string;
+    query?: string;
+    category?: string;
+};
+
+export default async function SuppliesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
     const supabase = await createClient();
     const params = await searchParams;
 
-    const page = parseInt(params.page || "1");
-    const query = params.query || "";
+    const parsedPage = parseInt(params.page || '1', 10);
+    const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+    const query = params.query || '';
+    const categoryFilter = params.category || '';
     const pageSize = 12;
 
-    const { data: supplies, count } = await supabase
+    const { data: categoriesData } = await supabase
+        .from('supply_categories')
+        .select('id, category_name')
+        .order('category_name', { ascending: true });
+
+    const categoryOptions = (categoriesData ?? []).map(category => ({
+        ...category,
+        id: String(category.id),
+    }));
+
+    let suppliesQuery = supabase
         .from('supplies')
         .select(
             `id,
@@ -25,9 +44,15 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
             supply_categories(id, category_name)`,
             { count: 'exact' }
         )
-        .ilike('supply_name', `%${query}%`)
-        .range((page - 1) * pageSize, page * pageSize - 1)
-        .order('supply_name', { ascending: true });
+        .ilike('supply_name', `%${query}%`);
+
+    if (categoryFilter) {
+        suppliesQuery = suppliesQuery.eq('supply_category_id', categoryFilter);
+    }
+
+    const { data: supplies, count } = await suppliesQuery
+        .order('supply_name', { ascending: true })
+        .range((page - 1) * pageSize, page * pageSize - 1);
 
     const totalCount = count ?? 0;
     const totalPages = Math.ceil(totalCount / pageSize);
@@ -41,10 +66,15 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
 
 
             <div className="content">
-                <div className="filter-bar supplies-filter-bar single-search">
-                    <Search placeholder="Search for supply name" query={query} />
+                <div className="filter-bar single-search">
+                    <div className="supplies-filter-bar">
+                        <div className="filter-bar-wrapper">
+                            <Search placeholder="Search for supply name" query={query} />
+                            <SupplyCategoryFilter categories={categoryOptions} selectedCategory={categoryFilter} />
+                        </div>
 
-                    <SettingsButton />
+                        <SettingsButton />
+                    </div>
                 </div>
 
                 <table>
