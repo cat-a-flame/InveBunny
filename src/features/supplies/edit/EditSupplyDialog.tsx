@@ -10,13 +10,15 @@ type EditSupplyDialogProps = {
     id: string;
     currentName: string;
     currentCategoryId: string;
+    currentQuantity: number;
     open: boolean;
     onClose: () => void;
 };
 
-export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onClose }: EditSupplyDialogProps) {
+export function EditSupplyDialog({ id, currentName, currentCategoryId, currentQuantity, open, onClose }: EditSupplyDialogProps) {
     const [supplyName, setSupplyName] = useState(currentName);
     const [supplyCategoryId, setSupplyCategoryId] = useState(currentCategoryId);
+    const [supplyQuantity, setSupplyQuantity] = useState<string>(String(currentQuantity ?? 0));
     const [categories, setCategories] = useState<{ id: string; category_name: string }[]>([]);
     const toast = useToast();
     const router = useRouter();
@@ -25,6 +27,7 @@ export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onC
         if (open) {
             setSupplyName(currentName);
             setSupplyCategoryId(currentCategoryId);
+            setSupplyQuantity(String(currentQuantity ?? 0));
             const load = async () => {
                 try {
                     const res = await fetch('/api/supplyCategories');
@@ -38,10 +41,16 @@ export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onC
             };
             load();
         }
-    }, [open, currentName, currentCategoryId]);
+    }, [open, currentName, currentCategoryId, currentQuantity]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const parsedQuantity = Number(supplyQuantity);
+        if (!Number.isFinite(parsedQuantity) || parsedQuantity < 0) {
+            toast('Quantity must be a non-negative number');
+            return;
+        }
 
         const response = await fetch(`/api/supplies/updateSupply`, {
             method: 'PUT',
@@ -49,6 +58,7 @@ export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onC
                 id,
                 supply_name: supplyName,
                 supply_category_id: supplyCategoryId,
+                supply_quantity: parsedQuantity,
             }),
             headers: {
                 'Content-Type': 'application/json',
@@ -72,6 +82,17 @@ export function EditSupplyDialog({ id, currentName, currentCategoryId, open, onC
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={supplyName} onChange={(e) => setSupplyName(e.target.value)} required />
+                </div>
+
+                <div className="input-group">
+                    <label className="input-label">Quantity</label>
+                    <input
+                        type="number"
+                        min="0"
+                        value={supplyQuantity}
+                        onChange={(e) => setSupplyQuantity(e.target.value)}
+                        required
+                    />
                 </div>
 
                 <div className="input-group">

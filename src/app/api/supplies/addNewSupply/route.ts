@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { supply_name, supply_category_id } = body;
+    const { supply_name, supply_category_id, supply_quantity } = body;
 
     if (!supply_name || supply_name.trim() === '') {
       return new Response(JSON.stringify({ success: false, error: 'Supply name is required' }), { status: 400 });
@@ -19,12 +19,18 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ success: false, error: 'Category is required' }), { status: 400 });
     }
 
+    const parsedQuantity = Number(supply_quantity);
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity < 0) {
+      return new Response(JSON.stringify({ success: false, error: 'Quantity must be a non-negative number' }), { status: 400 });
+    }
+
     const { data, error } = await supabase
       .from('supplies')
       .insert([
         {
           supply_name,
           supply_category_id,
+          supply_quantity: parsedQuantity,
           owner_id: user.id,
         },
       ]);

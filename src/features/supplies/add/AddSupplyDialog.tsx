@@ -14,6 +14,7 @@ type Props = {
 export function AddSupplyDialog({ open, onClose }: Props) {
     const [supplyName, setSupplyName] = useState('');
     const [supplyCategoryId, setSupplyCategoryId] = useState('');
+    const [supplyQuantity, setSupplyQuantity] = useState('');
     const [categories, setCategories] = useState<{ id: string; category_name: string }[]>([]);
     const toast = useToast();
     const router = useRouter();
@@ -37,9 +38,19 @@ export function AddSupplyDialog({ open, onClose }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const parsedQuantity = Number(supplyQuantity);
+        if (!Number.isFinite(parsedQuantity) || parsedQuantity < 0) {
+            toast('Quantity must be a non-negative number');
+            return;
+        }
+
         const response = await fetch('/api/supplies/addNewSupply', {
             method: 'POST',
-            body: JSON.stringify({ supply_name: supplyName, supply_category_id: supplyCategoryId }),
+            body: JSON.stringify({
+                supply_name: supplyName,
+                supply_category_id: supplyCategoryId,
+                supply_quantity: parsedQuantity,
+            }),
             headers: { 'Content-Type': 'application/json' },
         });
 
@@ -51,6 +62,7 @@ export function AddSupplyDialog({ open, onClose }: Props) {
             onClose();
             setSupplyName('');
             setSupplyCategoryId('');
+            setSupplyQuantity('');
         } else {
             toast(`Error: ${result.error}`);
         }
@@ -62,6 +74,17 @@ export function AddSupplyDialog({ open, onClose }: Props) {
                 <div className="input-group">
                     <label className="input-label">Name</label>
                     <input value={supplyName} onChange={(e) => setSupplyName(e.target.value)} required />
+                </div>
+
+                <div className="input-group">
+                    <label className="input-label">Quantity</label>
+                    <input
+                        type="number"
+                        min="0"
+                        value={supplyQuantity}
+                        onChange={(e) => setSupplyQuantity(e.target.value)}
+                        required
+                    />
                 </div>
 
                 <div className="input-group">
