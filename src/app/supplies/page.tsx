@@ -23,10 +23,12 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
     const selectedCategoryId = categoryParam || "";
     const pageSize = 12;
 
-    const { data: supplyCategories = [] } = await supabase
+    const { data: supplyCategoriesData } = await supabase
         .from('supply_categories')
         .select('id, category_name')
         .order('category_name', { ascending: true });
+
+    const supplyCategories = supplyCategoriesData ?? [];
 
     let queryBuilder = supabase
         .from('supplies')
