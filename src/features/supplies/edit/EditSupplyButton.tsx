@@ -8,9 +8,10 @@ type Props = {
     supplyId: string;
     currentName: string;
     currentCategoryId: string;
+    currentQuantity: number | null;
 };
 
-export function EditSupplyButton({ supplyId, currentName, currentCategoryId }: Props) {
+export function EditSupplyButton({ supplyId, currentName, currentCategoryId, currentQuantity }: Props) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -22,6 +23,7 @@ export function EditSupplyButton({ supplyId, currentName, currentCategoryId }: P
                     id={supplyId}
                     currentName={currentName}
                     currentCategoryId={currentCategoryId}
+                    currentQuantity={currentQuantity ?? 0}
                     open={open}
                     onClose={() => setOpen(false)}
                 />

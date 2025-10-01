@@ -21,6 +21,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
         .select(
             `id,
             supply_name,
+            supply_quantity,
             supply_category_id,
             supply_categories(id, category_name)`,
             { count: 'exact' }
@@ -51,6 +52,7 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                     <thead>
                         <tr>
                             <th>Supply name</th>
+                            <th>Quantity</th>
                             <th>Supply category</th>
                             <th></th>
                         </tr>
@@ -60,6 +62,9 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                             <tr key={supply.id}>
                                 <td><span className="item-name">{supply.supply_name}</span></td>
                                 <td>
+                                    <span className="item-name">{supply.supply_quantity ?? 0}</span>
+                                </td>
+                                <td>
                                     <div className="category-badge">
                                         {(supply.supply_categories as any)?.category_name}
                                     </div>
@@ -68,7 +73,12 @@ export default async function SuppliesPage({ searchParams }: { searchParams: any
                                     <div className="table-actions">
                                         <DeleteButton supplyId={supply.id} supplyName={supply.supply_name} />
                                         <ViewBatchButton supplyId={supply.id} />
-                                        <EditSupplyButton supplyId={supply.id} currentName={supply.supply_name} currentCategoryId={supply.supply_category_id} />
+                                        <EditSupplyButton
+                                            supplyId={supply.id}
+                                            currentName={supply.supply_name}
+                                            currentCategoryId={supply.supply_category_id}
+                                            currentQuantity={supply.supply_quantity}
+                                        />
                                     </div>
                                 </td>
                             </tr>
